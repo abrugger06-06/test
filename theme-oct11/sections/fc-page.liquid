@@ -1,0 +1,34 @@
+{%- comment -%}
+  Plain pages and the six policies. Policy pages get a side list of the other policies.
+  Page content is admin-written and is passed through fc-clean at render time, except the Disclaimer,
+  which is shown exactly as written.
+{%- endcomment -%}
+{%- assign pol = 'fluxcase-shipping:Shipping Policy,fluxcase-returns:Return Policy,fluxcase-terms:Terms & Conditions,fluxcase-privacy:Privacy Policy,fluxcase-cookies:Cookie Policy,fluxcase-disclaimer:Disclaimer' | split: ',' -%}
+{%- assign is_policy = false -%}
+{%- for x in pol -%}{%- assign p = x | split: ':' -%}{%- if p[0] == page.handle -%}{%- assign is_policy = true -%}{%- endif -%}{%- endfor -%}
+{%- comment -%}
+  Oct 11 (Alex): no 10-day money-back guarantee, all sales final, no "Changes" section on the Cookie Policy,
+  and the magnet safety note moves from the product pages to the Disclaimer. The admin pages are untouched
+  (the live BSB V13 theme still shows them as written); this theme rewrites them at render time.
+{%- endcomment -%}
+{%- capture body -%}
+  {%- if page.handle == 'fluxcase-returns' -%}
+<p><em>Applies to all orders placed through Fluxcase.</em></p><h2>All sales are final</h2><p>Every case is made to order, so we can’t accept returns or give refunds for a change of mind, including choosing a different size or color. Please check the size, vial count and color before you order, and email <strong>help@fluxcases.com</strong> first if you have any questions.</p><h2>Damaged or defective cases</h2><p>If your case arrives damaged, defective or with a manufacturing issue, email us at <strong>help@fluxcases.com</strong> within 5 days of delivery and we’ll send a replacement. See our <a href="/pages/fluxcase-shipping">Shipping Policy</a>.</p><h2>Bulk and custom-branded orders</h2><p>Volume and custom-branded orders are quoted individually. Any return terms for those orders are set in the quote.</p><h2>Shipping damage or loss</h2><p>A package that arrives damaged or never arrives is handled as a shipping claim under our <a href="/pages/fluxcase-shipping">Shipping Policy</a>, not as a return.</p>
+  {%- elsif page.handle == 'fluxcase-disclaimer' -%}{{ page.content | replace: '<h2>Contact</h2>', '<h2>Magnet safety</h2><p>Contains small, strong magnets. Not a toy; keep away from young children and pets. If a magnet is swallowed, get medical help right away.</p><h2>Contact</h2>' }}{%- else -%}{%- capture raw_body -%}{{ page.content | replace: ' You’re also covered by our 10-day money-back guarantee if you’d rather have a refund. See our <a href="/pages/fluxcase-returns">Return Policy</a>.', '' | replace: '<p>Standard orders are covered by our 10-day money-back guarantee. See our <a href="/pages/fluxcase-returns">Return Policy</a> for details.</p>', '<p>All sales are final. Damaged or defective cases are replaced. See our <a href="/pages/fluxcase-returns">Return Policy</a> for details.</p>' | replace: '<h2>Changes</h2><p>If we add other tools that use cookies, such as advertising or marketing tools, this page will be updated to describe what is used and why.</p>', '' | replace: 'answer your inquiry, or honor the window in our <a href="/pages/fluxcase-returns">Return Policy</a>.', 'answer your inquiry, or handle a claim under our <a href="/pages/fluxcase-returns">Return Policy</a>.' }}{%- endcapture -%}{%- render 'fc-clean', html: raw_body -%}{%- endif -%}
+{%- endcapture -%}
+<div class="wrap">
+<div class="page-head"><h1 class="t-h1">{{ page.title }}</h1></div>
+{%- if is_policy -%}
+<div class="policy">
+  <nav class="policy-nav" aria-label="Policies">
+  {%- for x in pol -%}{%- assign p = x | split: ':' -%}<a href="/pages/{{ p[0] }}"{% if p[0] == page.handle %} aria-current="page"{% endif %}>{{ p[1] }}</a>{%- endfor -%}
+  </nav>
+  <article class="prose">{{ body }}</article>
+</div>
+{%- else -%}
+<article class="prose" style="padding-bottom:var(--sec)">{{ body }}</article>
+{%- endif -%}
+</div>
+{% schema %}
+{ "name": "Fluxcase page", "settings": [] }
+{% endschema %}
