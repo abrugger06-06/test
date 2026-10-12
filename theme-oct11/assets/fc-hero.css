@@ -1,0 +1,14 @@
+/* Home hero, Oct 11: the 12-vial case with the lid lifting open and its parts named, in place of the
+   taken-apart render. One 1080 x 690 frame: the render on the left, leader lines (SVG, same frame) and
+   the part names on the right, all scaled together so the lines always meet their parts. */
+.hero-parts{display:block;position:relative;width:100%;aspect-ratio:1080/690;background:var(--plate);border-radius:6px;overflow:hidden;}
+.hero-parts img{position:absolute;left:2.78%;top:0;height:100%;width:auto;max-width:none;}
+.hero-parts-lines{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.hero-parts-lines polyline{fill:none;stroke:var(--ink);stroke-width:1.5px;vector-effect:non-scaling-stroke;}
+.hero-parts-lines circle{fill:var(--paper,#fff);stroke:var(--ink);stroke-width:1.5px;vector-effect:non-scaling-stroke;}
+.hero-parts-labels{list-style:none;margin:0;padding:0;}
+.hero-parts-labels li{position:absolute;left:68.5%;right:2%;transform:translateY(-50%);font-weight:600;font-size:clamp(12px,1.55vw,19px);line-height:1.15;color:var(--ink);text-wrap:balance;}
+@media (max-width:860px){.hero-parts-labels li{font-size:clamp(12px,3.3vw,17px);}}
+@media (prefers-reduced-motion:no-preference){.hero-parts img{animation:settle 700ms var(--ease) both;}}
+.hero-parts-labels .pl-short{display:none;}
+@media (max-width:560px){.hero-parts-labels .pl-long{display:none;}.hero-parts-labels .pl-short{display:inline;}.hero-parts-labels li{white-space:nowrap;}}

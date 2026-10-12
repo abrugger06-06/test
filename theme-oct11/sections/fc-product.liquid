@@ -1,0 +1,90 @@
+{%- comment -%}
+  Product page. The color picker (snippets/fc-picker.liquid) is rendered as is. The order form,
+  quantity stepper and phone buy bar keep the ids and data hooks fluxcase.js reads.
+  No case picker here (Alex, Oct 3 2026): the other cases are the cards under "The other cases".
+  On desktop the "Renders, not photos" note sits under the render plate (fable2.css); on a phone it
+  follows the order card. The price shows under the title (fc-logo.css) and in the subtotal.
+{%- endcomment -%}
+{%- assign current = product.selected_or_first_available_variant -%}
+{%- assign start_hex = current.sku | split: '-' | last | upcase -%}
+{%- assign fc_hidden = '707478,FBE95C,081B36,352A3B,1F1813,474648,012C61,BF1A11,363D40,A7AEB2,DC5D8C,F8FF6B,223622,1B3B99,6947B8,DBD5D6' | split: ',' -%}
+{%- if fc_hidden contains start_hex -%}{%- for v in product.variants -%}{%- assign vh = v.sku | split: '-' | last | upcase -%}{%- unless fc_hidden contains vh -%}{%- assign current = v -%}{%- assign start_hex = vh -%}{%- break -%}{%- endunless -%}{%- endfor -%}{%- endif -%}
+{%- assign size = '3&nbsp;ML' -%}{%- assign count = '' -%}{%- assign crumb = '/pages/fluxcase-3ml-cases' -%}
+{%- if product.handle contains '10-ml' -%}{%- assign size = '10&nbsp;ML' -%}{%- assign crumb = '/pages/fluxcase-10ml-cases' -%}{%- endif -%}
+{%- if product.handle contains '12-vial' -%}{%- assign count = '12' -%}{%- elsif product.handle contains '6-vial' -%}{%- assign count = '6' -%}{%- elsif product.handle contains '4-vial' -%}{%- assign count = '4' -%}{%- elsif product.handle contains '8-vial' -%}{%- assign count = '8' -%}{%- elsif product.handle contains '7-vial' -%}{%- assign count = '7' -%}{%- assign size = 'mixed' -%}{%- assign crumb = '' -%}{%- endif -%}
+{%- assign tag = count | append: '-vial ' | append: size -%}
+{%- liquid
+  assign fit_dia = ''
+  case count
+    when '12'
+      assign fit_dia = '91'
+    when '6'
+      assign fit_dia = '62'
+    when '8'
+      assign fit_dia = '95'
+    when '4'
+      assign fit_dia = '62'
+    when '7'
+      assign fit_dia = '77'
+  endcase
+-%}
+{%- capture raw_desc -%}{{ product.description }}{%- endcapture -%}
+{%- capture desc -%}{%- render 'fc-clean', html: raw_desc -%}{%- endcapture -%}
+<div class="wrap">
+<nav class="crumbs crumbs-product" aria-label="Breadcrumb"><a href="{{ routes.root_url }}">Home</a><span aria-hidden="true">/</span>{%- if crumb != '' -%}<a href="{{ crumb }}">{{ size }} cases</a><span aria-hidden="true">/</span>{%- else -%}<a href="/collections/all">All cases</a><span aria-hidden="true">/</span>{%- endif -%}{%- assign crumb_w = product.title | split: ' ' -%}<span aria-current="page"><span class="nw">{{ crumb_w.first | escape }}</span> {{ product.title | remove_first: crumb_w.first | strip | escape | replace: ' ML', '&nbsp;ML' }}</span></nav>
+<div class="product">
+  <div class="product-media-col"{% if count != '' %} data-render="{{ count }}"{% endif %}>
+    {%- render 'fc-picker', product: product, cols: 8, tag: tag, start_hex: start_hex, group: 'id', form_id: 'orderForm' -%}
+    <p class="render-note">Renders, not photos of samples, so a color can look a little different from screen to screen.</p>
+  </div>
+
+  <div class="product-side">
+    <div class="product-title">
+      <h1 class="t-h1">{{ product.title | escape | replace: ' ML', '&nbsp;ML' }}</h1>
+      <span class="price t-num" data-price>{{ current.price | money_without_trailing_zeros }}</span>
+      <p class="fit-line"><span class="holds-plan" aria-hidden="true">{%- render 'fc-ring', n: count -%}</span><span>Holds {% if count == '7' %}6 &times; 3&nbsp;ML and 1 &times; 10&nbsp;ML vials{% else %}{{ count }} &times; {{ size }} vials{% endif %}{% if fit_dia != '' %}, {{ fit_dia }}&nbsp;mm across{% endif %}. Vials not included.</span></p>
+    </div>
+
+    {%- form 'product', product, class: 'order', id: 'orderForm', data-unit: current.price -%}
+      <div class="order-row">
+        <div class="field"><label for="qty">Quantity</label>
+          <div class="qty"><button type="button" id="qtyMinus" aria-label="Decrease quantity">&#8722;</button><input id="qty" name="quantity" type="number" inputmode="numeric" min="1" max="999" value="1"><button type="button" id="qtyPlus" aria-label="Increase quantity">+</button></div></div>
+        <div class="total"><span class="lbl">Subtotal</span><span class="price" id="orderTotal">{{ current.price | money_without_trailing_zeros }}</span></div>
+      </div>
+      <button class="btn btn-block" type="submit" name="add" id="addBtn" data-add{% unless current.available %} disabled{% endunless %}>{% if current.available %}Add to cart{% else %}Not available{% endif %}</button>
+      <p class="added" data-added role="status" hidden>Added to your cart. <a href="{{ routes.cart_url }}">View cart (<span data-added-count>0</span>)</a></p>
+      <ul class="assure">
+        <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 6h10v8H2zM12 9h3l3 3v2h-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="5.5" cy="15" r="1.6" fill="currentColor"/><circle cx="14.5" cy="15" r="1.6" fill="currentColor"/></svg><span>Made to order. Ships within the US with tracking; shipping is calculated at checkout. <a href="/pages/fluxcase-shipping">Shipping</a></span></li>
+      </ul>
+    {%- endform -%}
+
+    {%- if desc != blank -%}<div class="desc">{{ desc }}</div>{%- endif -%}
+
+    <dl class="spec">
+      <div><dt>Closure</dt><dd>Magnets in the base and lid. <a href="/#shut">How it stays shut</a></dd></div>
+    </dl>
+  </div>
+</div>
+</div>
+
+
+<section class="sec-tight" aria-labelledby="otherTitle"><div class="wrap">
+  <h2 class="t-h2 other-title" id="otherTitle">The other cases</h2>
+  <div class="cat-cases other-cases">
+    {%- unless product.handle == '12-vial-3-ml-case' -%}{%- render 'fc-case', handle: '12-vial-3-ml-case', hex: '74CABF', sizes: '(min-width: 1101px) 280px, (min-width: 701px) 50vw, 100vw' -%}{%- endunless -%}
+    {%- unless product.handle == '6-vial-3-ml-case' -%}{%- render 'fc-case', handle: '6-vial-3-ml-case', hex: '070908', sizes: '(min-width: 1101px) 280px, (min-width: 701px) 50vw, 100vw' -%}{%- endunless -%}
+    {%- unless product.handle == '8-vial-10-ml-case' -%}{%- render 'fc-case', handle: '8-vial-10-ml-case', hex: '3E8CE4', sizes: '(min-width: 1101px) 280px, (min-width: 701px) 50vw, 100vw' -%}{%- endunless -%}
+    {%- unless product.handle == '4-vial-10-ml-case' -%}{%- render 'fc-case', handle: '4-vial-10-ml-case', hex: 'DC7C40', sizes: '(min-width: 1101px) 280px, (min-width: 701px) 50vw, 100vw' -%}{%- endunless -%}
+    {%- unless product.handle == '7-vial-mixed-case' -%}{%- render 'fc-case', handle: '7-vial-mixed-case', hex: '38B837', sizes: '(min-width: 1101px) 280px, (min-width: 701px) 50vw, 100vw' -%}{%- endunless -%}
+  </div>
+</div></section>
+
+<div class="buybar" data-buybar hidden>
+  <span class="dot" data-buybar-dot style="--c:#{{ start_hex }}" aria-hidden="true"></span>
+  <span class="buybar-text"><b>{{ product.title | escape | replace: ' ML', '&nbsp;ML' }}</b><span data-buybar-name>{{ current.title }}</span></span>
+  <span class="buybar-price t-num">{{ current.price | money_without_trailing_zeros }}</span>
+  <button type="submit" form="orderForm" class="btn" data-buybar-add{% unless current.available %} disabled{% endunless %}>{% if current.available %}Add to cart{% else %}Not available{% endif %}</button>
+</div>
+{% schema %}
+{ "name": "Fluxcase product", "settings": [] }
+{% endschema %}

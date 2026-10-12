@@ -1,0 +1,83 @@
+{%- comment -%}
+  Cart. Fable V2 plus the free-shipping tray (fc-ship-tray) at the top and an "Add a case" list
+  (fc-add-case) under the lines. Oct 11: free shipping is by order amount (section setting
+  "free_amount", default $80), no longer by case count.
+  The tray only describes the offer: the free rate itself must be set to $80 in Shopify Settings >
+  Shipping and delivery before this theme goes live (on Oct 11 it starts at $70).
+{%- endcomment -%}
+{{ 'fc-ship.css' | asset_url | stylesheet_tag }}
+{%- assign free_amount = section.settings.free_amount | default: 80 -%}
+{%- assign free_cents = free_amount | times: 100 -%}
+{%- assign ship_need = free_cents | minus: cart.total_price -%}
+<div class="wrap">
+<div class="page-head"><h1 class="t-h1">Your cart</h1></div>
+{%- if section.settings.show_tray -%}{%- render 'fc-ship-tray', free: free_amount -%}{%- endif -%}
+{%- if cart.item_count == 0 -%}
+<div class="empty">
+  <div class="stack">
+  <span class="plan-row page-mark" aria-hidden="true">{%- render 'fc-ring', n: 12 -%}{%- render 'fc-ring', n: 6 -%}{%- render 'fc-ring', n: 8 -%}{%- render 'fc-ring', n: 4 -%}{%- render 'fc-ring', n: 7 -%}</span>
+  <p class="t-lede">Your cart is empty. The five cases are below.</p>
+  </div>
+  <div class="grid-3">
+    {%- render 'fc-case', handle: '12-vial-3-ml-case', hex: '74CABF', sizes: '(min-width: 900px) 380px, 100vw' -%}
+    {%- render 'fc-case', handle: '6-vial-3-ml-case', hex: '070908', sizes: '(min-width: 900px) 380px, 100vw' -%}
+    {%- render 'fc-case', handle: '8-vial-10-ml-case', hex: '3E8CE4', sizes: '(min-width: 900px) 380px, 100vw' -%}
+    {%- render 'fc-case', handle: '4-vial-10-ml-case', hex: 'DC7C40', sizes: '(min-width: 900px) 380px, 100vw' -%}
+    {%- render 'fc-case', handle: '7-vial-mixed-case', hex: '38B837', sizes: '(min-width: 900px) 380px, 100vw' -%}
+  </div>
+</div>
+{%- else -%}
+<form action="{{ routes.cart_url }}" method="post" id="cartForm" class="cart">
+  <div class="lines">
+  {%- for item in cart.items -%}
+    {%- assign item_hex = item.sku | split: '-' | last | upcase -%}
+    {%- assign item_render = '' -%}
+    {%- if item.product.handle contains '12-vial' -%}{%- assign item_render = '12' -%}{%- elsif item.product.handle contains '6-vial' -%}{%- assign item_render = '6' -%}{%- elsif item.product.handle contains '4-vial' -%}{%- assign item_render = '4' -%}{%- elsif item.product.handle contains '8-vial' -%}{%- assign item_render = '8' -%}{%- elsif item.product.handle contains '7-vial' -%}{%- assign item_render = '7' -%}{%- endif -%}
+    <div class="line">
+      <a class="line-img"{% if item_render != '' %} data-render="{{ item_render }}"{% endif %} href="{{ item.url }}" tabindex="-1" aria-hidden="true">{% if item.image %}<img src="{{ item.image | image_url: width: 400 }}" alt="" width="1000" height="580" loading="lazy">{% else %}<span class="empty-case" style="--case:#{{ item_hex }}"><span></span></span>{% endif %}</a>
+      <div class="line-meta">
+        <a href="{{ item.url }}">{{ item.product.title | replace: ' ML', '&nbsp;ML' }}</a>
+        <span class="line-color"><span class="dot" style="background:#{{ item_hex }}" aria-hidden="true"></span>{{ item.variant.title }}</span>
+        <span class="line-each">{{ item.final_price | money_without_trailing_zeros }} each</span>
+      </div>
+      <div class="line-ctrl">
+        <label class="visually-hidden" for="q{{ forloop.index }}">Quantity for {{ item.product.title | escape }}, {{ item.variant.title | escape }}</label>
+        <div class="qty qty-cart"><button type="button" data-step="-1" aria-label="One fewer {{ item.variant.title | escape }} case">&#8722;</button><input data-autosubmit id="q{{ forloop.index }}" type="number" inputmode="numeric" name="updates[]" value="{{ item.quantity }}" min="0" max="999"><button type="button" data-step="1" aria-label="One more {{ item.variant.title | escape }} case">+</button></div>
+        <span class="line-total t-num">{{ item.final_line_price | money_without_trailing_zeros }}</span>
+        <a class="line-remove" href="{{ item.url_to_remove }}">Remove</a>
+      </div>
+    </div>
+  {%- endfor -%}
+  </div>
+  <div class="summary panel">
+    <div class="total"><span class="lbl">Subtotal</span><span class="price">{{ cart.total_price | money_without_trailing_zeros }}</span></div>
+    {%- if section.settings.show_tray and ship_need <= 0 -%}
+      <p class="t-small fc-ship-note"><b>Shipping is free</b> on this order.</p>
+    {%- elsif section.settings.show_tray -%}
+      <p class="t-small">Shipping is calculated at checkout. Add {{ ship_need | money_without_trailing_zeros }} more and it ships free.</p>
+    {%- else -%}
+      <p class="t-small">Shipping is calculated at checkout.</p>
+    {%- endif -%}
+    {%- if cart.item_count >= 50 -%}
+      <p class="notice">You have {{ cart.item_count }} cases in your cart. Orders of 50 or more can be quoted as a wholesale order. <a href="/pages/fluxcase-wholesale">Request a quote</a></p>
+    {%- endif -%}
+    <div class="cart-actions">
+      <button class="btn" type="submit" name="checkout">Check out</button>
+      <button class="btn btn-line" type="submit" name="update" data-update-btn>Update cart</button>
+    </div>
+    <p class="cart-more"><a href="/collections/all">Continue shopping</a></p>
+  </div>
+</form>
+{%- if section.settings.show_add -%}<div class="fc-add-wrap">{%- render 'fc-add-case', heading: 'Add another case' -%}</div>{%- endif -%}
+{%- endif -%}
+</div>
+{% schema %}
+{
+  "name": "Fluxcase cart",
+  "settings": [
+    { "type": "checkbox", "id": "show_tray", "label": "Show the free-shipping tray", "default": true, "info": "Describes the offer only. Set the free rate in Settings > Shipping and delivery to match." },
+    { "type": "range", "id": "free_amount", "label": "Free shipping at (dollars)", "min": 40, "max": 150, "step": 5, "default": 80 },
+    { "type": "checkbox", "id": "show_add", "label": "Show the Add a case list", "default": true }
+  ]
+}
+{% endschema %}

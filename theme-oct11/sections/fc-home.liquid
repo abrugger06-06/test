@@ -1,0 +1,71 @@
+{%- comment -%}
+  Home. Four parts: the headline with the exploded render (on phones: headline, lede and button, then
+  the size buttons, then the render), the five cases grouped by vial size (3 ML: 12, 6; 10 ML: 8, 4;
+  both sizes: the mixed case; layout in fc-logo.css),
+  how the case stays shut (only here) and the 8 colors (only here). Every price comes from the product.
+  The size buttons and the group heads carry the plans (snippets/fc-ring): the 12 and 6 wells for 3 ML,
+  the 8 and 4 wells for 10 ML, the mixed plan for both sizes, the same drawings as the size tiles on the
+  product page. Both size buttons open their size page.
+{%- endcomment -%}
+{{ 'fc-hero.css' | asset_url | stylesheet_tag }}
+<section class="hero" aria-labelledby="heroTitle"><div class="wrap hero-grid">
+  <div class="hero-copy">
+    <h1 class="t-display" id="heroTitle">Magnetic cases for 3&nbsp;ML and 10&nbsp;ML vials.</h1>
+    <p class="t-lede">Magnets in the base and lid pull the case shut and hold it there. Made to order, in 8 colors.</p>
+    <a class="btn" href="#cases">Shop the cases</a>
+  </div>
+  <figure class="hero-img">
+    <span class="hero-parts">
+      <img src="{{ 'fc-hero-parts.webp' | asset_url }}" width="760" height="849" alt="The 12-vial case with the lid lifting open: the lid, its magnets seated in the lid, twelve vials standing in their wells, the magnets seated in the base, and the base" fetchpriority="high" decoding="async">
+      <svg class="hero-parts-lines" viewBox="0 0 1080 690" preserveAspectRatio="none" aria-hidden="true"><circle cx="570" cy="58" r="5"/><polyline points="570,58 690,48 726,48"/><circle cx="426" cy="130" r="5"/><polyline points="426,130 690,150 726,150"/><circle cx="512" cy="304" r="5"/><polyline points="512,304 690,262 726,262"/><circle cx="416" cy="328" r="5"/><polyline points="416,328 690,374 726,374"/><circle cx="551" cy="492" r="5"/><polyline points="551,492 690,500 726,500"/></svg>
+      <ul class="hero-parts-labels" aria-hidden="true">
+        <li style="top:6.96%"><span class="pl-long">Lid</span><span class="pl-short">Lid</span></li>
+        <li style="top:21.74%"><span class="pl-long">Magnets, in the lid</span><span class="pl-short">Lid magnets</span></li>
+        <li style="top:37.97%"><span class="pl-long">Your vials</span><span class="pl-short">Your vials</span></li>
+        <li style="top:54.20%"><span class="pl-long">Magnets, in the base</span><span class="pl-short">Base magnets</span></li>
+        <li style="top:72.46%"><span class="pl-long">Base</span><span class="pl-short">Base</span></li>
+      </ul>
+    </span>
+    {%- assign hero_p = all_products['12-vial-3-ml-case'] -%}
+    <figcaption class="shown"><span class="dot" style="background:#0E100F" aria-hidden="true"></span>Shown: Black<span class="visually-hidden">, {% if hero_p != blank %}{{ hero_p.title }}{% else %}12-Vial 3 ML Case{% endif %}</span>. Vials not included.</figcaption>
+  </figure>
+  <div class="hero-more">
+    <nav class="hero-sizes" aria-label="Cases by vial size"><span>Start with the vials you carry</span><span class="hero-size-links"><a href="/pages/fluxcase-3ml-cases">{%- render 'fc-ring', n: 12 -%}<span>3&nbsp;ML cases</span></a><a href="/pages/fluxcase-10ml-cases">{%- render 'fc-ring', n: 8 -%}<span>10&nbsp;ML cases</span></a></span></nav>
+  </div>
+</div></section>
+
+<section class="sec" id="cases" aria-labelledby="casesTitle"><div class="wrap">
+  <div class="cases-head">
+    <h2 class="t-h2" id="casesTitle">Five cases</h2>
+    <p class="t-small">3&nbsp;ML vials go in the <span class="nw">6-vial</span> or the <span class="nw">12-vial</span> case. 10&nbsp;ML vials go in the <span class="nw">4-vial</span> or the <span class="nw">8-vial</span> case. The <span class="nw">7-vial</span> mixed case holds both sizes. Every case comes in 8 colors.</p>
+  </div>
+  <div class="sizes-row sizes-five">
+    <div class="size-group">
+      <div class="size-head"><h3>3&nbsp;ML</h3><span class="plan-row" aria-hidden="true">{%- render 'fc-ring', n: 12 -%}{%- render 'fc-ring', n: 6 -%}</span><span>Two cases</span></div>
+      <div class="size-cases">
+        {%- render 'fc-case', handle: '12-vial-3-ml-case', hex: '74CABF', sizes: '(min-width: 1101px) 280px, (min-width: 520px) 50vw, 100vw' -%}
+        {%- render 'fc-case', handle: '6-vial-3-ml-case', hex: '070908', sizes: '(min-width: 1101px) 280px, (min-width: 520px) 50vw, 100vw' -%}
+      </div>
+    </div>
+    <div class="size-group">
+      <div class="size-head"><h3>10&nbsp;ML</h3><span class="plan-row" aria-hidden="true">{%- render 'fc-ring', n: 8 -%}{%- render 'fc-ring', n: 4 -%}</span><span>Two cases</span></div>
+      <div class="size-cases">
+        {%- render 'fc-case', handle: '8-vial-10-ml-case', hex: '3E8CE4', sizes: '(min-width: 1101px) 280px, (min-width: 520px) 50vw, 100vw' -%}
+        {%- render 'fc-case', handle: '4-vial-10-ml-case', hex: 'DC7C40', sizes: '(min-width: 1101px) 280px, (min-width: 520px) 50vw, 100vw' -%}
+      </div>
+    </div>
+    <div class="size-group size-group-mixed">
+      <div class="size-head"><h3>Both sizes</h3><span class="plan-row" aria-hidden="true">{%- render 'fc-ring', n: 7 -%}</span><span>One case</span></div>
+      <div class="size-cases">
+        {%- render 'fc-case', handle: '7-vial-mixed-case', hex: '38B837', sizes: '(min-width: 1101px) 280px, (min-width: 520px) 50vw, 100vw' -%}
+      </div>
+    </div>
+  </div>
+</div></section>
+
+{%- render 'fc-shut' -%}
+
+{%- render 'fc-colors' -%}
+{% schema %}
+{ "name": "Fluxcase home", "settings": [] }
+{% endschema %}
