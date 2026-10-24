@@ -5,7 +5,7 @@ find every flaw a skeptical viewer, a platform reviewer, a competitor or a lawye
 there are problems and hunt for them, but report only real, specific, reproducible ones (with a
 timestamp and evidence). Do not pad: an invented or trivial complaint wastes a fix cycle.
 
-Read `/home/user/test/brag-output/work/judge/PROMO-BRIEF.md` first: the film, its hard rules and the
+Read `/home/user/test/brag-output/work/judge/LIFE-BRIEF.md` and `/home/user/test/brag-output/work/judge/PROMO-BRIEF.md` first: the film, its hard rules and the
 review files are the same. Your angle is given in your instructions.
 
 Classify each finding:
