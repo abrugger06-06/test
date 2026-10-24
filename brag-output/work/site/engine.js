@@ -98,13 +98,17 @@ const glassMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0,
 const crimpMat = new THREE.MeshStandardMaterial({ color: 0xA9ADB1, metalness: 0.35, roughness: 0.55 });
 // Base colour is set so the lit top of the cap renders close to brand teal #74CABF.
 const capMat = new THREE.MeshPhysicalMaterial({ color: 0x46857D, roughness: 0.45, clearcoat: 0.15, clearcoatRoughness: 0.5 });
-function vial(x, y, z0) {
+// Plain glass vials (no label, no claim): 10 mL serum vial, or a 3 mL vial for the smaller wells.
+// Sizes are scaled from the 10 mL profile; the cap is brand teal.
+function vial(x, y, z0, small = false) {
+  const s = small ? 0.68 : 1;                 // 3 mL: about 15 mm across for the 16.5 mm wells
+  const h = small ? 0.72 : 1;
   const g = new THREE.Group();
-  const body = [[0, 0], [9.6, 0], [11, 1.4], [11, 35], [10.4, 37.5], [7.2, 40.5], [6.4, 42], [6.4, 43]].map(([a, b]) => new THREE.Vector2(a, b));
+  const body = [[0, 0], [9.6, 0], [11, 1.4], [11, 35], [10.4, 37.5], [7.2, 40.5], [6.4, 42], [6.4, 43]].map(([a, b]) => new THREE.Vector2(a * s, b * h));
   const bodyG = new THREE.LatheGeometry(body, 48); bodyG.rotateX(Math.PI / 2);
   const glass = new THREE.Mesh(bodyG, glassMat); glass.renderOrder = 2;
-  const crimp = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 4, 48).rotateX(Math.PI / 2).translate(0, 0, 45), crimpMat);
-  const capP = [[0, 47], [9.6, 47], [9.6, 49.6], [9.1, 50.2], [8.4, 50.4], [0, 50.4]].map(([a, b]) => new THREE.Vector2(a, b));
+  const crimp = new THREE.Mesh(new THREE.CylinderGeometry(10 * s, 10 * s, 4 * h, 48).rotateX(Math.PI / 2).translate(0, 0, 45 * h), crimpMat);
+  const capP = [[0, 47], [9.6, 47], [9.6, 49.6], [9.1, 50.2], [8.4, 50.4], [0, 50.4]].map(([a, b]) => new THREE.Vector2(a * s, 47 * h + (b - 47)));
   const capG = toCreasedNormals(new THREE.LatheGeometry(capP, 48).rotateX(Math.PI / 2), THREE.MathUtils.degToRad(30));
   const cap = new THREE.Mesh(capG, capMat);
   crimp.castShadow = cap.castShadow = true;
@@ -143,12 +147,14 @@ function makeCase(parts, { vials = false } = {}) {
   cad.add(baseMesh, baseMagGrp, vialGrp);
   if (vials) {
     bb.pockets.filter(p => p.up && p.d > 20).forEach(p => vialGrp.add(vial(p.x - cx, p.y - cy, p.z)));
+    bb.pockets.filter(p => p.up && p.d > 15 && p.d < 18).forEach(p => vialGrp.add(vial(p.x - cx, p.y - cy, p.z, true)));
   }
   const contact = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), contactMat);
   const cs = (bb.max[0] - bb.min[0]) * 1.22;
   contact.scale.set(cs, cs, 1);
   contact.rotation.x = -Math.PI / 2;
   contact.position.y = 0.05;
+  contact.userData.noFit = true;
   root.add(contact);
 
   // Lid is printed upside down (z=0 is the outer top) and mirrored in Y on the plate.
@@ -164,7 +170,7 @@ function makeCase(parts, { vials = false } = {}) {
   lidPivot.add(lidInner);
   cad.add(lidPivot);
 
-  const c = { root, mat, baseH, lidH, dia: bb.max[0] - bb.min[0] };
+  const c = { root, mat, contact, lid: lidPivot, baseH, lidH, dia: bb.max[0] - bb.min[0] };
   c.set = ({ lift = 0, tiltX = 0, tiltZ = 0, back = 0, magOut = 0, vialLift = 0, color } = {}) => {
     vialGrp.position.z = vialLift;
     lidPivot.position.set(0, back, baseH + lidH / 2 + lift);
@@ -206,4 +212,4 @@ function look(pos, target, fov = 30, shiftX = 0, shiftY = 0) {
   camera.updateProjectionMatrix();
 }
 function render(bgHex) { renderer.setClearColor(bgHex, 1); renderer.render(scene, camera); }
-export { scene, camera, renderer, makeCase, partsFor, CASES, ORDER, COL, look, sph, render, magnetMat };
+export { scene, camera, renderer, makeCase, partsFor, CASES, ORDER, COL, look, sph, render, magnetMat, key, rim, kick, floor };

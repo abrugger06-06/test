@@ -2,6 +2,7 @@
 //   node scripts/capture.mjs frames OUT_DIR FPS T0 T1      every frame in [T0, T1)
 //   node scripts/capture.mjs stills OUT_DIR t1 t2 ...       named stills (t-<time>.png)
 //   node scripts/capture.mjs insta OUT_DIR design ...       Instagram stills from insta.html (<design>.png)
+//   node scripts/capture.mjs ads OUT_DIR 1 2 ... | all     static ads from ads.html (ad-NN.png)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -25,6 +26,21 @@ const port = server.address().port;
 const [mode, out, ...rest] = process.argv.slice(2);
 fs.mkdirSync(out, { recursive: true });
 const browser = await playwright.chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+if (mode === 'ads') {
+  const ns = rest[0] === 'all' ? Array.from({ length: 30 }, (_, i) => i + 1) : rest.map(Number);
+  const p = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
+  p.on('pageerror', e => console.log('[pageerror]', e.message));
+  for (const n of ns) {
+    await p.goto(`http://127.0.0.1:${port}/ads.html?n=${n}`);
+    await p.waitForFunction('window.__ready === true', null, { timeout: 300000 });
+    const { W, H } = await p.evaluate(() => window.STAGE);
+    await p.screenshot({ path: path.join(out, `ad-${String(n).padStart(2, '0')}.png`), clip: { x: 0, y: 0, width: W, height: H } });
+  }
+  console.log('wrote', ns.length, 'ads');
+  await browser.close();
+  server.close();
+  process.exit(0);
+}
 if (mode === 'insta') {
   for (const d of rest) {
     const [w, h] = d.startsWith('story') ? [1080, 1920] : d.startsWith('square') ? [1080, 1080] : [1080, 1350];

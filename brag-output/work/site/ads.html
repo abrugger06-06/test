@@ -1,0 +1,260 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fluxcase Instagram ads</title>
+<style>
+  @font-face { font-family: Archivo; font-weight: 800; font-stretch: 125%; src: url(fonts/archivo-800.ttf); font-display: block; }
+  @font-face { font-family: Archivo; font-weight: 900; font-stretch: 125%; src: url(fonts/archivo-900.ttf); font-display: block; }
+  @font-face { font-family: JBM; font-weight: 700; src: url(fonts/JetBrainsMono-Bold.ttf); font-display: block; }
+  html, body { margin: 0; overflow: hidden; }
+  canvas { position: absolute; left: 0; top: 0; }
+  #top { position: absolute; left: 64px; right: 64px; display: flex; flex-direction: column; gap: 18px; }
+  .h { font-family: Archivo; font-weight: 900; font-stretch: 125%; letter-spacing: -0.01em; line-height: 0.98; }
+  .s { font-family: Archivo; font-weight: 800; font-stretch: 125%; line-height: 1.1; }
+  .m { font-family: JBM; font-weight: 700; letter-spacing: 0.02em; font-size: 26px; line-height: 1.35; }
+  .acc { color: var(--acc); }
+  .rule { width: 150px; height: 6px; background: var(--acc); }
+  #foot { position: absolute; left: 64px; right: 64px; display: flex; justify-content: space-between; align-items: baseline; }
+  #foot b { font-family: Archivo; font-weight: 900; font-stretch: 125%; font-size: 34px; }
+  #foot span { font-family: JBM; font-weight: 700; font-size: 22px; }
+  #note { position: absolute; left: 64px; font-family: JBM; font-weight: 700; font-size: 21px; }
+  .label { position: absolute; transform: translateX(-50%); font-family: JBM; font-weight: 700; font-size: 23px; white-space: nowrap; text-align: center; }
+  .label i { display: block; height: 3px; background: currentColor; margin: 0 auto 10px; width: 100%; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui"></div>
+<script type="module">
+// Fluxcase static ads: ads.html?n=<1..30>. Each ad is a spec below; layout is automatic:
+// copy block at the top, footer at the bottom, and the camera fits the product into the space between.
+const N = Number(new URLSearchParams(location.search).get('n') || 1);
+
+const THEMES = {
+  grey:  { bg: '#E2E2E2', ink: '#111413', acc: '#1D6B62', dark: false },
+  light: { bg: '#F3F4F2', ink: '#111413', acc: '#1D6B62', dark: false },
+  ink:   { bg: '#111413', ink: '#F3F4F2', acc: '#74CABF', dark: true },
+  teal:  { bg: '#1D6B62', ink: '#F3F4F2', acc: '#F3F4F2', dark: true },
+};
+const SIZES = { feed: [1080, 1350], square: [1080, 1080], story: [1080, 1920] };
+const DATE = 'Kickstarter. November 1, 2026.';
+
+// ---------- the 30 ads ----------
+// head: headline (\n = line break, *word* = accent colour); sub: small mono line; scene: what is shown.
+const ADS = [
+  { head: 'It closes\nitself.', sub: 'Ring magnets pull the lid shut.', theme: 'grey', scene: ['hover', 'c12'] },
+  { head: 'Magnetic\nvial cases.', sub: 'For 3 mL and 10 mL vials.', theme: 'light', scene: ['closed', 'c12'] },
+  { head: 'Ring magnets\nin the base\nand lid.', size: 84, theme: 'grey', scene: ['open', 'c8', { vials: true }] },
+  { head: 'No clips.', sub: 'Ring magnets pull it shut and hold it there.', theme: 'ink', scene: ['open', 'c8', { magOut: 10 }] },
+  { head: 'Tip it over.\nThe lid stays on.', size: 84, theme: 'grey', scene: ['tipped', 'c7'] },
+  { head: 'Five sizes.', sub: 'For 3 mL and 10 mL vials.', theme: 'light', scene: ['lineup'] },
+  { head: '3 mL.\n10 mL.\nMixed.', theme: 'grey', scene: ['grid'] },
+  { head: '12 vials.\n3 mL.', sub: '12-Vial 3 mL', theme: 'light', scene: ['open', 'c12'] },
+  { head: '6 vials.\n3 mL.', sub: '6-Vial 3 mL', theme: 'grey', scene: ['open', 'c6'] },
+  { head: '4 vials.\n10 mL.', sub: '4-Vial 10 mL', theme: 'light', scene: ['open', 'c4'] },
+  { head: '8 vials.\n10 mL.', sub: '8-Vial 10 mL', theme: 'grey', scene: ['open', 'c8', { vials: true }] },
+  { head: '3 mL and\n10 mL in\none case.', size: 88, sub: '7-Vial Mixed', theme: 'light', scene: ['open', 'c7', { vials: true }] },
+  { head: 'Back it on\n*Kickstarter.*', sub: 'Launching November 1, 2026.', theme: 'teal', scene: ['pair'], foot: 'Black PETG. Printed in Texas.' },
+  { head: 'November 1,\n2026.', sub: 'Fluxcase launches on Kickstarter.', theme: 'ink', scene: ['lineup'], foot: 'Black PETG. Printed in Texas.' },
+  { head: 'A well for\nevery vial.', theme: 'grey', scene: ['top', 'c7', { vials: true }] },
+  { head: 'Silver ring\nmagnets.', sub: 'Set into the base and the lid.', theme: 'light', scene: ['macro', 'c8'] },
+  { head: 'Pulls shut.\nHolds shut.', theme: 'grey', scene: ['hover', 'c4'] },
+  { head: 'No clips.\nNo friction lid.', size: 88, sub: 'The magnets do the work.', theme: 'light', scene: ['closed', 'c8'] },
+  { head: 'Black PETG.', sub: '3D printed to order in Texas.', theme: 'ink', scene: ['closed', 'c7'] },
+  { head: 'Printed to\norder in Texas.', size: 88, sub: 'Black PETG.', theme: 'light', scene: ['lineup'] },
+  { head: 'Back it on\n*Kickstarter.*', sub: 'Launching November 1, 2026.', theme: 'light', scene: ['pair'], fmt: 'square', foot: 'Black PETG. Printed in Texas.' },
+  { head: 'Back it on\n*Kickstarter.*', sub: 'Launching November 1, 2026.', theme: 'light', scene: ['pair'], fmt: 'story', foot: 'Black PETG. Printed in Texas.' },
+  { head: 'It closes\nitself.', sub: 'Ring magnets in the base and lid.', theme: 'grey', scene: ['open', 'c8', { vials: true }], fmt: 'story' },
+  { head: 'Drop the lid.\nThe magnets\nclose it.', size: 80, theme: 'grey', scene: ['hover', 'c6'], fmt: 'square' },
+  { head: 'Open.\nClosed.', theme: 'light', scene: ['pair'] },
+  { head: 'Magnets in.\nClips out.', theme: 'teal', scene: ['open', 'c12', { magOut: 8 }] },
+  { head: 'Kickstarter.\nNov 1.', sub: 'Five magnetic vial cases.', theme: 'grey', scene: ['grid'] },
+  { head: 'It closes\nitself.', sub: 'Ring magnets pull the lid shut.', theme: 'ink', scene: ['hover', 'c8'] },
+  { head: '3 mL and\n10 mL vials.', sub: 'Five sizes. All black PETG.', theme: 'light', scene: ['top', 'c8', { vials: true }] },
+  { head: 'FLUXCASE', size: 120, sub: 'Magnetic vial cases. On Kickstarter November 1, 2026.', theme: 'teal', scene: ['closed', 'c12'], rule: true, foot: 'Black PETG. Printed in Texas.' },
+];
+
+const ad = ADS[N - 1];
+const T = THEMES[ad.theme];
+const [W, H] = SIZES[ad.fmt || 'feed'];
+window.STAGE = { W, H };
+document.body.style.cssText = `width:${W}px; height:${H}px; background:${T.bg}; color:${T.ink}; --acc:${T.acc}`;
+const cv = document.getElementById('c');
+cv.width = W; cv.height = H; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+
+const E = await import('./engine.js');
+const { THREE, scene, camera, makeCase, partsFor, CASES, ORDER, COL, render, key, rim, kick, floor } = E;
+const deg = THREE.MathUtils.degToRad;
+
+// ---------- copy ----------
+const story = (ad.fmt === 'story');
+const ui = document.getElementById('ui');
+const top = document.createElement('div');
+top.id = 'top';
+top.style.top = (story ? 250 : 72) + 'px';
+const size = ad.size || (story ? 116 : 104);
+const headHtml = ad.head.split('\n').map(l => l.replace(/\*(.+?)\*/g, '<span class="acc">$1</span>')).join('<br>');
+if (ad.rule) top.innerHTML += `<div class="h" style="font-size:${size}px">${headHtml}</div><div class="rule"></div>`;
+else top.innerHTML += `<div class="h" style="font-size:${size}px">${headHtml}</div>`;
+if (ad.sub) top.innerHTML += `<div class="m">${ad.sub}</div>`;
+ui.appendChild(top);
+
+const footY = story ? H - 330 : H - 88;
+const foot = document.createElement('div');
+foot.id = 'foot';
+foot.style.top = footY + 'px';
+foot.innerHTML = ad.head === 'FLUXCASE' ? `<b></b><span>${ad.foot}</span>` : `<b>FLUXCASE</b><span>${ad.foot || DATE}</span>`;
+ui.appendChild(foot);
+
+const vials = ad.scene[2]?.vials;
+if (vials) {
+  const note = document.createElement('div');
+  note.id = 'note'; note.textContent = 'Vials not included.';
+  note.style.top = (footY - 46) + 'px';
+  ui.appendChild(note);
+}
+
+await document.fonts.load('900 40px Archivo');
+await document.fonts.load('800 40px Archivo');
+await document.fonts.load('700 20px JBM');
+await document.fonts.ready;
+
+// The product fills the space between the copy and the footer.
+const region = {
+  top: top.getBoundingClientRect().bottom + 44,
+  bottom: footY - (vials ? 76 : 40),
+  left: 64, right: W - 64,
+};
+
+// ---------- lighting per theme ----------
+if (T.dark) {
+  kick.intensity = 4.2; rim.intensity = 2.2;   // black PETG needs edge light to read on a dark ground
+  floor.material.opacity = 0.35;
+}
+
+// ---------- scenes ----------
+const add = (k, opts) => { const c = makeCase(partsFor(k), opts); scene.add(c.root); c.set({ color: COL.black }); return c; };
+const OPEN = { lift: 62, back: 58, tiltX: -1.62 };          // lid swung back, inner face toward camera
+
+// Fit the camera so every non-shadow mesh of `objs` fills the region; az/el in degrees.
+function fit(objs, az, el, fov = 30, fill = 0.9) {
+  const box = new THREE.Box3();
+  objs.forEach(o => o.traverse(m => {
+    if (m.isMesh && m.visible && !m.userData.noFit) {
+      m.updateWorldMatrix(true, false);
+      box.union(new THREE.Box3().setFromObject(m, true));
+    }
+  }));
+  const ctr = box.getCenter(new THREE.Vector3());
+  const pts = [];
+  for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) pts.push(new THREE.Vector3(x, y, z));
+  const rw = (region.right - region.left) * fill, rh = (region.bottom - region.top) * fill;
+  const a = deg(az), e = deg(el);
+  const dir = new THREE.Vector3(Math.cos(e) * Math.sin(a), Math.sin(e), Math.cos(e) * Math.cos(a));
+  camera.fov = fov; camera.aspect = W / H; camera.clearViewOffset();
+  let d = 400, ext;
+  for (let i = 0; i < 8; i++) {
+    camera.position.copy(ctr).addScaledVector(dir, d);
+    camera.lookAt(ctr); camera.updateProjectionMatrix(); camera.updateMatrixWorld();
+    const p = pts.map(q => q.clone().project(camera));
+    ext = { x0: Math.min(...p.map(q => q.x)), x1: Math.max(...p.map(q => q.x)), y0: Math.min(...p.map(q => q.y)), y1: Math.max(...p.map(q => q.y)) };
+    const pw = (ext.x1 - ext.x0) / 2 * W, ph = (ext.y1 - ext.y0) / 2 * H;
+    d *= Math.max(pw / rw, ph / rh);
+  }
+  // Shift so the projected box centre lands on the region centre.
+  const cx = ((ext.x0 + ext.x1) / 4 + 0.5) * W, cy = (0.5 - (ext.y0 + ext.y1) / 4) * H;
+  const tx = (region.left + region.right) / 2, ty = (region.top + region.bottom) / 2;
+  camera.setViewOffset(W, H, cx - tx, cy - ty, W, H);
+  camera.updateProjectionMatrix();
+}
+
+function rowOf(keys, gap, z = 0) {
+  const cs = keys.map(k => add(k));
+  const w = cs.reduce((s, c) => s + c.dia, 0) + gap * (cs.length - 1);
+  let x = -w / 2;
+  cs.forEach(c => { c.root.position.set(x + c.dia / 2, 0, z); c.root.rotation.y = deg(-10); x += c.dia + gap; });
+  return cs;
+}
+function labelUnder(c, k) {
+  const v = new THREE.Vector3(c.root.position.x, 0, c.root.position.z + c.dia / 2 + 8).project(camera);
+  const d = document.createElement('div');
+  d.className = 'label'; d.innerHTML = `<i></i>${CASES[k].label}`;
+  d.style.left = `${(v.x * .5 + .5) * W}px`; d.style.top = `${(-v.y * .5 + .5) * H + 16}px`;
+  ui.appendChild(d);
+}
+
+const [kind, k, opt = {}] = ad.scene;
+const SCENES = {
+  closed() { const c = add(k); c.root.rotation.y = deg(-16); fit([c.root], -6, 22); },
+  hover() { const c = add(k); c.root.rotation.y = deg(-14); c.set({ lift: 9, tiltX: 0.03, color: COL.black }); fit([c.root], -8, 18); },
+  open() {
+    const c = add(k, { vials: !!opt.vials });
+    c.root.rotation.y = deg(-12);
+    c.set({ ...OPEN, magOut: opt.magOut || 0, vialLift: opt.vials ? 20 : 0, color: COL.black });
+    fit([c.root], -2, 32);
+  },
+  top() {   // lid off to the side, looking down into the wells
+    const c = add(k, { vials: !!opt.vials });
+    c.lid.visible = false;
+    c.root.rotation.y = deg(-8);
+    fit([c.root], 0, 62, 30, 0.86);
+  },
+  macro() { // close on the silver rings in the base, lid swung back out of frame
+    const c = add(k);
+    c.set({ ...OPEN, magOut: 4, color: COL.black });
+    c.lid.visible = false;
+    c.root.rotation.y = deg(-12);
+    fit([c.root], -4, 48, 24, 0.98);
+  },
+  tipped() { // on its side, lid held shut by the magnets
+    const c = add(k);
+    const R = c.dia / 2, tip = deg(90);
+    c.root.rotation.order = 'ZYX';
+    c.root.rotation.set(0, deg(-24), -tip);
+    c.root.position.set(R, R, 0);
+    c.root.updateMatrixWorld(true);
+    const mid = c.root.localToWorld(new THREE.Vector3(0, (c.baseH + c.lidH) / 2, 0));
+    c.contact.position.copy(c.root.worldToLocal(new THREE.Vector3(mid.x, 0.05, mid.z)));
+    c.contact.quaternion.copy(c.root.quaternion).invert().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)));
+    fit([c.root], -6, 18, 30, 0.78);
+  },
+  lineup() { // the five on a diagonal, so the row fills a portrait frame
+    const cs = rowOf(ORDER, 30);
+    const a = deg(-38);
+    cs.forEach(c => {
+      const { x, z } = c.root.position;
+      c.root.position.set(x * Math.cos(a) + z * Math.sin(a), 0, -x * Math.sin(a) + z * Math.cos(a));
+      c.root.rotation.y = deg(-14);
+    });
+    fit(cs.map(c => c.root), -4, 24, 24, 0.94);
+  },
+  grid() {
+    const back = rowOf(['c12', 'c6', 'c4'], 46, -150), front = rowOf(['c8', 'c7'], 46, 150);
+    const all = [...back, ...front];
+    region.bottom -= 46;                       // room for the labels
+    fit(all.map(c => c.root), 0, 40, 16, 0.9);
+    camera.updateMatrixWorld();
+    all.forEach((c, i) => labelUnder(c, ['c12', 'c6', 'c4', 'c8', 'c7'][i]));
+  },
+  pair() {  // one closed, one open with vials
+    const a = add('c12'); a.root.position.set(-62, 0, 20); a.root.rotation.y = deg(-16);
+    const b = add('c8', { vials: true }); b.root.position.set(70, 0, -30); b.root.rotation.y = deg(-8);
+    b.set({ ...OPEN, vialLift: 20, color: COL.black });
+    fit([a.root, b.root], -6, 22);
+  },
+};
+// The pair scene shows vials, so it carries the note too.
+if (kind === 'pair' && !vials) {
+  const note = document.createElement('div');
+  note.id = 'note'; note.textContent = 'Vials not included.';
+  note.style.top = (footY - 46) + 'px';
+  ui.appendChild(note);
+  region.bottom = footY - 76;
+}
+SCENES[kind]();
+render(T.bg);
+window.__ready = true;
+</script>
+</body>
+</html>

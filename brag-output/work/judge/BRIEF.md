@@ -26,10 +26,12 @@ A stranger who watches it once must come away knowing:
 - Brand: ink #111413, background #F3F4F2, render grey #E2E2E2, teal #74CABF, deep teal #1D6B62.
   Type: Archivo (wide, heavy) for headlines, JetBrains Mono for labels.
 - The owner asked that the material statement ("Black PETG...") be very small.
+- The owner asked that the maker name (The 3D Print Depot) not appear anywhere.
+- Wherever vials are shown, a small "Vials not included." line must be on screen.
 
 ## Facts that are allowed on screen
 Ring magnets in base and lid pull the case shut and hold it, no clips. PETG, 3D printed to order in
-Texas by The 3D Print Depot. Five cases: 12-Vial 3 mL, 6-Vial 3 mL, 4-Vial 10 mL, 8-Vial 10 mL,
+Texas. Five cases: 12-Vial 3 mL, 6-Vial 3 mL, 4-Vial 10 mL, 8-Vial 10 mL,
 7-Vial Mixed. Kickstarter launch November 1, 2026. No Kickstarter URL exists yet.
 
 ## What to review (all under the round folder you are given)

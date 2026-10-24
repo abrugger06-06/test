@@ -35,6 +35,7 @@
 
   <div id="mag1" class="t s" style="left:120px; top:330px; font-size:62px">Ring magnets in<br>the base and lid.</div>
   <div id="mag2" class="t h" style="left:120px; top:494px; font-size:96px">No clips.</div>
+  <div id="novial" class="t m" style="left:124px; top:982px; font-size:24px">Vials not included.</div>
 
   <div id="five" class="t h" style="left:120px; top:110px; font-size:112px">Five sizes.</div>
   <div id="labels"></div>
@@ -46,7 +47,6 @@
   <div id="ksrule" class="rule" style="left:124px; top:166px; width:0"></div>
   <div id="ks1" class="t h" style="left:120px; top:206px; font-size:92px">Back it on Kickstarter.</div>
   <div id="ks2" class="t s" style="left:120px; top:316px; font-size:58px">Launching November 1, 2026.</div>
-  <div id="ks3" class="t m" style="left:124px; top:410px; font-size:26px">by The 3D Print Depot</div>
 </div>
 
 <script type="module">
@@ -283,7 +283,7 @@ function wordify(id) {
   return el;
 }
 const TXT = {};
-['hook', 'mark', 'sub', 'mag1', 'mag2', 'five', 'col1', 'col2', 'ks0', 'ks1', 'ks2', 'ks3'].forEach(id => TXT[id] = wordify(id));
+['hook', 'mark', 'sub', 'mag1', 'mag2', 'five', 'col1', 'col2', 'ks0', 'ks1', 'ks2', 'novial'].forEach(id => TXT[id] = wordify(id));
 
 // Show text `id` from tIn to tOut (both on beats). Words rise in with a 30 ms stagger,
 // or all together when `unit` is set (small print, long lines).
@@ -369,8 +369,9 @@ function renderAt(t) {
     magnetMat.envMapIntensity = 1.5 + flash * 1.6;
     const cam = eio(seg(t, 5, 9));
     look(sph(lerp(515, 490, cam), lerp(-6, 8, cam), lerp(32, 38, cam), [0, 74, 10]), [0, 74, 10], 30, 440);
-    text('mag1', t, 5.5, 9.0);
+    text('mag1', t, 4.6, 9.0);           // already set on the 5.0 cut, so nothing rises through the small line
     text('mag2', t, 7.0, 9.0);
+    text('novial', t, 4.75, 9.0, true);   // legal line, bottom left: fully on screen from the 5.0 cut, before any vial shows
   } else if (t < 13) {
     // FIVE SIZES: bases land one per beat.
     bg('#E2E2E2');
@@ -452,7 +453,6 @@ function renderAt(t) {
     document.getElementById('ksrule').style.width = `${eo(seg(t, 16.1, 16.6)) * 150}px`;
     text('ks1', t, 16.25, 99);
     text('ks2', t, 16.75, 99, true);
-    text('ks3', t, 17.25, 99, true);
   }
   renderer.render(scene, camera);
 }
