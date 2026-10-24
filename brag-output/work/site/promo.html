@@ -1,0 +1,341 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fluxcase Kickstarter Promo</title>
+<style>
+  @font-face { font-family: Archivo; font-weight: 800; font-stretch: 125%; src: url(fonts/archivo-800.ttf); font-display: block; }
+  @font-face { font-family: Archivo; font-weight: 900; font-stretch: 125%; src: url(fonts/archivo-900.ttf); font-display: block; }
+  @font-face { font-family: JBM; font-weight: 700; src: url(fonts/JetBrainsMono-Bold.ttf); font-display: block; }
+  :root { --ink: #111413; --paper: #F3F4F2; --grey: #E2E2E2; --teal: #74CABF; --deep: #1D6B62; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #111413; }
+  #bg, #fx, #ui, svg { position: absolute; inset: 0; }
+  canvas { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+  #fx { background: #fff; opacity: 0; pointer-events: none; }
+  .t { position: absolute; white-space: nowrap; visibility: hidden; will-change: transform, opacity; }
+  .h { font-family: Archivo; font-weight: 900; font-stretch: 125%; letter-spacing: -0.01em; line-height: 0.96; }
+  .s { font-family: Archivo; font-weight: 800; font-stretch: 125%; line-height: 1.1; }
+  .m { font-family: JBM; font-weight: 700; letter-spacing: 0.02em; }
+  .w { display: inline-block; }
+  .light { color: var(--paper); }
+  .dark { color: var(--ink); }
+  .acc { color: var(--deep); }
+  .rule { position: absolute; height: 6px; background: var(--deep); }
+  .label { position: absolute; transform: translateX(-50%); font-family: JBM; font-weight: 700; font-size: 26px; color: var(--ink); white-space: nowrap; visibility: hidden; }
+  .label i { display: block; width: 100%; height: 3px; background: var(--ink); margin-bottom: 12px; }
+  .call { position: absolute; font-family: JBM; font-weight: 700; font-size: 28px; color: var(--paper); white-space: nowrap; visibility: hidden; }
+  svg line { stroke: var(--teal); stroke-width: 3; }
+  svg circle { fill: none; stroke: var(--teal); stroke-width: 3; }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<canvas id="c" width="1920" height="1080"></canvas>
+<svg id="lines" width="1920" height="1080"></svg>
+<div id="ui">
+  <!-- S1 hook -->
+  <div id="hook1" class="t h light" style="left:110px; top:742px; font-size:124px">It closes</div>
+  <div id="hook2" class="t h light" style="left:110px; top:866px; font-size:124px">itself.</div>
+  <!-- S2 montage -->
+  <div id="noclip" class="t h light" style="left:120px; top:800px; font-size:150px">No clips.</div>
+  <!-- S3 title -->
+  <div id="mark" class="t h dark" style="left:0; width:1920px; text-align:center; top:96px; font-size:200px">FLUXCASE</div>
+  <div id="sub" class="t s dark" style="left:0; width:1920px; text-align:center; top:930px; font-size:54px">Magnetic cases for 3 and 10 mL vials.</div>
+  <!-- S4 explode -->
+  <div id="callLid" class="call">Magnets in the lid</div>
+  <div id="callBase" class="call">Magnets in the base</div>
+  <div id="legal4" class="t m light" style="left:124px; top:996px; font-size:24px">Vials not included.</div>
+  <!-- S5 tip -->
+  <div id="pulls" class="t h dark" style="left:120px; top:120px; font-size:120px">Pulls shut.</div>
+  <div id="holds" class="t h acc" style="left:120px; top:240px; font-size:120px">Holds shut.</div>
+  <div id="petg" class="t m dark" style="left:124px; top:386px; font-size:24px">Black PETG. 3D printed to order.</div>
+  <!-- S6 sizes -->
+  <div id="five" class="t h dark" style="left:120px; top:100px; font-size:130px">Five sizes.</div>
+  <div id="fiveSub" class="t s dark" style="left:122px; top:244px; font-size:46px">For 3 mL and 10 mL vials.</div>
+  <div id="labels"></div>
+  <!-- S7 Kickstarter card -->
+  <div id="ks1" class="t s light" style="left:0; width:1920px; text-align:center; top:250px; font-size:72px">Launching on</div>
+  <div id="ks2" class="t h light" style="left:0; width:1920px; text-align:center; top:350px; font-size:184px">KICKSTARTER</div>
+  <div id="ks3" class="t h" style="left:0; width:1920px; text-align:center; top:610px; font-size:120px; color:#74CABF">November 1, 2026.</div>
+  <!-- S8 end card -->
+  <div id="end0" class="t h dark" style="left:120px; top:80px; font-size:72px">FLUXCASE</div>
+  <div id="endRule" class="rule" style="left:124px; top:170px; width:0"></div>
+  <div id="end1" class="t h dark" style="left:120px; top:212px; font-size:116px">Back it on <span class="acc">Kickstarter.</span></div>
+  <div id="end2" class="t s dark" style="left:122px; top:350px; font-size:64px">Launching November 1, 2026.</div>
+</div>
+<div id="fx"></div>
+
+<script type="module">
+window.STAGE = { W: 1920, H: 1080 };
+const { THREE, scene, camera, makeCase, partsFor, CASES, ORDER, COL, look, sph, render, magnetMat, key, rim, kick, floor } = await import('./engine.js');
+const W = 1920, H = 1080;
+const deg = THREE.MathUtils.degToRad;
+
+// ---------- timing ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const eio = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const eo = k => 1 - Math.pow(1 - k, 3);
+const eo5 = k => 1 - Math.pow(1 - k, 5);
+const ei = k => k * k;
+const backOut = k => { const c = 1.6; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+// Lid gap for a magnetic close: drifts, the magnets take the last stretch, lands on `at`, small rebound.
+function closeGap(t, start, at, from = 34) {
+  if (t < at - 0.3) return lerp(from, 10, eo(seg(t, start, at - 0.3)));
+  if (t < at) return lerp(10, 0, ei(seg(t, at - 0.3, at)));
+  return Math.max(0, Math.sin(seg(t, at, at + 0.18) * Math.PI) * 1.2);
+}
+
+// ---------- cast ----------
+const add = (k, o) => { const c = makeCase(partsFor(k), o); scene.add(c.root); c.set({ color: COL.black }); return c; };
+const hero12 = add('c12'), m6 = add('c6'), m4 = add('c4'), m8 = add('c8');
+const x8 = add('c8', { vials: true }), tip7 = add('c7');
+const row = ORDER.map(k => add(k));
+const all = [hero12, m6, m4, m8, x8, tip7, ...row];
+function show(...on) { all.forEach(c => c.root.visible = on.includes(c)); }
+function reset(c) {
+  c.root.position.set(0, 0, 0); c.root.rotation.set(0, 0, 0); c.root.rotation.order = 'XYZ'; c.root.scale.set(1, 1, 1);
+  c.contact.position.set(0, 0.05, 0); c.contact.rotation.set(-Math.PI / 2, 0, 0);
+  c.set({ color: COL.black });
+}
+const GAP = 44;
+const rowW = row.reduce((s, c) => s + c.dia, 0) + GAP * 4;
+let acc = -rowW / 2;
+const rowX = row.map(c => { const x = acc + c.dia / 2; acc += c.dia + GAP; return x; });
+
+// ---------- looks ----------
+const BG = {
+  dark: 'radial-gradient(ellipse 70% 80% at 62% 48%, #2b2f2e 0%, #151817 52%, #0a0b0b 100%)',
+  grey: 'radial-gradient(ellipse 75% 85% at 55% 50%, #efefed 0%, #E2E2E2 58%, #d3d4d2 100%)',
+  paper: '#F3F4F2',
+  teal: 'radial-gradient(ellipse 70% 80% at 50% 50%, #237d73 0%, #1D6B62 55%, #164f49 100%)',
+};
+const bgEl = document.getElementById('bg'), fx = document.getElementById('fx');
+function setLook(name) {
+  bgEl.style.background = BG[name];
+  const dark = name === 'dark';
+  key.intensity = dark ? 1.5 : 2.2;
+  rim.intensity = dark ? 2.6 : 0.9;
+  kick.intensity = dark ? 5.0 : 2.4;
+  floor.material.opacity = dark ? 0.5 : 0.13;
+}
+function flash(t, at, amp, decay = 0.05) { if (t >= at) fx.style.opacity = Math.max(+fx.style.opacity || 0, amp * Math.exp(-(t - at) / decay)); }
+function shake(t, at, amp = 1.6) { const k = t - at; return k < 0 ? 0 : amp * Math.exp(-k / 0.09) * Math.sin(k * 95); }
+
+// ---------- type ----------
+function wordify(id) {
+  const el = document.getElementById(id);
+  const walk = n => [...n.childNodes].forEach(c => {
+    if (c.nodeType === 3) {
+      const span = document.createElement('span');
+      span.innerHTML = c.textContent.split(' ').map(w => w ? `<span class="w">${w}</span>` : '').join(' ');
+      c.replaceWith(span);
+    } else if (c.nodeType === 1 && !c.classList.contains('w')) walk(c);
+  });
+  walk(el);
+  return el;
+}
+const TXT = {};
+['hook1', 'hook2', 'noclip', 'mark', 'sub', 'legal4', 'pulls', 'holds', 'petg', 'five', 'fiveSub', 'ks1', 'ks2', 'ks3', 'end0', 'end1', 'end2']
+  .forEach(id => TXT[id] = wordify(id));
+// Modes: 'rise' (words rise in, 30 ms apart), 'unit' (whole line fades up), 'slam' (drops in large, settles).
+function text(id, t, tIn, tOut, mode = 'rise') {
+  const el = TXT[id];
+  if (!(t >= tIn && t < tOut)) return;
+  el.style.visibility = 'visible';
+  const ws = [...el.querySelectorAll('.w')];
+  if (mode === 'slam') {
+    const k = eo5(seg(t, tIn, tIn + 0.16));
+    el.style.opacity = Math.min(1, k * 1.5);
+    el.style.transform = `scale(${lerp(1.22, 1, k)})`;
+    el.style.transformOrigin = el.style.textAlign === 'center' ? '50% 50%' : '0% 50%';
+    ws.forEach(w => { w.style.opacity = 1; w.style.transform = 'none'; });
+    return;
+  }
+  el.style.opacity = 1; el.style.transform = 'none';
+  ws.forEach((w, i) => {
+    const d = mode === 'unit' ? 0 : i * 0.03;
+    const k = eo5(seg(t, tIn + d, tIn + d + 0.25));
+    w.style.opacity = k;
+    w.style.transform = `translateY(${(1 - k) * (mode === 'unit' ? 16 : 44)}px)`;
+  });
+}
+
+// Labels and callouts
+const labelsEl = document.getElementById('labels');
+const labels = ORDER.map(k => { const d = document.createElement('div'); d.className = 'label'; d.innerHTML = `<i></i>${CASES[k].label}`; labelsEl.appendChild(d); return d; });
+const svg = document.getElementById('lines');
+const callLid = document.getElementById('callLid'), callBase = document.getElementById('callBase');
+const proj = v => { const p = v.clone().project(camera); return [(p.x * .5 + .5) * W, (-p.y * .5 + .5) * H]; };
+function callout(el, from, toX, toY, k, right) {
+  if (k <= 0) return '';
+  el.style.visibility = 'visible';
+  el.style.opacity = k;
+  el.style.left = (right ? toX + 18 : toX - 18 - el.offsetWidth) + 'px';
+  el.style.top = (toY - 20) + 'px';
+  const [fx0, fy0] = from;
+  const ex = lerp(fx0, toX, eo(k)), ey = lerp(fy0, toY, eo(k));
+  return `<circle cx="${fx0}" cy="${fy0}" r="${10 * k}"/><line x1="${fx0}" y1="${fy0}" x2="${ex}" y2="${ey}"/>`;
+}
+
+// ---------- scenes (120 BPM: beat 0.5 s). Cuts: 2.5, 3.0, 3.5, 4.0, 7.5, 11.5, 14.0, 17.5, 19.5 ----------
+function sHook(t) {
+  setLook('dark');
+  show(hero12); reset(hero12);
+  hero12.root.rotation.y = deg(-18 + t * 4);
+  hero12.set({ lift: closeGap(t, 0, 1.5, 36), tiltX: t < 1.5 ? (1 - seg(t, 0, 1.5)) * 0.05 : 0 });
+  const tgt = [0, 34, 0];
+  const r = t < 1.5 ? lerp(160, 132, eio(seg(t, 0, 1.5))) : lerp(132, 175, eo(seg(t, 1.5, 2.5)));
+  const el = t < 1.5 ? 7 : lerp(7, 13, eo(seg(t, 1.5, 2.5)));
+  const p = sph(r, -14, el, tgt);
+  p[1] += shake(t, 1.5);
+  look(p, tgt, 30, 420, -60);
+  flash(t, 1.5, 0.4);
+  text('hook1', t, 0.3, 2.5);
+  text('hook2', t, 1.5, 2.5, 'slam');
+}
+function sMontage(t) {
+  setLook('dark');
+  const shots = [[m6, 2.5, -32, 16, 230], [m4, 3.0, 28, 30, 250], [m8, 3.5, -10, 52, 330]];
+  const [c, t0, az, el, r] = shots[t < 3.0 ? 0 : t < 3.5 ? 1 : 2];
+  show(c); reset(c);
+  c.root.rotation.y = deg(-20 + (t - t0) * 30);
+  c.set({ lift: closeGap(t, t0 - 0.05, t0 + 0.25, 16) });
+  const tgt = [0, c.baseH, 0];
+  const p = sph(lerp(r, r * 0.9, seg(t, t0, t0 + 0.5)), az, el, tgt);
+  p[1] += shake(t, t0 + 0.25, 1.2);
+  look(p, tgt, 30, 330, 0);
+  flash(t, t0 + 0.25, 0.18, 0.04);
+  text('noclip', t, 2.5, 4.0);
+}
+function sTitle(t) {
+  setLook('grey');
+  show(hero12); reset(hero12);
+  hero12.root.rotation.y = deg(lerp(-200, -22, eo5(seg(t, 4.0, 5.3))) + (t - 4) * 2);
+  const tgt = [0, 26, 0];
+  look(sph(lerp(400, 370, seg(t, 4, 7.5)), 0, 20, tgt), tgt, 30, 0, 50);
+  flash(t, 4.0, 0.7, 0.08);
+  text('mark', t, 4.0, 7.5, 'slam');
+  text('sub', t, 4.5, 7.5, 'unit');
+}
+function sExplode(t) {
+  setLook('dark');
+  show(x8); reset(x8);
+  const open = eo(seg(t, 8.0, 8.4)) * (1 - seg(t, 10.7, 11.0));
+  const lidLift = t < 10.7 ? open * 70 : lerp(70, 0, ei(seg(t, 10.7, 11.0)));
+  const mag = backOut(seg(t, 8.5, 8.9)) * (1 - eio(seg(t, 10.4, 10.8))) * 7;
+  const vial = eo(seg(t, 9.5, 9.9)) * (1 - eio(seg(t, 10.3, 10.7))) * 26;
+  x8.set({ lift: Math.max(0, lidLift), back: open * 34, tiltX: -open * 1.15, magOut: Math.max(0, mag), vialLift: vial });
+  x8.root.rotation.y = deg(-20);
+  const tgt = [0, 62, 0];
+  const p = sph(lerp(640, 560, eio(seg(t, 7.5, 8.4))), lerp(-38, 34, eio(seg(t, 7.5, 11.5))), lerp(18, 30, eio(seg(t, 7.5, 9))), tgt);
+  p[1] += shake(t, 11.0, 1.4);
+  look(p, tgt, 30, 0, 20);
+  flash(t, 11.0, 0.2, 0.05);
+  magnetMat.emissiveIntensity = Math.max(0, 1 - seg(t, 8.5, 9.2)) * (t >= 8.5 ? 0.25 : 0);
+  // Callouts to the lid's and the base's magnets
+  x8.root.updateMatrixWorld(true);
+  camera.updateMatrixWorld();
+  const lidP = x8.lid.getWorldPosition(new THREE.Vector3());
+  const baseP = new THREE.Vector3(0, x8.baseH + 2, 0);
+  const kl = seg(t, 8.5, 8.8) * (1 - seg(t, 10.3, 10.5)), kb = seg(t, 9.0, 9.3) * (1 - seg(t, 10.3, 10.5));
+  svg.innerHTML = callout(callLid, proj(lidP), 560, 260, kl, false) + callout(callBase, proj(baseP), 1380, 760, kb, true);
+  text('legal4', t, 7.25, 11.5, 'unit');
+}
+function sTip(t) {
+  setLook('grey');
+  show(tip7); reset(tip7);
+  const tipK = t < 12.0 ? 0 : t < 12.3 ? eo(seg(t, 12.0, 12.3)) : t < 12.45 ? 1 : t < 12.75 ? 1 - ei(seg(t, 12.45, 12.75)) : -0.03 * Math.sin(Math.PI * seg(t, 12.75, 12.95));
+  const tip = deg(90) * tipK, R = tip7.dia / 2, side = tip >= 0 ? 1 : -1;
+  tip7.root.rotation.order = 'ZYX';
+  tip7.root.rotation.set(0, deg(-26 + (t - 11.5) * 4), -tip);
+  tip7.root.position.set(side * (R - R * Math.cos(tip)), R * Math.sin(Math.abs(tip)), 0);
+  tip7.root.updateMatrixWorld(true);
+  const mid = tip7.root.localToWorld(new THREE.Vector3(0, (tip7.baseH + tip7.lidH) / 2, 0));
+  tip7.contact.position.copy(tip7.root.worldToLocal(new THREE.Vector3(mid.x, 0.05, mid.z)));
+  tip7.contact.quaternion.copy(tip7.root.quaternion).invert().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)));
+  const tg = [50 * Math.max(0, tipK), 50, 10];
+  look(sph(lerp(470, 440, seg(t, 11.5, 14)), 4, 22, tg), tg, 30, 440, 40);
+  text('pulls', t, 11.5, 14.0);
+  text('holds', t, 11.7, 14.0);
+  text('petg', t, 11.75, 14.0, 'unit');
+}
+function sSizes(t) {
+  setLook('grey');
+  show(...row);
+  row.forEach((c, i) => {
+    reset(c);
+    const land = 14.5 + i * 0.5, t0 = i === 0 ? 14.0 : land - 0.38;
+    c.root.visible = t >= t0;
+    c.root.position.set(rowX[i], (1 - ei(seg(t, t0, land))) * 80, 0);
+    const sq = t >= land ? Math.sin(seg(t, land, land + 0.16) * Math.PI) * 0.04 : 0;
+    c.root.scale.set(1 + sq, 1 - sq, 1 + sq);
+    c.root.rotation.y = deg(-10);
+  });
+  const tgt = [0, 40, 0];
+  look(sph(lerp(1460, 1380, eio(seg(t, 14, 17.5))), lerp(-3, 2, seg(t, 14, 17.5)), 19, tgt), tgt, 16, 0, 60);
+  camera.updateMatrixWorld();
+  const base = Math.max(...row.map((c, i) => -new THREE.Vector3(rowX[i], 0, c.dia / 2 + 10).project(camera).y));
+  row.forEach((c, i) => {
+    const land = 14.5 + i * 0.5;
+    if (t < land) return;
+    const p = new THREE.Vector3(rowX[i], 0, 0).project(camera), l = labels[i], k = eo5(seg(t, land, land + 0.3));
+    l.style.visibility = 'visible'; l.style.opacity = k;
+    l.style.left = `${(p.x * .5 + .5) * W}px`;
+    l.style.top = `${(base * .5 + .5) * H + 30 + (1 - k) * 20}px`;
+  });
+  text('five', t, 14.0, 17.5);
+  text('fiveSub', t, 14.3, 17.5, 'unit');
+}
+function sKick(t) {
+  setLook('teal');
+  show();
+  flash(t, 17.5, 0.5, 0.08);
+  flash(t, 18.5, 0.45, 0.08);
+  text('ks1', t, 17.5, 19.5, 'unit');
+  text('ks2', t, 17.6, 19.5, 'slam');
+  text('ks3', t, 18.5, 19.5, 'slam');
+}
+function sEnd(t) {
+  setLook('paper');
+  show(...row);
+  row.forEach((c, i) => { reset(c); c.root.position.set(rowX[i], 0, 0); c.root.rotation.y = deg(-10); });
+  // The owner's end card: the row big and running off the right edge, pinned under the copy.
+  const tgt = [rowX[1] + 40, 26, 0];
+  look(sph(lerp(980, 930, eio(seg(t, 19.5, 24))), 0, 17, tgt), tgt, 22, 120, 230);
+  flash(t, 19.5, 0.6, 0.1);
+  text('end0', t, 19.5, 99, 'unit');
+  document.getElementById('endRule').style.width = `${eo(seg(t, 19.6, 20.0)) * 150}px`;
+  text('end1', t, 19.6, 99);
+  text('end2', t, 20.0, 99, 'unit');
+}
+
+function renderAt(t) {
+  Object.values(TXT).forEach(el => el.style.visibility = 'hidden');
+  labels.forEach(l => l.style.visibility = 'hidden');
+  [callLid, callBase].forEach(c => c.style.visibility = 'hidden');
+  svg.innerHTML = '';
+  fx.style.opacity = 0;
+  document.getElementById('endRule').style.width = '0';
+  magnetMat.emissiveIntensity = 0;
+  if (t < 2.5) sHook(t);
+  else if (t < 4.0) sMontage(t);
+  else if (t < 7.5) sTitle(t);
+  else if (t < 11.5) sExplode(t);
+  else if (t < 14.0) sTip(t);
+  else if (t < 17.5) sSizes(t);
+  else if (t < 19.5) sKick(t);
+  else sEnd(t);
+  render(0x000000, 0);
+}
+window.renderAt = renderAt;
+await document.fonts.load('900 40px Archivo');
+await document.fonts.load('800 40px Archivo');
+await document.fonts.load('700 20px JBM');
+await document.fonts.ready;
+renderAt(Number(new URLSearchParams(location.search).get('t') || 0));
+window.__ready = true;
+</script>
+</body>
+</html>

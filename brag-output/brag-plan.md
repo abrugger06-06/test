@@ -1,20 +1,22 @@
-# Fluxcase Kickstarter ad: storyboard
+# Fluxcase Kickstarter promo (v2): storyboard
 
-20 s, 1920x1080, 30 fps, landscape 16:9. Built from the real CAD
-(`FluxCase_all_cases_silver_magnets.3mf`: 5 bases, 5 lids, and their silver magnets).
-Music: 120 BPM, D major, written as code (`work/scripts/music.py`). One beat is 0.5 s
-and one bar is 2 s. Every cut lands on a beat: 2.0, 5.0, 9.0, 13.0, 16.0.
+24 s, 1920x1080, 30 fps, landscape 16:9. Built from the real CAD
+(`FluxCase_all_cases_silver_magnets.3mf`: 5 bases, 5 lids, and their solid silver disc magnets).
+Renderer: `work/site/promo.html` (three.js). Music: `work/scripts/music2.py`, 120 BPM, D minor, written
+as code; one beat is 0.5 s and one bar is 2 s. Every cut lands on a beat:
+2.5, 3.0, 3.5, 4.0, 7.5, 11.5, 14.0, 17.5, 19.5. The first cut (v1, 20 s) is kept as `brag-v1.mp4`.
 
 | Time | Scene | Picture | On screen | Sound |
 |---|---|---|---|---|
-| 0.0-2.0 | Hook | Close-up, black 12-vial. The lid hovers with the wells and silver magnets visible, drifts down, then the magnets take it the last 9 mm and it snaps shut at 1.5 s (beat 4) with a small rebound. | "It closes itself." | Pad, three rising ticks on beats 1 to 3, magnet snap on beat 4 |
-| 2.0-5.0 | Reveal | Pull back and orbit to a three-quarter hero view of the closed case. | FLUXCASE (wordmark, deep teal rule) at 2.25 / "Magnetic cases for 3 mL and 10 mL vials." at 2.25 | Groove enters on 2.0 |
-| 5.0-9.0 | How it stays shut | Black 8-vial with plain 10 mL vials (teal flip caps) in its wells. The lid lifts, swings back and opens toward camera. At 6.5 s the silver magnets in the base and lid rise and flash. | "Magnets in the base and lid." then "No clips." at 7.0, small: "Vials not included." | Four ticks from 6.5 s as the magnets light |
-| 9.0-13.0 | Five sizes | The five bases slide in, one per beat (landing 9.5, 10.0, 10.5, 11.0, 11.5), each labeled. | "Five sizes." + labels: 12-Vial 3 mL, 6-Vial 3 mL, 4-Vial 10 mL, 8-Vial 10 mL, 7-Vial Mixed | One tuned tick per landing |
-| 13.0-16.0 | Pulls shut | Black 7-vial. The open lid swings back down, drifts, and the magnets snap it shut at 14.5 s (on the beat). | "Pulls shut. Holds shut." / small: "Black PETG. 3D printed to order." | Three rising ticks, snap on 14.5 |
-| 16.0-20.0 | Outro | All five cases closed in a row, with a slow push. | FLUXCASE / "Back it on Kickstarter." / "Launching November 1, 2026." | Final D chord with bells, ringing out |
+| 0.0-2.5 | Cold open | Dark studio. Macro on the black 12-vial: the lid hovers over the wells, drifts down, the magnets take the last 10 mm and it snaps shut at 1.5 s with a small rebound, a camera kick and a flash. | "It closes" (0.3), "itself." slams in on the snap (1.5) | Sub drone, heartbeat kick, riser, magnet clack + impact at 1.5 |
+| 2.5-4.0 | Snap montage | Three hard cuts, one per beat: 6-Vial, 4-Vial, 8-Vial, each lid snapping shut on the off-beat (2.75, 3.25, 3.75). | "No clips." | A clack on each snap, snare roll and riser into the drop |
+| 4.0-7.5 | Title drop | Flash to a light studio. The 12-vial whips round and settles. | FLUXCASE (slams in, 4.0) / "Magnetic cases for 3 and 10 mL vials." (4.5) | DROP on 4.0: full kit, bass, pluck chords |
+| 7.5-11.5 | How it works | Dark studio, slow orbit. The 8-Vial with plain 10 mL vials (teal caps): the lid lifts and swings open (8.0), the magnets in lid and base rise (8.5), the vials rise (9.5); everything snaps back together at 11.0. | Callouts drawn to the magnets: "Magnets in the lid" (8.5), "Magnets in the base" (9.0). Legal line "Vials not included." from the cut | Whoosh in, clacks on 8.0 / 8.5 / 9.0 / 9.5, reverse swell, snap at 11.0 |
+| 11.5-14.0 | Holds shut | Light studio. The 7-Vial Mixed tips onto its side at 12.0 with the lid held, then rocks back upright at 12.75. | "Pulls shut." / "Holds shut." (teal) / small: "Black PETG. 3D printed to order." | Thud on 12.0, knock on 12.75 |
+| 14.0-17.5 | Five sizes | The five cases drop into a row, one per beat (14.5 to 16.5), each labeled. | "Five sizes." / "For 3 mL and 10 mL vials." + labels | A tuned impact per landing |
+| 17.5-19.5 | Kickstarter card | Full-bleed deep teal, type only. | "Launching on" / KICKSTARTER (slam) / "November 1, 2026." (slam, 18.5) | Riser, impact on the date at 18.5 |
+| 19.5-24.0 | End card | The owner's end card: light ground, all five cases large, running off the right edge, slow push. | FLUXCASE + teal rule / "Back it on Kickstarter." / "Launching November 1, 2026." | Final chord, sub boom, bells ring out |
 
-Decisions: every case is black PETG (the only material offered), magnets silver. No dimensions on screen, no URL, no pricing, no invented claims.
-Case names: "8-Vial 10 mL" and "7-Vial Mixed".
-Poster: a settled outro frame (the ask, the date, all five cases).
-Magnets: solid silver discs, rendered straight from the CAD.
+Decisions: every case is black PETG, magnets are solid silver discs (as in the CAD). No dimensions,
+URL, prices or invented claims. No maker name and no mention of Texas. "Vials not included." whenever
+vials are on screen. Poster: a settled end-card frame.

@@ -59,7 +59,7 @@ if (mode === 'insta') {
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
 page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') console.log('[page]', m.text()); });
 page.on('pageerror', e => console.log('[pageerror]', e.message));
-await page.goto(`http://127.0.0.1:${port}/video.html`);
+await page.goto(`http://127.0.0.1:${port}/${process.env.PAGE || 'video.html'}`);   // PAGE=promo.html for the v2 film
 await page.waitForFunction('window.__ready === true', null, { timeout: 300000 });
 
 const shot = async (t, file) => {

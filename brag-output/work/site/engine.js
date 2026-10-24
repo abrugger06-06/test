@@ -1,5 +1,5 @@
-// Shared 3D stage for the Instagram stills: the same renderer, lights, materials and CAD
-// loading as video.html. Set window.STAGE = { W, H } before importing.
+// Shared 3D stage for the Instagram stills and the promo film: renderer, lights, materials and
+// CAD loading. Set window.STAGE = { W, H } before importing.
 import * as THREE from './vendor/three.module.js';
 import { RoomEnvironment } from './vendor/RoomEnvironment.js';
 import { toCreasedNormals, mergeGeometries } from './vendor/BufferGeometryUtils.js';
@@ -10,7 +10,7 @@ const MESH = new URLSearchParams(location.search).get('mesh') || 'mesh';
 
 // ---------- renderer ----------
 const canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, alpha: true });
 renderer.setPixelRatio(1);
 renderer.setSize(W, H, false);
 renderer.toneMapping = THREE.NeutralToneMapping;
@@ -256,5 +256,6 @@ function look(pos, target, fov = 30, shiftX = 0, shiftY = 0) {
   camera.setViewOffset(W, H, -shiftX, -shiftY, W, H);
   camera.updateProjectionMatrix();
 }
-function render(bgHex) { renderer.setClearColor(bgHex, 1); renderer.render(scene, camera); }
+// alpha 0 leaves the canvas transparent so a CSS background shows through.
+function render(bgHex, alpha = 1) { renderer.setClearColor(bgHex, alpha); renderer.render(scene, camera); }
 export { scene, camera, renderer, makeCase, partsFor, CASES, ORDER, COL, look, sph, render, magnetMat, key, rim, kick, floor };
