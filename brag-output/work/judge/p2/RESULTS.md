@@ -1,0 +1,10 @@
+G7 customer: 8. Tip a loaded case with a visible fall; shorten the teal card or add product; make the lid pops at 5.0 and 22.0 bigger; put "3 and 10 mL" in the title subhead.
+G1 CD: 8. End card static, 22.0 lid snap invisible (open ~15 deg on 21, snap 22, push-in, louder accent) or end at 22.5; audio hole 7.3-8.0 (pad/sub, ticks, riser into 10.0); teal card duplicate: cut to 16.5-18.0, text in at 16.5, date at 17.0, no empty frame.
+G4 type: 8. KS card left-aligned, "Kickstarter." hero slam 16.5, "Launching November 1, 2026." 800 subhead 17.5 teal date; PETG line >=34px or Archivo subhead; end row on margins 124..1796; legal 34-36px.
+A2 claims: FAIL. Lid tops pale silver-blue in dark look at 3.25, 3.75, 10.0 (keep <= #3a3d3c). Nits: 7-Vial Mixed label, timezone, hovering lid.
+G6 CGI: 7. Dark lid tops silver (3.0-3.75, 10.0); vials milky (transmission glass + edge streak); product on KS card; hook rim light; tipped contact strip; end row up 60px, closer, faint reflection.
+G3 motion: 8. Tip hold stalls (beat move on 12.0 or cut); 22.0 lid snap invisible (lift 35 from 21.5, punch-in 3%); "Pulls shut." colour flip across 10.5; slams 0.1 s early; sizes opener floating case.
+G5 sound: 6. Level -19 LUFS (pre-gain, -1 dBFS ceiling, -14 LUFS); 6.5-8.0 hole (pad+bass from 6.5, louder clacks); muddy (HP 50 Hz drone/bass, bass sine at root, plucks/clap +4-6 dB, lead 1-3 kHz from 10.5); 11.0 too loud (drop groove kick, extra kick 0.7; crash on 4.0/16.5/19.0); end thin (bells +3 dB, 22.0 accent 0.7).
+G2 brand: 8. Dark lid silver; anchor dark and teal gradients to brand values.
+A1 critic: FAIL. Lid silver (MUST); breakdown audio hole; end card static; KS card redundant/no period; PETG and size labels too small; nits: tip proves little, sizes floating case, end "Kickstarter." right margin.
+A3 QA: FAIL. Lid silver (MUST, key-3.75 RGB 169,179,196, target <=100); m4 shot base cut off bottom; 22.0 lid lift invisible (20-25 units from 21.5); nits: petg before holds, breakdown bass at 10.0 bar overlaps, lid hinge-like close at 9.5.

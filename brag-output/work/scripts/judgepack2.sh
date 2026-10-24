@@ -4,9 +4,9 @@ set -e
 cd "$(dirname "$0")/.."
 R=${1:-judge/p1}
 rm -rf "$R" && mkdir -p "$R/frames"
-KEYS="0.50 1.50 1.70 3.25 3.75 4.30 5.50 6.80 7.80 8.50 10.00 11.00 12.00 15.80 17.00 17.80 20.50 22.05"
+KEYS="0.00 1.50 3.25 3.75 5.12 5.50 7.00 7.80 8.50 10.00 10.80 11.50 12.15 13.00 15.80 16.80 17.40 18.90 21.65 22.05"
 TS=$(python3 -c "print(' '.join(f'{i*0.25:.2f}' for i in range(96)))")
-PAGE=promo.html node scripts/capture.mjs stills "$R/frames" $TS 1.70 4.30 6.80 7.80 15.80 17.80 22.05 >/dev/null
+PAGE=promo.html node scripts/capture.mjs stills "$R/frames" $TS 5.12 7.80 10.80 12.15 15.80 16.80 17.40 18.90 21.65 22.05 >/dev/null
 python3 - "$R" "$KEYS" <<'PY'
 import sys, glob
 from PIL import Image, ImageDraw, ImageFont
