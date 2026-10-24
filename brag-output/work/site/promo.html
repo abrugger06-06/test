@@ -11,7 +11,7 @@
   html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #111413; }
   #bg, #fx, #ui, svg { position: absolute; inset: 0; }
   canvas { position: absolute; inset: 0; width: 1920px; height: 1080px; }
-  #fx { background: #fff; opacity: 0; pointer-events: none; }
+  #fx { background: var(--paper); opacity: 0; pointer-events: none; }
   .t { position: absolute; white-space: nowrap; visibility: hidden; will-change: transform, opacity; }
   .h { font-family: Archivo; font-weight: 900; font-stretch: 125%; letter-spacing: -0.01em; line-height: 0.96; }
   .s { font-family: Archivo; font-weight: 800; font-stretch: 125%; line-height: 1.1; }
@@ -20,12 +20,13 @@
   .light { color: var(--paper); }
   .dark { color: var(--ink); }
   .acc { color: var(--deep); }
+  .accl { color: var(--teal); }
   .rule { position: absolute; height: 6px; background: var(--deep); }
-  .label { position: absolute; transform: translateX(-50%); font-family: JBM; font-weight: 700; font-size: 26px; color: var(--ink); white-space: nowrap; visibility: hidden; }
-  .label i { display: block; width: 100%; height: 3px; background: var(--ink); margin-bottom: 12px; }
-  .call { position: absolute; font-family: JBM; font-weight: 700; font-size: 28px; color: var(--paper); white-space: nowrap; visibility: hidden; }
-  svg line { stroke: var(--teal); stroke-width: 3; }
-  svg circle { fill: none; stroke: var(--teal); stroke-width: 3; }
+  .label { position: absolute; transform: translateX(-50%); font-family: JBM; font-weight: 700; font-size: 34px; color: var(--ink); white-space: nowrap; visibility: hidden; }
+  .label i { display: block; width: 100%; height: 4px; background: var(--ink); margin-bottom: 12px; }
+  .call { position: absolute; font-family: JBM; font-weight: 700; font-size: 36px; color: var(--paper); white-space: nowrap; visibility: hidden; }
+  svg line { stroke: var(--teal); stroke-width: 4; }
+  svg circle { fill: none; stroke: var(--teal); stroke-width: 4; }
 </style>
 </head>
 <body>
@@ -33,41 +34,43 @@
 <canvas id="c" width="1920" height="1080"></canvas>
 <svg id="lines" width="1920" height="1080"></svg>
 <div id="ui">
-  <!-- S1 hook -->
-  <div id="hook1" class="t h light" style="left:110px; top:742px; font-size:124px">It closes</div>
-  <div id="hook2" class="t h light" style="left:110px; top:866px; font-size:124px">itself.</div>
-  <!-- S2 montage -->
-  <div id="noclip" class="t h light" style="left:120px; top:800px; font-size:150px">No clips.</div>
-  <!-- S3 title -->
-  <div id="mark" class="t h dark" style="left:0; width:1920px; text-align:center; top:96px; font-size:200px">FLUXCASE</div>
-  <div id="sub" class="t s dark" style="left:0; width:1920px; text-align:center; top:930px; font-size:54px">Magnetic cases for 3 and 10 mL vials.</div>
-  <!-- S4 explode -->
+  <!-- S1 hook (0-3.0) -->
+  <div id="hook1" class="t h light" style="left:120px; top:110px; font-size:132px">Magnets</div>
+  <div id="hook2" class="t h accl" style="left:120px; top:240px; font-size:132px">pull it shut.</div>
+  <div id="legal1" class="t m light" style="left:124px; top:900px; font-size:34px">Vials not included.</div>
+  <!-- S2 montage (3.0-4.0) -->
+  <div id="noclip" class="t h light" style="left:120px; top:110px; font-size:150px">No clips.</div>
+  <!-- S3 title (4.0-6.5) -->
+  <div id="mark" class="t h dark" style="left:120px; top:370px; font-size:132px">FLUXCASE</div>
+  <div id="markRule" class="rule" style="left:124px; top:520px; width:0"></div>
+  <div id="sub" class="t s dark" style="left:122px; top:556px; font-size:58px">Magnetic vial cases.</div>
+  <!-- S4 explode (6.5-10.5) -->
   <div id="callLid" class="call">Magnets in the lid</div>
   <div id="callBase" class="call">Magnets in the base</div>
-  <div id="legal4" class="t m light" style="left:124px; top:996px; font-size:24px">Vials not included.</div>
-  <!-- S5 tip -->
-  <div id="pulls" class="t h dark" style="left:120px; top:120px; font-size:120px">Pulls shut.</div>
-  <div id="holds" class="t h acc" style="left:120px; top:240px; font-size:120px">Holds shut.</div>
-  <div id="petg" class="t m dark" style="left:124px; top:386px; font-size:24px">Black PETG. 3D printed to order.</div>
-  <!-- S6 sizes -->
+  <div id="legal4" class="t m light" style="left:124px; top:900px; font-size:34px">Vials not included.</div>
+  <!-- S4 to S5: the claim lands on the snap (10.0) and the tip (11.0) -->
+  <div id="pulls" class="t h" style="left:120px; top:110px; font-size:124px">Pulls shut.</div>
+  <div id="holds" class="t h acc" style="left:120px; top:234px; font-size:124px">Holds shut.</div>
+  <div id="petg" class="t m dark" style="left:124px; top:384px; font-size:32px">Black PETG. 3D printed to order.</div>
+  <!-- S6 sizes (13.0-16.5) -->
   <div id="five" class="t h dark" style="left:120px; top:100px; font-size:130px">Five sizes.</div>
-  <div id="fiveSub" class="t s dark" style="left:122px; top:244px; font-size:46px">For 3 mL and 10 mL vials.</div>
+  <div id="fiveSub" class="t s dark" style="left:122px; top:244px; font-size:54px">For 3 mL and 10 mL vials.</div>
   <div id="labels"></div>
-  <!-- S7 Kickstarter card -->
-  <div id="ks1" class="t s light" style="left:0; width:1920px; text-align:center; top:250px; font-size:72px">Launching on</div>
-  <div id="ks2" class="t h light" style="left:0; width:1920px; text-align:center; top:350px; font-size:184px">KICKSTARTER</div>
-  <div id="ks3" class="t h" style="left:0; width:1920px; text-align:center; top:610px; font-size:120px; color:#74CABF">November 1, 2026.</div>
-  <!-- S8 end card -->
+  <!-- S7 Kickstarter card (16.5-19.0) -->
+  <div id="ks1" class="t h light" style="left:0; width:1920px; text-align:center; top:270px; font-size:100px">Launching on Kickstarter</div>
+  <div id="ks2" class="t h light" style="left:0; width:1920px; text-align:center; top:500px; font-size:140px">November 1, 2026.</div>
+  <!-- S8 end card (19.0-24.0) -->
   <div id="end0" class="t h dark" style="left:120px; top:80px; font-size:72px">FLUXCASE</div>
   <div id="endRule" class="rule" style="left:124px; top:170px; width:0"></div>
-  <div id="end1" class="t h dark" style="left:120px; top:212px; font-size:116px">Back it on <span class="acc">Kickstarter.</span></div>
+  <div id="end1" class="t h dark" style="left:120px; top:212px; font-size:116px">Follow it on <span class="acc">Kickstarter.</span></div>
   <div id="end2" class="t s dark" style="left:122px; top:350px; font-size:64px">Launching November 1, 2026.</div>
+  <div id="end3" class="t m dark" style="left:124px; top:446px; font-size:30px">Renders shown.</div>
 </div>
 <div id="fx"></div>
 
 <script type="module">
 window.STAGE = { W: 1920, H: 1080 };
-const { THREE, scene, camera, makeCase, partsFor, CASES, ORDER, COL, look, sph, render, magnetMat, key, rim, kick, floor } = await import('./engine.js');
+const { THREE, scene, camera, makeCase, partsFor, CASES, ORDER, COL, look, sph, render, magnetMat, glassMat, key, rim, kick, floor } = await import('./engine.js');
 const W = 1920, H = 1080;
 const deg = THREE.MathUtils.degToRad;
 
@@ -80,48 +83,64 @@ const eo = k => 1 - Math.pow(1 - k, 3);
 const eo5 = k => 1 - Math.pow(1 - k, 5);
 const ei = k => k * k;
 const backOut = k => { const c = 1.6; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
-// Lid gap for a magnetic close: drifts, the magnets take the last stretch, lands on `at`, small rebound.
-function closeGap(t, start, at, from = 34) {
+// A magnetic close: the lid drifts down, the magnets take the last 10 mm and it lands on `at` with a small rebound.
+function closeGap(t, start, at, from = 22) {
   if (t < at - 0.3) return lerp(from, 10, eo(seg(t, start, at - 0.3)));
   if (t < at) return lerp(10, 0, ei(seg(t, at - 0.3, at)));
   return Math.max(0, Math.sin(seg(t, at, at + 0.18) * Math.PI) * 1.2);
 }
 
+// ---------- look of the film (overrides on the shared engine) ----------
+// Matte black PETG: no clearcoat, so no lid top ever reads white or metal.
+const matte = c => { c.mat.clearcoat = 0; c.mat.roughness = 0.62; c.mat.envMapIntensity = 0.5; };
+// Polished magnets with a smooth studio gradient (no strips, so rims stay clean).
+magnetMat.envMap = (() => {
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256;
+  const g = cv.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.3, '#d9dcdf'); gr.addColorStop(0.55, '#7b7f83'); gr.addColorStop(1, '#3a3d40');
+  g.fillStyle = gr; g.fillRect(0, 0, 512, 256);
+  const t = new THREE.CanvasTexture(cv); t.mapping = THREE.EquirectangularReflectionMapping; t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+magnetMat.envMapIntensity = 1.4;
+magnetMat.roughness = 0.15;
+// Clearer glass: thinner body, brighter edge reflections.
+glassMat.opacity = 0.2; glassMat.envMapIntensity = 3.2; glassMat.color.set(0xf4fbff);
+
 // ---------- cast ----------
-const add = (k, o) => { const c = makeCase(partsFor(k), o); scene.add(c.root); c.set({ color: COL.black }); return c; };
-const hero12 = add('c12'), m6 = add('c6'), m4 = add('c4'), m8 = add('c8');
+const add = (k, o) => { const c = makeCase(partsFor(k), o); scene.add(c.root); matte(c); c.set({ color: COL.black }); return c; };
+const h8 = add('c8', { vials: true }), m6 = add('c6'), m4 = add('c4'), hero12 = add('c12');
 const x8 = add('c8', { vials: true }), tip7 = add('c7');
 const row = ORDER.map(k => add(k));
-const all = [hero12, m6, m4, m8, x8, tip7, ...row];
+const all = [h8, m6, m4, hero12, x8, tip7, ...row];
 function show(...on) { all.forEach(c => c.root.visible = on.includes(c)); }
 function reset(c) {
   c.root.position.set(0, 0, 0); c.root.rotation.set(0, 0, 0); c.root.rotation.order = 'XYZ'; c.root.scale.set(1, 1, 1);
   c.contact.position.set(0, 0.05, 0); c.contact.rotation.set(-Math.PI / 2, 0, 0);
   c.set({ color: COL.black });
 }
-const GAP = 44;
-const rowW = row.reduce((s, c) => s + c.dia, 0) + GAP * 4;
-let acc = -rowW / 2;
-const rowX = row.map(c => { const x = acc + c.dia / 2; acc += c.dia + GAP; return x; });
+const rowAt = gap => { const w = row.reduce((s, c) => s + c.dia, 0) + gap * 4; let a = -w / 2; return row.map(c => { const x = a + c.dia / 2; a += c.dia + gap; return x; }); };
+const rowX = rowAt(44), endX = rowAt(30);
 
 // ---------- looks ----------
 const BG = {
-  dark: 'radial-gradient(ellipse 70% 80% at 62% 48%, #2b2f2e 0%, #151817 52%, #0a0b0b 100%)',
+  dark: 'radial-gradient(ellipse 60% 70% at 64% 50%, #3a3f3e 0%, #1a1d1c 50%, #0b0c0c 100%)',
   grey: 'radial-gradient(ellipse 75% 85% at 55% 50%, #efefed 0%, #E2E2E2 58%, #d3d4d2 100%)',
   paper: '#F3F4F2',
   teal: 'radial-gradient(ellipse 70% 80% at 50% 50%, #237d73 0%, #1D6B62 55%, #164f49 100%)',
 };
 const bgEl = document.getElementById('bg'), fx = document.getElementById('fx');
+let pulse = 0;   // a light hit on a snap, in place of a full-frame flash
 function setLook(name) {
   bgEl.style.background = BG[name];
   const dark = name === 'dark';
-  key.intensity = dark ? 1.5 : 2.2;
-  rim.intensity = dark ? 2.6 : 0.9;
-  kick.intensity = dark ? 5.0 : 2.4;
-  floor.material.opacity = dark ? 0.5 : 0.13;
+  key.intensity = (dark ? 1.4 : 2.2) * (1 + pulse * 0.6);
+  rim.intensity = (dark ? 2.0 : 0.9) * (1 + pulse);
+  kick.intensity = (dark ? 3.4 : 2.4) * (1 + pulse);
+  floor.material.opacity = dark ? 0.5 : name === 'paper' ? 0.24 : 0.16;
 }
-function flash(t, at, amp, decay = 0.05) { if (t >= at) fx.style.opacity = Math.max(+fx.style.opacity || 0, amp * Math.exp(-(t - at) / decay)); }
-function shake(t, at, amp = 1.6) { const k = t - at; return k < 0 ? 0 : amp * Math.exp(-k / 0.09) * Math.sin(k * 95); }
+const hit = (t, at, decay = 0.12) => (t >= at ? Math.exp(-(t - at) / decay) : 0);
+function flash(t, at, amp) { if (t >= at) fx.style.opacity = Math.max(+fx.style.opacity || 0, amp * Math.exp(-(t - at) / 0.04)); }
+function shake(t, at, amp = 1.4) { const k = t - at; return k < 0 ? 0 : amp * Math.exp(-k / 0.09) * Math.sin(k * 95); }
 
 // ---------- type ----------
 function wordify(id) {
@@ -137,18 +156,18 @@ function wordify(id) {
   return el;
 }
 const TXT = {};
-['hook1', 'hook2', 'noclip', 'mark', 'sub', 'legal4', 'pulls', 'holds', 'petg', 'five', 'fiveSub', 'ks1', 'ks2', 'ks3', 'end0', 'end1', 'end2']
+['hook1', 'hook2', 'legal1', 'noclip', 'mark', 'sub', 'legal4', 'pulls', 'holds', 'petg', 'five', 'fiveSub', 'ks1', 'ks2', 'end0', 'end1', 'end2', 'end3']
   .forEach(id => TXT[id] = wordify(id));
-// Modes: 'rise' (words rise in, 30 ms apart), 'unit' (whole line fades up), 'slam' (drops in large, settles).
+// Modes: 'rise' (words rise in, 30 ms apart), 'unit' (whole line fades up), 'slam' (drops in large, settles fast).
 function text(id, t, tIn, tOut, mode = 'rise') {
   const el = TXT[id];
   if (!(t >= tIn && t < tOut)) return;
   el.style.visibility = 'visible';
   const ws = [...el.querySelectorAll('.w')];
   if (mode === 'slam') {
-    const k = eo5(seg(t, tIn, tIn + 0.16));
-    el.style.opacity = Math.min(1, k * 1.5);
-    el.style.transform = `scale(${lerp(1.22, 1, k)})`;
+    const k = eo5(seg(t, tIn, tIn + 0.14));
+    el.style.opacity = Math.min(1, k * 1.6);
+    el.style.transform = `scale(${lerp(1.18, 1, k)})`;
     el.style.transformOrigin = el.style.textAlign === 'center' ? '50% 50%' : '0% 50%';
     ws.forEach(w => { w.style.opacity = 1; w.style.transform = 'none'; });
     return;
@@ -171,144 +190,160 @@ const proj = v => { const p = v.clone().project(camera); return [(p.x * .5 + .5)
 function callout(el, from, toX, toY, k, right) {
   if (k <= 0) return '';
   el.style.visibility = 'visible';
-  el.style.opacity = k;
-  el.style.left = (right ? toX + 18 : toX - 18 - el.offsetWidth) + 'px';
-  el.style.top = (toY - 20) + 'px';
-  const [fx0, fy0] = from;
-  const ex = lerp(fx0, toX, eo(k)), ey = lerp(fy0, toY, eo(k));
-  return `<circle cx="${fx0}" cy="${fy0}" r="${10 * k}"/><line x1="${fx0}" y1="${fy0}" x2="${ex}" y2="${ey}"/>`;
+  el.style.opacity = Math.min(1, k * 1.5);
+  el.style.left = (right ? toX + 20 : toX - 20 - el.offsetWidth) + 'px';
+  el.style.top = (toY - 24) + 'px';
+  const [x0, y0] = from, e = eo(clamp(k * 1.5));
+  return `<circle cx="${x0}" cy="${y0}" r="${12 * e}"/><line x1="${x0}" y1="${y0}" x2="${lerp(x0, toX, e)}" y2="${lerp(y0, toY, e)}"/>`;
 }
 
-// ---------- scenes (120 BPM: beat 0.5 s). Cuts: 2.5, 3.0, 3.5, 4.0, 7.5, 11.5, 14.0, 17.5, 19.5 ----------
+// ---------- scenes (120 BPM, beat 0.5 s). Cuts: 3.0, 3.5, 4.0, 6.5, 10.5, 13.0, 16.5, 19.0 ----------
 function sHook(t) {
+  pulse = hit(t, 1.5);
   setLook('dark');
-  show(hero12); reset(hero12);
-  hero12.root.rotation.y = deg(-18 + t * 4);
-  hero12.set({ lift: closeGap(t, 0, 1.5, 36), tiltX: t < 1.5 ? (1 - seg(t, 0, 1.5)) * 0.05 : 0 });
-  const tgt = [0, 34, 0];
-  const r = t < 1.5 ? lerp(160, 132, eio(seg(t, 0, 1.5))) : lerp(132, 175, eo(seg(t, 1.5, 2.5)));
-  const el = t < 1.5 ? 7 : lerp(7, 13, eo(seg(t, 1.5, 2.5)));
-  const p = sph(r, -14, el, tgt);
+  show(h8); reset(h8);
+  h8.root.rotation.y = deg(-14 + t * 3);
+  h8.set({ lift: closeGap(t, 0, 1.5, 22), tiltX: t < 1.5 ? (1 - seg(t, 0, 1.5)) * 0.04 : 0 });
+  const tgt = [0, 46, 0];
+  const r = t < 1.5 ? lerp(250, 215, eio(seg(t, 0, 1.5))) : lerp(215, 270, eo(seg(t, 1.5, 3.0)));
+  const el = t < 1.5 ? 16 : lerp(16, 22, eo(seg(t, 1.5, 3.0)));
+  const p = sph(r, -12, el, tgt);
   p[1] += shake(t, 1.5);
-  look(p, tgt, 30, 420, -60);
-  flash(t, 1.5, 0.4);
-  text('hook1', t, 0.3, 2.5);
-  text('hook2', t, 1.5, 2.5, 'slam');
+  look(p, tgt, 30, 420, 40);
+  text('hook1', t, 0.25, 3.0);
+  text('hook2', t, 1.5, 3.0, 'slam');
+  text('legal1', t, -1, 3.0, 'unit');
 }
 function sMontage(t) {
+  const shots = [[m6, 3.0, -32, 18, 250], [m4, 3.5, 30, 22, 260]];
+  const [c, t0, az, el, r] = shots[t < 3.5 ? 0 : 1];
+  pulse = hit(t, t0 + 0.25);
   setLook('dark');
-  const shots = [[m6, 2.5, -32, 16, 230], [m4, 3.0, 28, 30, 250], [m8, 3.5, -10, 52, 330]];
-  const [c, t0, az, el, r] = shots[t < 3.0 ? 0 : t < 3.5 ? 1 : 2];
   show(c); reset(c);
   c.root.rotation.y = deg(-20 + (t - t0) * 30);
-  c.set({ lift: closeGap(t, t0 - 0.05, t0 + 0.25, 16) });
-  const tgt = [0, c.baseH, 0];
-  const p = sph(lerp(r, r * 0.9, seg(t, t0, t0 + 0.5)), az, el, tgt);
-  p[1] += shake(t, t0 + 0.25, 1.2);
-  look(p, tgt, 30, 330, 0);
-  flash(t, t0 + 0.25, 0.18, 0.04);
-  text('noclip', t, 2.5, 4.0);
+  c.set({ lift: closeGap(t, t0 - 0.1, t0 + 0.25, 28) });
+  const tgt = [0, c.baseH + 6, 0];
+  const p = sph(lerp(r, r * 0.88, seg(t, t0, t0 + 0.5)), az, el, tgt);
+  p[1] += shake(t, t0 + 0.25, 1.1);
+  look(p, tgt, 30, 400, 40);
+  text('noclip', t, 3.0, 4.0);
 }
 function sTitle(t) {
+  pulse = hit(t, 4.0) + hit(t, 5.5) * 0.6;
   setLook('grey');
   show(hero12); reset(hero12);
-  hero12.root.rotation.y = deg(lerp(-200, -22, eo5(seg(t, 4.0, 5.3))) + (t - 4) * 2);
+  hero12.root.rotation.y = deg(lerp(-220, -24, eo5(seg(t, 4.0, 4.6))) + (t - 4) * 3);
+  // On 5.0 the lid lifts a little; the magnets pull it back down on 5.5.
+  const lid = t < 5.0 ? 0 : t < 5.15 ? eo(seg(t, 5.0, 5.15)) * 12 : closeGap(t, 5.15, 5.5, 12);
+  hero12.set({ lift: lid });
   const tgt = [0, 26, 0];
-  look(sph(lerp(400, 370, seg(t, 4, 7.5)), 0, 20, tgt), tgt, 30, 0, 50);
-  flash(t, 4.0, 0.7, 0.08);
-  text('mark', t, 4.0, 7.5, 'slam');
-  text('sub', t, 4.5, 7.5, 'unit');
+  const p = sph(lerp(470, 370, eo5(seg(t, 4.0, 4.5))) - (t - 4.5 > 0 ? (t - 4.5) * 8 : 0), -4, 22, tgt);
+  p[1] += shake(t, 5.5, 0.8);
+  look(p, tgt, 30, 560, 30);
+  flash(t, 4.0, 0.12);
+  text('mark', t, 4.0, 6.5, 'slam');
+  document.getElementById('markRule').style.width = `${eo(seg(t, 4.1, 4.5)) * 300}px`;
+  text('sub', t, 4.25, 6.5, 'unit');
 }
 function sExplode(t) {
+  pulse = hit(t, 10.0) + hit(t, 7.0) * 0.5 + hit(t, 7.5) * 0.5;
   setLook('dark');
   show(x8); reset(x8);
-  const open = eo(seg(t, 8.0, 8.4)) * (1 - seg(t, 10.7, 11.0));
-  const lidLift = t < 10.7 ? open * 70 : lerp(70, 0, ei(seg(t, 10.7, 11.0)));
-  const mag = backOut(seg(t, 8.5, 8.9)) * (1 - eio(seg(t, 10.4, 10.8))) * 7;
-  const vial = eo(seg(t, 9.5, 9.9)) * (1 - eio(seg(t, 10.3, 10.7))) * 26;
-  x8.set({ lift: Math.max(0, lidLift), back: open * 34, tiltX: -open * 1.15, magOut: Math.max(0, mag), vialLift: vial });
+  const open = eo(seg(t, 6.5, 6.9)) * (1 - eio(seg(t, 9.4, 9.9)));
+  const lift = t < 9.4 ? eo(seg(t, 6.5, 6.9)) * 64 : closeGap(t, 9.4, 10.0, 64);
+  const out = k => k * 14;   // magnets rise clear of their pockets
+  const lidMag = out(backOut(seg(t, 7.0, 7.35))) * (1 - eio(seg(t, 9.3, 9.6)));
+  const baseMag = out(backOut(seg(t, 7.5, 7.85))) * (1 - eio(seg(t, 9.3, 9.6)));
+  const vial = eo(seg(t, 8.0, 8.35)) * (1 - eio(seg(t, 9.2, 9.5))) * 14;
+  x8.set({ lift: Math.max(0, lift), back: open * 30, tiltX: -open * 1.15, magOut: Math.max(0, baseMag), magOutLid: Math.max(0, lidMag), vialLift: vial });
   x8.root.rotation.y = deg(-20);
-  const tgt = [0, 62, 0];
-  const p = sph(lerp(640, 560, eio(seg(t, 7.5, 8.4))), lerp(-38, 34, eio(seg(t, 7.5, 11.5))), lerp(18, 30, eio(seg(t, 7.5, 9))), tgt);
-  p[1] += shake(t, 11.0, 1.4);
-  look(p, tgt, 30, 0, 20);
-  flash(t, 11.0, 0.2, 0.05);
-  magnetMat.emissiveIntensity = Math.max(0, 1 - seg(t, 8.5, 9.2)) * (t >= 8.5 ? 0.25 : 0);
-  // Callouts to the lid's and the base's magnets
+  const tgt = [0, 60, 0];
+  const p = sph(lerp(470, 410, eio(seg(t, 6.5, 7.2))), lerp(-30, 26, eio(seg(t, 6.5, 10.5))), lerp(24, 32, eio(seg(t, 6.5, 8))), tgt);
+  p[1] += shake(t, 10.0, 1.3);
+  look(p, tgt, 30, 0, 30);
+  magnetMat.emissiveIntensity = (hit(t, 7.0, 0.3) + hit(t, 7.5, 0.3)) * 0.18;
   x8.root.updateMatrixWorld(true);
   camera.updateMatrixWorld();
   const lidP = x8.lid.getWorldPosition(new THREE.Vector3());
-  const baseP = new THREE.Vector3(0, x8.baseH + 2, 0);
-  const kl = seg(t, 8.5, 8.8) * (1 - seg(t, 10.3, 10.5)), kb = seg(t, 9.0, 9.3) * (1 - seg(t, 10.3, 10.5));
-  svg.innerHTML = callout(callLid, proj(lidP), 560, 260, kl, false) + callout(callBase, proj(baseP), 1380, 760, kb, true);
-  text('legal4', t, 7.25, 11.5, 'unit');
+  const baseP = new THREE.Vector3(0, x8.baseH + baseMag + 2, 0);
+  const kl = seg(t, 7.0, 7.3) * (1 - seg(t, 9.3, 9.45)), kb = seg(t, 7.5, 7.8) * (1 - seg(t, 9.3, 9.45));
+  svg.innerHTML = callout(callLid, proj(lidP), 560, 230, kl, false) + callout(callBase, proj(baseP), 1390, 820, kb, true);
+  text('legal4', t, 5.5, 10.5, 'unit');
+  TXT.pulls.className = 't h light';
+  text('pulls', t, 10.0, 10.5, 'slam');
 }
 function sTip(t) {
+  // Tips onto its side, landing on 11.0, and stays there with the lid held. No self-righting.
+  pulse = hit(t, 11.0) * 0.6;
   setLook('grey');
   show(tip7); reset(tip7);
-  const tipK = t < 12.0 ? 0 : t < 12.3 ? eo(seg(t, 12.0, 12.3)) : t < 12.45 ? 1 : t < 12.75 ? 1 - ei(seg(t, 12.45, 12.75)) : -0.03 * Math.sin(Math.PI * seg(t, 12.75, 12.95));
-  const tip = deg(90) * tipK, R = tip7.dia / 2, side = tip >= 0 ? 1 : -1;
+  const k = seg(t, 10.7, 11.0);
+  const tipK = t < 11.0 ? ei(k) : 1 + 0.035 * Math.sin(Math.PI * seg(t, 11.0, 11.2));
+  const tip = deg(90) * tipK, R = tip7.dia / 2;
   tip7.root.rotation.order = 'ZYX';
-  tip7.root.rotation.set(0, deg(-26 + (t - 11.5) * 4), -tip);
-  tip7.root.position.set(side * (R - R * Math.cos(tip)), R * Math.sin(Math.abs(tip)), 0);
+  tip7.root.rotation.set(0, deg(-26 + (t - 10.5) * 3), -tip);
+  tip7.root.position.set(R - R * Math.cos(tip), R * Math.sin(tip), 0);
   tip7.root.updateMatrixWorld(true);
   const mid = tip7.root.localToWorld(new THREE.Vector3(0, (tip7.baseH + tip7.lidH) / 2, 0));
   tip7.contact.position.copy(tip7.root.worldToLocal(new THREE.Vector3(mid.x, 0.05, mid.z)));
   tip7.contact.quaternion.copy(tip7.root.quaternion).invert().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)));
-  const tg = [50 * Math.max(0, tipK), 50, 10];
-  look(sph(lerp(470, 440, seg(t, 11.5, 14)), 4, 22, tg), tg, 30, 440, 40);
-  text('pulls', t, 11.5, 14.0);
-  text('holds', t, 11.7, 14.0);
-  text('petg', t, 11.75, 14.0, 'unit');
+  const tg = [lerp(0, 52, eo(seg(t, 10.7, 11.1))), 44, 10];
+  const p = sph(lerp(400, 330, eio(seg(t, 10.5, 13.0))), 4, 18, tg);
+  p[1] += shake(t, 11.0, 0.9);
+  look(p, tg, 30, 420, 60);
+  TXT.pulls.className = 't h dark';
+  text('pulls', t, 10.0, 13.0, 'slam');
+  text('holds', t, 11.0, 13.0, 'slam');
+  text('petg', t, 10.75, 13.0, 'unit');
 }
 function sSizes(t) {
   setLook('grey');
   show(...row);
   row.forEach((c, i) => {
     reset(c);
-    const land = 14.5 + i * 0.5, t0 = i === 0 ? 14.0 : land - 0.38;
+    const land = 13.5 + i * 0.5, t0 = i === 0 ? 13.0 : land - 0.38;
     c.root.visible = t >= t0;
     c.root.position.set(rowX[i], (1 - ei(seg(t, t0, land))) * 80, 0);
     const sq = t >= land ? Math.sin(seg(t, land, land + 0.16) * Math.PI) * 0.04 : 0;
     c.root.scale.set(1 + sq, 1 - sq, 1 + sq);
     c.root.rotation.y = deg(-10);
   });
-  const tgt = [0, 40, 0];
-  look(sph(lerp(1460, 1380, eio(seg(t, 14, 17.5))), lerp(-3, 2, seg(t, 14, 17.5)), 19, tgt), tgt, 16, 0, 60);
+  const tgt = [0, 38, 0];
+  look(sph(lerp(1440, 1360, eio(seg(t, 13, 16.5))), lerp(-3, 2, seg(t, 13, 16.5)), 19, tgt), tgt, 16, 0, 70);
   camera.updateMatrixWorld();
   const base = Math.max(...row.map((c, i) => -new THREE.Vector3(rowX[i], 0, c.dia / 2 + 10).project(camera).y));
   row.forEach((c, i) => {
-    const land = 14.5 + i * 0.5;
+    const land = 13.5 + i * 0.5;
     if (t < land) return;
     const p = new THREE.Vector3(rowX[i], 0, 0).project(camera), l = labels[i], k = eo5(seg(t, land, land + 0.3));
     l.style.visibility = 'visible'; l.style.opacity = k;
     l.style.left = `${(p.x * .5 + .5) * W}px`;
-    l.style.top = `${(base * .5 + .5) * H + 30 + (1 - k) * 20}px`;
+    l.style.top = `${(base * .5 + .5) * H + 26 + (1 - k) * 20}px`;
   });
-  text('five', t, 14.0, 17.5);
-  text('fiveSub', t, 14.3, 17.5, 'unit');
+  text('five', t, 13.0, 16.5);
+  text('fiveSub', t, 13.25, 16.5, 'unit');
 }
 function sKick(t) {
   setLook('teal');
   show();
-  flash(t, 17.5, 0.5, 0.08);
-  flash(t, 18.5, 0.45, 0.08);
-  text('ks1', t, 17.5, 19.5, 'unit');
-  text('ks2', t, 17.6, 19.5, 'slam');
-  text('ks3', t, 18.5, 19.5, 'slam');
+  text('ks1', t, 16.5, 19.0, 'slam');
+  text('ks2', t, 17.5, 19.0, 'slam');
 }
 function sEnd(t) {
+  pulse = hit(t, 22.0) * 0.5;
   setLook('paper');
   show(...row);
-  row.forEach((c, i) => { reset(c); c.root.position.set(rowX[i], 0, 0); c.root.rotation.y = deg(-10); });
-  // The owner's end card: the row big and running off the right edge, pinned under the copy.
-  const tgt = [rowX[1] + 40, 26, 0];
-  look(sph(lerp(980, 930, eio(seg(t, 19.5, 24))), 0, 17, tgt), tgt, 22, 120, 230);
-  flash(t, 19.5, 0.6, 0.1);
-  text('end0', t, 19.5, 99, 'unit');
-  document.getElementById('endRule').style.width = `${eo(seg(t, 19.6, 20.0)) * 150}px`;
-  text('end1', t, 19.6, 99);
-  text('end2', t, 20.0, 99, 'unit');
+  // All five lids lift a touch and the magnets pull them shut together on 22.0: the closing beat.
+  const lid = t < 21.75 ? 0 : t < 21.85 ? eo(seg(t, 21.75, 21.85)) * 10 : closeGap(t, 21.85, 22.0, 10);
+  row.forEach((c, i) => { reset(c); c.root.position.set(endX[i], 0, 0); c.root.rotation.y = deg(-10); c.set({ lift: lid }); });
+  const tgt = [0, 30, 0];
+  look(sph(lerp(1250, 1190, eio(seg(t, 19.0, 24))), 0, 15, tgt), tgt, 18, 0, 250);
+  flash(t, 19.0, 0.1);
+  text('end0', t, 19.0, 99, 'unit');
+  document.getElementById('endRule').style.width = `${eo(seg(t, 19.1, 19.5)) * 150}px`;
+  text('end1', t, 19.1, 99);
+  text('end2', t, 19.5, 99, 'unit');
+  text('end3', t, 19.75, 99, 'unit');
 }
 
 function renderAt(t) {
@@ -317,15 +352,16 @@ function renderAt(t) {
   [callLid, callBase].forEach(c => c.style.visibility = 'hidden');
   svg.innerHTML = '';
   fx.style.opacity = 0;
-  document.getElementById('endRule').style.width = '0';
+  pulse = 0;
+  ['markRule', 'endRule'].forEach(id => document.getElementById(id).style.width = '0');
   magnetMat.emissiveIntensity = 0;
-  if (t < 2.5) sHook(t);
+  if (t < 3.0) sHook(t);
   else if (t < 4.0) sMontage(t);
-  else if (t < 7.5) sTitle(t);
-  else if (t < 11.5) sExplode(t);
-  else if (t < 14.0) sTip(t);
-  else if (t < 17.5) sSizes(t);
-  else if (t < 19.5) sKick(t);
+  else if (t < 6.5) sTitle(t);
+  else if (t < 10.5) sExplode(t);
+  else if (t < 13.0) sTip(t);
+  else if (t < 16.5) sSizes(t);
+  else if (t < 19.0) sKick(t);
   else sEnd(t);
   render(0x000000, 0);
 }

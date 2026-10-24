@@ -17,7 +17,11 @@ A stranger who watches once must come away knowing:
 - what it is: magnetic vial cases for 3 mL and 10 mL vials
 - why it is different: magnets in the base and lid pull the lid shut and hold it; no clips
 - the range: five sizes, black PETG
-- the ask: back it on Kickstarter, launching November 1, 2026
+- the ask: follow it on Kickstarter now, launching November 1, 2026
+
+Owner decisions (not up for grading): the CTA is "Follow it on Kickstarter." (the page is a pre-launch
+page until launch day), the end card carries a small "Renders shown.", and the end card shows all five
+cases in frame. Second lines set in Archivo 800 sentence case are subheads, by design.
 
 ## Hard rules
 - No invented claims: no backer counts, goals, reviews, ratings, dimensions, weights, prices, strength

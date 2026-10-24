@@ -216,12 +216,12 @@ function makeCase(parts, { vials = false } = {}) {
   cad.add(lidPivot);
 
   const c = { root, mat, contact, lid: lidPivot, baseH, lidH, dia: bb.max[0] - bb.min[0] };
-  c.set = ({ lift = 0, tiltX = 0, tiltZ = 0, back = 0, magOut = 0, vialLift = 0, color } = {}) => {
+  c.set = ({ lift = 0, tiltX = 0, tiltZ = 0, back = 0, magOut = 0, magOutLid, vialLift = 0, color } = {}) => {
     vialGrp.position.z = vialLift;
     lidPivot.position.set(0, back, baseH + lidH / 2 + lift);
     lidPivot.rotation.set(tiltX, 0, tiltZ);
     baseMagGrp.position.z = magOut;
-    lidMagGrp.position.z = magOut;           // lid print +z points toward its open face
+    lidMagGrp.position.z = magOutLid ?? magOut;   // lid print +z points toward its open face; may move on its own beat
     if (color !== undefined) mat.color.set(color);
   };
   c.set();
@@ -258,4 +258,4 @@ function look(pos, target, fov = 30, shiftX = 0, shiftY = 0) {
 }
 // alpha 0 leaves the canvas transparent so a CSS background shows through.
 function render(bgHex, alpha = 1) { renderer.setClearColor(bgHex, alpha); renderer.render(scene, camera); }
-export { scene, camera, renderer, makeCase, partsFor, CASES, ORDER, COL, look, sph, render, magnetMat, key, rim, kick, floor };
+export { scene, camera, renderer, makeCase, partsFor, CASES, ORDER, COL, look, sph, render, magnetMat, glassMat, key, rim, kick, floor };

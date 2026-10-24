@@ -3,15 +3,16 @@
 120 BPM (beat 0.5 s, bar 2 s), D minor, 24 s, 48 kHz stereo. Every hit is tied to the picture
 (promo.html); the cue list below is the contract between the two.
 
-  0.0-2.5   cold open: sub drone, heartbeat kick, riser, magnet snap + impact at 1.5
-  2.5-4.0   snap montage: a snap on 2.75, 3.25, 3.75; snare roll and riser into the drop
-  4.0       DROP: title card. Full kit, saw bass, pluck chords (Dm Bb F C)
-  7.5       whoosh into the exploded view; clacks at 8.0 (lid), 8.5 (lid magnets), 9.0 (base
-            magnets), 9.5 (vials); reverse swell and snap back together at 11.0
-  11.5      tip-over scene: thud at 12.0 (tips), knock at 12.75 (back upright)
-  14.0      five sizes: tuned impacts as cases land at 14.5, 15.0, 15.5, 16.0, 16.5
-  17.5      Kickstarter card: riser, filter sweep, impact on the date at 18.5
-  19.5      end card: final chord, sub boom, ring out to 24.0
+  0.0-3.0   hook: sub drone, heartbeat kick, riser, magnet snap + impact on 1.5, half-time tail
+  3.0-4.0   snap montage: cuts on 3.0 / 3.5, snaps on 3.25 / 3.75; snare roll and riser into the drop
+  4.0       DROP: title card. Full kit, bass, pluck chords (Dm Bb F C). Lid pops 5.0, snaps 5.5
+  6.5-10.5  breakdown (no kick): air as the lid opens 6.5, magnet clacks 7.0 (lid) and 7.5 (base),
+            glass ticks as the vials rise 8.0, reverse swell, snap back together on 10.0
+  10.5      groove back. Tip-over: whoosh, thud as it lands on its side at 11.0
+  13.0      five sizes: tuned impacts as the cases land at 13.5, 14.0, 14.5, 15.0, 15.5; build to 16.5
+  16.5      Kickstarter card: hit on 16.5, snare roll 17.0-17.5, impact on the date at 17.5, riser out
+  19.0      end card: final chord, sub boom, bells; the five lids snap shut together on 22.0
+Mix: subs high-passed at 30 Hz, music bus ducked by the kick, peak limiter with 3 dB headroom.
 Usage: python3 music2.py out.wav
 """
 import sys
@@ -24,23 +25,24 @@ BEAT = 0.5
 DUR = 24.0
 N = int(SR * DUR)
 rng = np.random.default_rng(7)
-L = np.zeros(N)
-R = np.zeros(N)
+BUS = {b: np.zeros((2, N)) for b in ('drums', 'music', 'fx')}
+KICKS = []
 
 
 def midi(n):
     return 440.0 * 2 ** ((n - 69) / 12)
 
 
-def place(sig, t, gain=1.0, pan=0.0):
+def place(sig, t, gain=1.0, pan=0.0, bus='fx'):
     i = int(round(t * SR))
     if i >= N or i + len(sig) <= 0:
         return
     if i < 0:
         sig, i = sig[-i:], 0
     sig = sig[: N - i] * gain
-    L[i:i + len(sig)] += sig * np.sqrt(0.5 * (1 - pan))
-    R[i:i + len(sig)] += sig * np.sqrt(0.5 * (1 + pan))
+    B = BUS[bus]
+    B[0, i:i + len(sig)] += sig * np.sqrt(0.5 * (1 - pan))
+    B[1, i:i + len(sig)] += sig * np.sqrt(0.5 * (1 + pan))
 
 
 def tt(dur):
@@ -195,99 +197,159 @@ def reverse_swell(dur=0.5, g=1.0):
 
 
 # ---------- arrangement ----------
-# Cold open
-place(sub_drone(2.6), 0.0, 1.0)
+def K(t, g=1.0, dur=0.45, gain=1.0):
+    """A kick on the drum bus; also keys the sidechain duck."""
+    place(kick(g, dur), t, gain, bus='drums')
+    KICKS.append((t, g * gain))
+
+
+def glass(note, g=1.0):
+    t = tt(0.4)
+    x = sum(np.sin(2 * np.pi * midi(note) * m * t) * np.exp(-t / d) for m, d in ((1, 0.15), (2.4, 0.06), (4.1, 0.03)))
+    return x * np.minimum(1, t / 0.001) * 0.25 * g
+
+
+# Hook 0.0-3.0
+place(sub_drone(3.1), 0.0, 1.0, bus='music')
 for b in (0.0, 0.5, 1.0):
-    place(kick(0.55, 0.35), b, 0.8)
+    K(b, 0.55, 0.35, 0.8)
 place(riser(1.45, 0.8, 200, 3000), 0.05, 1.0)
 place(reverse_swell(0.35), 1.15, 1.0)
 place(clack(86, 1.6), 1.5, 1.0)
 place(impact(1.0), 1.5, 1.0)
+K(1.5, 1.2, 0.6)
+place(pad([50, 57, 62, 65], 1.5, 0.5, 0.05), 1.5, 1.0, bus='music')
+K(2.5, 0.7, 0.4)
 
-# Snap montage
-for i, ts in enumerate((2.75, 3.25, 3.75)):
-    place(clack([81, 84, 88][i], 1.3), ts, 1.0, pan=(-0.3, 0.0, 0.3)[i])
-    place(kick(0.8), ts, 0.7)
-place(sub_drone(1.5, 26, 0.8), 2.5, 1.0)
+# Snap montage 3.0-4.0
+for i, ts in enumerate((3.25, 3.75)):
+    place(clack([84, 88][i], 1.3), ts, 1.0, pan=(-0.3, 0.3)[i])
+    K(ts, 0.8, 0.45, 0.7)
+for ts in (3.0, 3.5):
+    place(whoosh(0.25, 0.6), ts - 0.1, 1.0)
 for k in range(8):
-    place(snare(0.25 + 0.09 * k), 3.0 + k * 0.125, 1.0)
+    place(snare(0.25 + 0.09 * k), 3.0 + k * 0.125, 1.0, bus='drums')
 place(riser(1.5, 1.0, 400, 9000), 2.5, 1.0)
 
-# Main groove 4.0-17.5 (Dm Bb F C), chord per bar
+# Groove: Dm Bb F C, a chord per bar. Full kit 4.0-6.5 and 10.5-19.0; breakdown 6.5-10.5.
 prog = [(38, [62, 65, 69]), (34, [58, 62, 65]), (41, [60, 65, 69]), (36, [60, 64, 67])]
-for bar in range(7):          # 4.0 .. 18.0
+for bar in range(8):          # 4.0 .. 20.0
     t0 = 4.0 + bar * 2.0
-    if t0 >= 17.5:
-        break
     root, chord = prog[bar % 4]
-    place(pad(chord, 2.0, 0.6), t0, 1.0)
     for k in range(4):
         tb = t0 + k * BEAT
-        if tb >= 17.5:
+        if tb >= 19.0:
             break
-        place(kick(1.0), tb, 1.0)
-        if k in (1, 3):
-            place(clap(1.0), tb, 0.8)
-        place(hat(0.8), tb + 0.25, 1.0, pan=0.3)
-        place(hat(0.5), tb + 0.125, 1.0, pan=-0.2)
-        place(hat(0.4), tb + 0.375, 1.0, pan=-0.2)
-        place(bass(root, 0.22, 1.0, 420), tb, 1.0)
-        place(bass(root + 12, 0.12, 0.6, 600), tb + 0.25, 1.0)
-    for k, off in enumerate((0, 0.75, 1.5)):
-        if t0 + off < 17.5:
-            place(pluck([n + 12 for n in chord]), t0 + off, 0.9, pan=-0.25 + 0.25 * k)
+        brk = 6.5 <= tb < 10.5
+        if not brk:
+            K(tb)
+            if k in (1, 3):
+                place(clap(1.0), tb, 0.8, bus='drums')
+            place(hat(0.8), tb + 0.25, 1.0, pan=0.3, bus='drums')
+            place(hat(0.5), tb + 0.125, 1.0, pan=-0.2, bus='drums')
+            place(hat(0.4), tb + 0.375, 1.0, pan=-0.2, bus='drums')
+            place(bass(root, 0.22, 1.0, 420), tb, 1.0, bus='music')
+            place(bass(root + 12, 0.12, 0.6, 600), tb + 0.25, 1.0, bus='music')
+        else:
+            place(hat(0.35), tb + 0.25, 1.0, pan=0.3, bus='drums')
+    if t0 < 19.0:
+        brk = 6.5 <= t0 < 10.5
+        place(pad(chord, min(2.0, 19.0 - t0), 0.9 if brk else 0.6), t0, 1.0, bus='music')
+        if brk:
+            place(bass(root, 1.9, 0.7, 260), t0, 1.0, bus='music')
+        for k, off in enumerate((0, 0.75, 1.5)):
+            if t0 + off < 19.0:
+                place(pluck([n + 12 for n in chord], g=0.7 if brk else 1.0), t0 + off, 1.15, pan=-0.25 + 0.25 * k, bus='music')
 place(impact(1.1, 26), 4.0, 1.0)
 place(clack(88, 1.0), 4.0, 0.8)
+# Title: the lid pops on 5.0 and the magnets pull it shut on 5.5
+place(clack(93, 0.5), 5.0, 0.6, pan=0.3)
+place(clack(86, 1.2), 5.5, 1.0, pan=0.3)
 
-# Exploded view
-place(whoosh(0.7, 1.0), 7.15, 1.0)
-for ts, nt in ((8.0, 81), (8.5, 84), (9.0, 88), (9.5, 91)):
-    place(clack(nt, 1.0), ts, 0.9, pan=0.25)
-place(reverse_swell(0.6, 1.0), 10.4, 1.0)
-place(clack(86, 1.5), 11.0, 1.0)
-place(impact(0.6, 33), 11.0, 1.0)
+# Exploded view 6.5-10.5
+place(whoosh(0.6, 0.9), 6.3, 1.0)
+place(clack(81, 1.1), 7.0, 1.0, pan=-0.2)
+place(clack(84, 1.1), 7.5, 1.0, pan=0.2)
+for j, nt in enumerate((93, 96, 100, 98)):
+    place(glass(nt), 8.0 + j * 0.06, 0.8, pan=-0.3 + 0.2 * j)
+place(riser(0.9, 0.7, 300, 6000), 9.1, 1.0)
+place(reverse_swell(0.6, 1.0), 9.4, 1.0)
+place(clack(86, 1.6), 10.0, 1.0)
+place(impact(0.8, 33), 10.0, 1.0)
+K(10.0, 1.1, 0.5)
 
-# Tip-over
-place(whoosh(0.5, 0.7), 11.3, 1.0)
-place(kick(1.2, 0.5), 12.0, 0.9)
-place(clack(74, 0.8), 12.0, 0.8)
-place(kick(0.9, 0.4), 12.75, 0.8)
-place(clack(81, 0.7), 12.75, 0.7)
+# Tip-over: lands on its side at 11.0
+place(whoosh(0.4, 0.7), 10.65, 1.0)
+K(11.0, 1.3, 0.55, 0.9)
+place(impact(0.45, 31), 11.0, 1.0)
+place(clack(74, 0.8), 11.0, 0.8)
 
-# Five sizes landing
-for i, ts in enumerate((14.5, 15.0, 15.5, 16.0, 16.5)):
-    place(impact(0.35, 33 + [0, 3, 5, 7, 10][i]), ts, 1.0, pan=-0.4 + 0.2 * i)
+# Five sizes: a tuned impact per landing, then a build into 16.5
+for i, ts in enumerate((13.5, 14.0, 14.5, 15.0, 15.5)):
+    place(impact(0.4, 33 + [0, 3, 5, 7, 10][i]), ts, 1.0, pan=-0.4 + 0.2 * i)
+    place(clack(81 + [0, 3, 5, 7, 10][i], 0.6), ts, 0.7, pan=-0.4 + 0.2 * i)
+place(riser(1.0, 1.0, 400, 9000), 15.5, 1.0)
+for k in range(4):
+    place(snare(0.3 + 0.15 * k), 16.0 + k * 0.125, 1.0, bus='drums')
 
-# Kickstarter card: riser, sweep, impact on the date
-place(riser(1.0, 1.1, 500, 10000), 17.5, 1.0)
-place(whoosh(0.5, 0.8), 17.3, 1.0)
-place(impact(1.2, 26), 18.5, 1.0)
-place(pad([62, 65, 69, 72], 1.0, 0.8, 0.05), 18.5, 1.0)
+# Kickstarter card
+place(impact(1.1, 26), 16.5, 1.0)
+for k in range(8):
+    place(snare(0.25 + 0.1 * k), 17.0 + k * 0.0625, 1.0, bus='drums')
+place(impact(1.2, 26), 17.5, 1.0)
+place(riser(1.0, 0.9, 500, 10000), 18.0, 1.0)
 
-# End card: final chord, ring out
-place(impact(1.0, 26), 19.5, 1.0)
-place(kick(1.3, 0.6), 19.5, 1.0)
-place(sub_drone(4.5, 26, 1.1), 19.5, 1.0)
-place(pad([50, 57, 62, 65, 69, 76], 4.5, 1.0, 0.02), 19.5, 1.0)
+# End card: final chord, ring out; the lids snap on 22.0
+place(impact(1.0, 26), 19.0, 1.0)
+K(19.0, 1.3, 0.6)
+place(sub_drone(5.0, 26, 1.1), 19.0, 1.0, bus='music')
+place(pad([50, 57, 62, 65, 69, 76], 5.0, 1.0, 0.02), 19.0, 1.0, bus='music')
 for nt, d in ((74, 0), (77, 0.03), (81, 0.06), (86, 0.09)):
-    place(bell(nt, 4.4), 19.5 + d, 1.0, pan=(nt - 80) / 15)
+    place(bell(nt, 4.9), 19.0 + d, 1.0, pan=(nt - 80) / 15, bus='music')
+place(clack(86, 1.2), 22.0, 0.9)
+place(bell(86, 2.0, 0.8), 22.0, 1.0)
+
+# ---------- mix ----------
+# Sidechain: the music bus dips under each kick (6 dB, 120 ms recovery).
+duck = np.ones(N)
+for tk, g in KICKS:
+    i = int(tk * SR)
+    t = tt(0.25)
+    d = 1 - 0.5 * min(1.0, g) * np.exp(-t / 0.12)
+    n = min(len(d), N - i)
+    duck[i:i + n] = np.minimum(duck[i:i + n], d[:n])
+mix = BUS['drums'] + BUS['music'] * duck + BUS['fx']
+mix[0], mix[1] = highpass(mix[0], 30), highpass(mix[1], 30)
 
 # Room: short stereo reflections
 for d, g in ((0.019, 0.16), (0.031, 0.12), (0.053, 0.09), (0.083, 0.06)):
     k = int(d * SR)
-    L2, R2 = L.copy(), R.copy()
-    L[k:] += R2[:-k] * g
-    R[k:] += L2[:-k] * g
+    Lc, Rc = mix[0].copy(), mix[1].copy()
+    mix[0, k:] += Rc[:-k] * g
+    mix[1, k:] += Lc[:-k] * g
 
-mix = np.stack([L, R], axis=1)
 f = int(1.0 * SR)
-mix[-f:] *= np.linspace(1, 0, f)[:, None] ** 1.5
-mix = np.tanh(mix * 1.2)
-mix *= 0.89 / np.max(np.abs(mix))
+mix[:, -f:] *= np.linspace(1, 0, f) ** 1.5
+# Peak limiter: 5 ms blocks, 1 block lookahead, instant attack, 80 ms release; ceiling -3 dBFS.
+mix /= np.percentile(np.abs(mix), 99.9) / 0.6
+CEIL, BL = 10 ** (-3 / 20), 240
+nb = N // BL + 1
+pk = np.zeros(nb)
+a = np.abs(mix).max(axis=0)
+for b in range(nb):
+    seg_ = a[b * BL:(b + 1) * BL]
+    pk[b] = seg_.max() if len(seg_) else 0
+g = np.minimum(1, CEIL / np.maximum(pk, 1e-9))
+g = np.minimum(g, np.concatenate([g[1:], [1]]))
+rel = np.exp(-BL / SR / 0.08)
+for b in range(1, nb):
+    g[b] = min(g[b], g[b - 1] * rel + (1 - rel))
+gs = np.interp(np.arange(N), np.arange(nb) * BL + BL / 2, g)
+mix = np.clip(mix * gs, -CEIL, CEIL).T
 out = sys.argv[1] if len(sys.argv) > 1 else 'music2.wav'
 with wave.open(out, 'wb') as w:
     w.setnchannels(2)
     w.setsampwidth(2)
     w.setframerate(SR)
     w.writeframes((mix * 32767).astype('<i2').tobytes())
-print('wrote', out, DUR, 's')
+print('wrote', out, DUR, 's', 'peak', np.abs(mix).max(), 'gr_min_db', 20 * np.log10(g.min()))
