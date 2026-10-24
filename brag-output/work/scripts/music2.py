@@ -5,7 +5,7 @@
 
   0.0-3.0   hook: a tick and air on 0.0, drone, heartbeat kick, riser, magnet snap + impact on 1.5
   3.0-4.0   snap montage: cuts on 3.0 / 3.5, snaps on 3.25 / 3.75; snare roll and riser into the drop
-  4.0       DROP + crash: title card. Full kit, bass, plucks (Dm Bb F C). Lid pops 5.0, snaps 5.5
+  4.0       DROP + crash: title card. Full kit, bass, plucks (Dm Bb F C), lead at -4 dB. Lid pops 5.0, snaps 5.5
   6.5-10.5  breakdown (no kick): pad and held bass from 6.5, an eighth-note glass-tick pulse, magnet
             clacks 7.0 (lid) and 7.5 (base), glass ticks as the vials rise 8.0, riser from 8.0, snap on 10.0
   10.5      groove back with a lead. The case falls onto its side on 11.0 (thud), is knocked round on 12.0
@@ -286,9 +286,9 @@ for bar in range(9):          # 4.0 .. 21.0
             if k in (0, 2):
                 place(bass(root, 0.22, 0.6, 420), tb, 1.0, bus='music')
             place(bass(root + 12, 0.12, 0.6, 600), tb + 0.25, 1.0, bus='music')
-            if tb >= 10.5:   # lead arpeggio from the groove's return
+            if tb >= 4.0:   # lead arpeggio: about -4 dB under the title, full from the groove's return
                 for j, off in enumerate((0, 0.25)):
-                    place(lead(chord[(k * 2 + j) % 3] + 24, 0.2), tb + off, 2.3, pan=0.35 - 0.7 * j, bus='music')
+                    place(lead(chord[(k * 2 + j) % 3] + 24, 0.2), tb + off, 2.3 if tb >= 10.5 else 1.45, pan=0.35 - 0.7 * j, bus='music')
         else:
             # breakdown pulse: hats and a soft glass tick on the off-beats keep time without a kick
             place(hat(0.45), tb + 0.25, 1.0, pan=0.3, bus='drums')
@@ -337,16 +337,16 @@ K(12.25, 0.5, 0.3)
 for i, ts in enumerate((13.0, 13.5, 14.0, 14.5, 15.0)):
     place(impact(0.4, 33 + [0, 3, 5, 7, 10][i]), ts, 1.0, pan=-0.4 + 0.2 * i)
     place(clack(81 + [0, 3, 5, 7, 10][i], 0.7), ts, 0.8, pan=-0.4 + 0.2 * i)
-place(riser(1.0, 1.0, 400, 9000), 15.5, 1.0)
-for k in range(4):
+place(riser(0.875, 1.0, 400, 9000), 15.5, 1.0)
+for k in range(3):   # roll stops at 16.375 so the 16.5 hit lands on a dip
     place(snare(0.3 + 0.15 * k), 16.0 + k * 0.125, 1.0, bus='drums')
 
 # Kickstarter card 16.5-18.0
-place(impact(1.2, 38), 16.5, 1.0)
+place(impact(1.05, 38), 16.5, 1.0)
 place(crash(1.0), 16.5, 1.0)
 place(clack(93, 0.6), 16.5, 0.7, pan=0.3)
 place(clack(86, 1.4), 17.0, 1.0, pan=0.3)
-place(impact(1.0, 41), 17.0, 1.0)
+place(impact(0.9, 41), 17.0, 1.0)
 place(bell(86, 1.0, 0.9), 17.0, 1.0, bus='music')
 place(bell(81, 1.0, 0.6), 17.02, 1.0, pan=-0.3, bus='music')
 for k in range(8):
@@ -359,14 +359,14 @@ place(bell(86, 1.2, 0.9), 18.0, 1.0, bus='music')
 place(crash(0.9), 18.0, 1.0)
 place(riser(0.5, 0.6, 400, 6000), 20.5, 1.0)
 place(clack(93, 0.6), 20.5, 0.7)
-place(clack(86, 1.4), 21.0, 1.0)
+place(clack(86, 1.7), 21.0, 1.0)
 place(impact(0.8, 33), 21.0, 1.0)
 place(crash(0.8), 21.0, 1.0)
 K(21.0, 0.8, 0.6)
 place(sub_drone(2.0, 38, 1.1), 21.0, 1.0, bus='music')
 place(pad([50, 57, 62, 65, 69, 76], 2.0, 1.2, 0.02), 21.0, 1.0, bus='music')
 for nt, d in ((74, 0), (77, 0.03), (81, 0.06), (86, 0.09)):
-    place(bell(nt, 2.0, 1.4), 21.0 + d, 1.0, pan=(nt - 80) / 15, bus='music')
+    place(bell(nt, 2.0, 1.8), 21.0 + d, 1.0, pan=(nt - 80) / 15, bus='music')
 
 # ---------- mix ----------
 # Sidechain: the music bus dips under each kick (6 dB, 120 ms recovery).

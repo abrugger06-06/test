@@ -99,7 +99,7 @@ const matte = c => { c.mat.clearcoat = 0; c.mat.roughness = 0.7; c.mat.envMapInt
 magnetMat.envMap = (() => {
   const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256;
   const g = cv.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
-  gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.2, '#e9ecee'); gr.addColorStop(0.28, '#ffffff'); gr.addColorStop(0.36, '#b4b9bd'); gr.addColorStop(0.62, '#8e9397'); gr.addColorStop(1, '#787c80');
+  gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.2, '#e9ecee'); gr.addColorStop(0.28, '#ffffff'); gr.addColorStop(0.36, '#b4b9bd'); gr.addColorStop(0.62, '#989da1'); gr.addColorStop(1, '#878b8f');
   g.fillStyle = gr; g.fillRect(0, 0, 512, 256);
   const t = new THREE.CanvasTexture(cv); t.mapping = THREE.EquirectangularReflectionMapping; t.colorSpace = THREE.SRGBColorSpace; return t;
 })();
@@ -114,6 +114,11 @@ glassMat.onBeforeCompile = sh => {
     gl_FragColor.rgb += vec3(0.85, 0.92, 0.95) * fres * 0.9;
     gl_FragColor.a = max(gl_FragColor.a, fres * 0.8);`);
 };
+
+// A soft fill from camera-left, used only on the knocked case so its lid face falls off from charcoal.
+const FILL = 260000;
+const fill = new THREE.PointLight(0xffffff, 0, 0, 2);
+scene.add(fill);
 
 // ---------- cast ----------
 const add = (k, o) => { const c = makeCase(partsFor(k), o); scene.add(c.root); matte(c); c.set({ color: COL.black }); return c; };
@@ -286,7 +291,6 @@ function sTip(t) {
   pulse = hit(t, 11.0) * 0.6 + hit(t, 12.25) * 0.4;
   setLook('grey');
   show(tip7); reset(tip7);
-  tip7.mat.envMapIntensity = 1.1;   // a soft falloff across the lid face once it turns to camera
   const k = seg(t, 10.55, 11.0);
   const tipK = t < 11.0 ? ei(k) : 1 + 0.035 * Math.sin(Math.PI * seg(t, 11.0, 11.2));
   const tip = deg(90) * tipK, R = tip7.dia / 2;
@@ -295,6 +299,7 @@ function sTip(t) {
   tip7.root.position.set(R - R * Math.cos(tip), R * Math.sin(tip), 0);
   tip7.root.updateMatrixWorld(true);
   // Spin about the vertical through the body's centre: the lid end swings round and the lid stays seated.
+  fill.intensity = FILL * eio(seg(t, 12.0, 12.3));
   const spin = deg(-50) * eo(seg(t, 12.0, 12.25)) + deg(-3) * Math.sin(Math.PI * seg(t, 12.25, 12.45));
   const ctr = tip7.root.localToWorld(new THREE.Vector3(0, (tip7.baseH + tip7.lidH) / 2, 0));
   const qs = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), spin);
@@ -314,6 +319,10 @@ function sTip(t) {
   const tg = [lerp(0, 52, eo(seg(t, 10.7, 11.1))), 44, 10];
   const p = sph(lerp(400, 340, eio(seg(t, 10.5, 13.0))), 4, 18, tg);
   p[1] += shake(t, 11.0, 0.9);
+  // the fill rides with the camera, up and to its left, aimed at the case
+  // a close point light up and left of the lid face, so the face falls off from charcoal to ink
+  const toCam = new THREE.Vector3(...p).sub(ctr).normalize();
+  fill.position.copy(ctr).addScaledVector(toCam, 170).add(new THREE.Vector3(-30, 60, 0));
   look(p, tg, 30, lerp(420, 470, eio(seg(t, 12.0, 12.4))), lerp(60, 90, eio(seg(t, 12.0, 12.4))));
   TXT.pulls.className = 't h dark';
   text('pulls', t, 10.5, 13.0, 'slam');
@@ -355,7 +364,7 @@ function sKick(t) {
   setLook('teal');
   show(hero12); reset(hero12);
   hero12.root.rotation.y = deg(-30 + (t - 16.5) * 6);
-  const lid = t < 16.5 ? 0 : t < 16.62 ? eo(seg(t, 16.5, 16.62)) * 34 : closeGap(t, 16.62, 17.0, 34);
+  const lid = t < 16.5 ? 0 : t < 16.62 ? eo(seg(t, 16.5, 16.62)) * 44 : closeGap(t, 16.62, 17.0, 44);
   hero12.set({ lift: lid });
   hero12.contact.scale.set(hero12.dia * 1.05, hero12.dia * 1.05, 1);   // tighter contact on the teal set
   const tgt = [0, 26, 0];
@@ -396,6 +405,7 @@ function renderAt(t) {
   pulse = 0;
   ['markRule', 'endRule', 'ksRule'].forEach(id => document.getElementById(id).style.width = '0');
   magnetMat.emissiveIntensity = 0;
+  fill.intensity = 0;
   if (t < 3.0) sHook(t);
   else if (t < 4.0) sMontage(t);
   else if (t < 6.5) sTitle(t);
