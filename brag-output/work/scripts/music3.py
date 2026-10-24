@@ -331,7 +331,7 @@ for k in range(4):
     place(snare(0.3 + 0.15 * k), 3.5 + k * 0.125, 1.0, bus='drums')
 place(riser(0.9, 0.8, 400, 9000), 3.1, 1.0)
 for j, tc in enumerate((2.0, 2.5, 3.0, 3.5)):   # a keys stab and a clap on every montage cut
-    place(rhodes([n + 12 for n in (62, 66, 69)], 0.45, 1.0), tc, 2.2, pan=0.15, bus='music')
+    place(rhodes([n + 12 for n in (61, 64, 69)], 0.45, 1.0), tc, 2.2, pan=0.15, bus='music')   # the bar's own chord (A)
     place(clap(0.7), tc, 0.9, pan=-0.2, bus='drums')
 
 # Groove: D A Bm G, a chord per bar, from frame 0 to 18.0; lighter (no kick, no clap) under the 6.5-9.0 explainer.

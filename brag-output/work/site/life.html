@@ -97,6 +97,7 @@ const { RenderPass } = await import('./vendor/pp/RenderPass.js');
 const { BokehPass } = await import('./vendor/pp/BokehPass.js');
 const { OutputPass } = await import('./vendor/pp/OutputPass.js');
 const W = 1920, H = 1080;
+const DBG = Object.fromEntries([...new URLSearchParams(location.search)].filter(([k]) => k !== 't').map(([k, v]) => [k, Number(v)]));
 const deg = THREE.MathUtils.degToRad;
 // ---------- timing ----------
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -328,6 +329,7 @@ function sMontage(t) {
   setSet(s.set);
   show(s.c); reset(s.c);
   s.c.root.rotation.y = deg(-20 + (t - s.t0) * 40);
+  if (s.set === 'kitchen') SETS.kitchen.userData.jar.position.set(170, 0, -290);   // in the counter shot behind the case
   if (s.set === 'travel') {
     // packed: the case sits down inside the open pouch, the lining hides most of its body
     s.c.root.position.set(20, SETS.travel.userData.floorY, 0);
@@ -340,7 +342,7 @@ function sMontage(t) {
     SETS.night.userData.light.intensity = 260000 * on;
     SETS.night.userData.shade.material.emissiveIntensity = 0.9 * on;
     key.intensity = on > 0.5 ? 0.3 : 0.12; kick.intensity = 0.12; rim.intensity = on > 0.5 ? 0.5 : 0.4;
-    fill.color.set(0xffb46a); fill.position.set(-120, 140, -90); fill.intensity = 220000 * on;
+    fill.color.set(0xffb46a); fill.position.set(-110, 60, 50); fill.intensity = 380000 * on;
   }
   const tgt = [s.c.root.position.x, s.c.baseH * 0.7 + s.c.root.position.y, s.c.root.position.z];
   const drift = eo(seg(t, s.t0, s.t0 + 0.5));
@@ -416,9 +418,10 @@ function sTip(t) {
   pulse = hit(t, 10.0) * 0.6 + hit(t, 11.0) * 0.4;
   setSet('desk');
   show(tip7); reset(tip7);
+  SETS.desk.userData.mug.visible = false;   // keep the headline box clear
   const R = tip7.dia / 2, L = tip7.baseH + tip7.lidH;
   const k = seg(t, 9.5, 10.0);
-  const z = t < 10.0 ? 320 * Math.pow(1 - k, 2.2) : -5 * Math.sin(seg(t, 10.0, 10.3) * Math.PI) * Math.exp(-(t - 10.0) / 0.25);
+  const z = t < 10.0 ? -200 * Math.pow(1 - k, 2.2) : -5 * Math.sin(seg(t, 10.0, 10.3) * Math.PI) * Math.exp(-(t - 10.0) / 0.25);
   tip7.root.rotation.order = 'ZYX';
   tip7.root.rotation.set(0, deg(-30), deg(-90));
   tip7.root.position.set(R, R, z);
@@ -432,17 +435,17 @@ function sTip(t) {
   tip7.ring.visible = false;
   tipLine.visible = true; tipLine.position.set(R + L / 2, 0.15, z); tipLine.scale.set(L * 1.04, 46, 1);
   const ctr = new THREE.Vector3(R + L / 2, R, z);
-  fill.position.copy(ctr).add(new THREE.Vector3(-80, 140, 160));
-  fill.intensity = 120000 * eio(seg(t, 9.9, 10.4));
+  fill.position.copy(ctr).add(t < 11.0 ? new THREE.Vector3(-80, 140, 160) : new THREE.Vector3(140, 120, 150));
+  fill.intensity = t < 11.0 ? 120000 * eio(seg(t, 9.9, 10.4)) : 160000;
   let p, tg;
   if (t < 11.0) {
     tg = [52, 40, 0];
-    p = sph(lerp(420, 380, eio(seg(t, 9.5, 11.0))), lerp(150, 140, eio(seg(t, 9.5, 11.0))), 38, tg);
+    p = sph(lerp(470, 430, eio(seg(t, 9.5, 11.0))), lerp(44, 38, eio(seg(t, 9.5, 11.0))), 34, tg);
     p[1] += shake(t, 10.0, 0.9);
   } else {
     // close-up on the lid seam, drifting slowly
-    tg = [R + tip7.baseH, R, 0];
-    p = sph(lerp(300, 285, seg(t, 11.0, 12.0)), lerp(118, 112, seg(t, 11.0, 12.0)), 18, tg);
+    tg = [R + L * 0.55, R, 0];
+    p = sph(lerp(340, 326, eio(seg(t, 11.0, 12.0))), 24 + lerp(0, -6, seg(t, 11.0, 12.0)), 28, tg);
     p[1] += shake(t, 11.0, 0.5);
   }
   frame(p, tg, 30, t < 11.0 ? 440 : 600, t < 11.0 ? 60 : 30, [tg[0], 0, tg[2]]);
@@ -488,7 +491,7 @@ function sKick(t) {
   show(hero12); reset(hero12);
   hero12.root.rotation.y = deg(-30 + (t - 14.5) * 6);
   const LH = 15;
-  const lid = t < 14.4 ? 0 : t < 14.55 ? eo(seg(t, 14.4, 14.55)) * LH : t < 14.78 ? lerp(LH, LH * 0.8, seg(t, 14.55, 14.78)) : LH * 0.8 * (1 - ei(seg(t, 14.78, 15.0))) + Math.max(0, Math.sin(seg(t, 15.0, 15.18) * Math.PI) * 1.2);
+  const lid = t < 14.5 ? 0 : t < 14.62 ? eo(seg(t, 14.5, 14.62)) * LH : t < 14.78 ? lerp(LH, LH * 0.8, seg(t, 14.62, 14.78)) : LH * 0.8 * (1 - ei(seg(t, 14.78, 15.0))) + Math.max(0, Math.sin(seg(t, 15.0, 15.18) * Math.PI) * 1.2);
   hero12.set({ lift: lid, tiltX: -0.3 * clamp(lid / LH) });
   const kl = clamp(lid / LH);
   lidShade.visible = lid > 0.5;
@@ -499,8 +502,8 @@ function sKick(t) {
   p[1] += shake(t, 15.0, 0.8);
   frame(p, tgt, 30, 480, 60);
   panel.style.visibility = 'visible';
-  panel.style.transform = `translateX(${(1 - eo5(seg(t, 14.4, 14.55))) * -1040}px)`;
-  text('ks0', t, 14.4, 16.0, 'unit');
+  panel.style.transform = `translateX(${(1 - eo5(seg(t, 14.5, 14.6))) * -90}px)`;   // the panel lands on the hit with a short settle
+  text('ks0', t, 14.5, 16.0, 'unit');
   text('ks1', t, 14.5, 16.0, 'slam');
   text('ks2', t, 15.0, 16.0, 'slam');
   document.getElementById('ksRule').style.width = `${eo(seg(t, 15.0, 15.3)) * 300}px`;
@@ -512,6 +515,8 @@ function sEnd(t) {
   setSet('shelf');
   show(...row);
   const lid = t < 17.5 ? 0 : t < 17.7 ? eo(seg(t, 17.5, 17.7)) * 24 : closeGap(t, 17.7, 18.0, 24);
+  SETS.shelf.userData.books.visible = false;
+  SETS.shelf.userData.plant.position.set(350, 0, -150); SETS.shelf.userData.plant.scale.setScalar(0.36);
   row.forEach((c, i) => { reset(c); c.root.position.set(endX[i], 0, 0); c.root.rotation.y = deg(-10); c.set({ lift: lid }); });
   const tgt = [0, 30, 0];
   const r = lerp(END_R0, END_R1, eio(seg(t, 16.0, 19.5))) * (1 - 0.025 * hit(t, 18.0, 0.3));
@@ -539,7 +544,9 @@ function renderAt(t) {
   magnetMat.emissiveIntensity = 0;
   lidShade.visible = false;
   fill.intensity = 0; fill.color.set(0xfff1e0);
-  tipLine.visible = false;
+  tipLine.visible = false; SETS.desk.userData.mug.visible = true;
+  SETS.kitchen.userData.jar.position.set(300, 0, -250);   // clear of the wordmark in the title shot
+  SETS.shelf.userData.books.visible = true; SETS.shelf.userData.plant.position.copy(SETS.shelf.userData.plantAt); SETS.shelf.userData.plant.scale.setScalar(0.75);
   SETS.night.userData.light.intensity = 400000; SETS.night.userData.shade.material.emissiveIntensity = 0.9;
   if (t < 2.0) sHook(t);
   else if (t < 4.0) sMontage(t);
