@@ -114,6 +114,7 @@ glassMat.onBeforeCompile = sh => {
     gl_FragColor.rgb += vec3(0.85, 0.92, 0.95) * fres * 1.15;
     gl_FragColor.a = max(gl_FragColor.a, fres * 0.8);`);
 };
+glassMat.needsUpdate = true;   // the engine may have compiled it already
 
 // A soft fill from camera-left, used only on the knocked case so its lid face falls off from charcoal.
 const FILL = 210000;
@@ -125,6 +126,14 @@ const add = (k, o) => { const c = makeCase(partsFor(k), o); scene.add(c.root); m
 const h8 = add('c8', { vials: true }), m6 = add('c6'), m4 = add('c4'), hero12 = add('c12');
 const x8 = add('c8', { vials: true }), tip7 = add('c7');
 const row = ORDER.map(k => add(k));
+// The lifted lid's soft shadow on the 12-Vial's base top: lighter and wider while the lid hangs high,
+// darker and tighter as the magnets pull it down.
+const lidShade = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), hero12.contact.material.clone());
+lidShade.material.transparent = true;
+lidShade.rotation.x = -Math.PI / 2;
+lidShade.position.y = hero12.baseH + 0.4;
+lidShade.visible = false;
+hero12.root.add(lidShade);
 const all = [h8, m6, m4, hero12, x8, tip7, ...row];
 function show(...on) { all.forEach(c => c.root.visible = on.includes(c)); }
 function reset(c) {
@@ -365,8 +374,13 @@ function sKick(t) {
   show(hero12); reset(hero12);
   hero12.root.rotation.y = deg(-30 + (t - 16.5) * 6);
   // open on 16.5, hold the peak through 16.75 so the discs read, then the magnets pull it shut on 17.0
-  const lid = t < 16.5 ? 0 : t < 16.62 ? eo(seg(t, 16.5, 16.62)) * 44 : t < 16.78 ? 44 : 44 * (1 - ei(seg(t, 16.78, 17.0))) + Math.max(0, Math.sin(seg(t, 17.0, 17.18) * Math.PI) * 1.2);
-  hero12.set({ lift: lid, tiltX: -0.22 * clamp(lid / 44) });   // tipped back a little so the gap faces camera
+  const LH = 24;   // about a third of the case height: the pull reads as the last stretch, not a long reach
+  const lid = t < 16.5 ? 0 : t < 16.62 ? eo(seg(t, 16.5, 16.62)) * LH : t < 16.78 ? lerp(LH, LH * 0.8, seg(t, 16.62, 16.78)) : LH * 0.8 * (1 - ei(seg(t, 16.78, 17.0))) + Math.max(0, Math.sin(seg(t, 17.0, 17.18) * Math.PI) * 1.2);
+  hero12.set({ lift: lid, tiltX: -0.3 * clamp(lid / LH) });   // tipped back a little so the gap faces camera
+  const kl = clamp(lid / LH);
+  lidShade.visible = lid > 0.5;
+  lidShade.material.opacity = 1.0 - 0.35 * kl;
+  lidShade.scale.set(hero12.dia * (0.8 + 0.14 * kl), hero12.dia * (0.8 + 0.14 * kl), 1);   // always inside the rim
   hero12.contact.scale.set(hero12.dia * 1.05, hero12.dia * 1.05, 1);   // tighter contact on the teal set
   const tgt = [0, 26, 0];
   const p = sph(lerp(420, 390, seg(t, 16.5, 18.0)) * (1 - 0.04 * hit(t, 17.0, 0.3)), -6, 20, tgt);
@@ -407,6 +421,7 @@ function renderAt(t) {
   ['markRule', 'endRule', 'ksRule'].forEach(id => document.getElementById(id).style.width = '0');
   magnetMat.emissiveIntensity = 0;
   fill.intensity = 0;
+  lidShade.visible = false;
   if (t < 3.0) sHook(t);
   else if (t < 4.0) sMontage(t);
   else if (t < 6.5) sTitle(t);
