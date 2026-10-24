@@ -74,12 +74,17 @@ const ADS = [
   { head: 'The magnets\n*do the work.*', size: 84, line: 'Set the lid on. They pull it shut.', scene: ['hover', 'c7'] },
   { head: '3 mL and\n*10 mL vials.*', line: 'Five sizes. All black PETG.', scene: ['top', 'c8', { vials: true }], theme: 'grey' },
   { head: '*Magnetic*\nvial cases.', line: 'Back it on Kickstarter.\nLaunching November 1, 2026.', scene: ['bleed'], fmt: 'story', launch: true },
+  // 31-34: the two film frames the owner picked, as posts (4:5 and 1:1).
+  { plain: 'Magnets in the<br>base and lid.', head: 'No clips.', scene: ['open', 'c8', { vials: true }], theme: 'grey' },
+  { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['row'], launch: true },
+  { plain: 'Magnets in the<br>base and lid.', head: 'No clips.', scene: ['open', 'c8', { vials: true }], theme: 'grey', fmt: 'square' },
+  { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['row'], launch: true, fmt: 'square' },
 ];
 
 const ad = ADS[N - 1];
 const T = THEMES[ad.theme || 'light'];
 const [W, H] = SIZES[ad.fmt || 'feed'];
-window.STAGE = { W, H };
+window.STAGE = { W, H, count: ADS.length };
 document.body.style.cssText = `width:${W}px; height:${H}px; background:${T.bg}; color:${T.ink}; --acc:${T.acc}`;
 const cv = document.getElementById('c');
 cv.width = W; cv.height = H; cv.style.width = W + 'px'; cv.style.height = H + 'px';
@@ -98,7 +103,10 @@ top.style.top = (story ? 250 : square ? 60 : 72) + 'px';
 const size = ad.size || (story ? 104 : square ? 84 : 92);
 const markSize = story ? 64 : square ? 52 : 57;   // one wordmark size per format
 const acc = t => t.replace(/\*(.+?)\*/g, '<span class="acc">$1</span>');
-top.innerHTML =
+top.innerHTML = ad.plain ?
+  // The film's 5-9 s frame: Archivo 800 lead-in, then the heavy line.
+  `<div class="s" style="font-size:${Math.round(size * 0.68)}px">${ad.plain}</div>` +
+  `<div class="h" style="font-size:${size + 8}px; margin-top:${Math.round(size * 0.22)}px">${acc(ad.head)}</div>` :
   `<div style="display:flex; justify-content:space-between; align-items:baseline"><div class="h" style="font-size:${markSize}px">FLUXCASE</div>` +
   `<div class="kick" style="font-size:${Math.round(markSize * 0.46)}px">${ad.noKick ? '' : 'Magnetic vial cases'}</div></div>` +
   `<div class="rule" style="margin:${Math.round(markSize * 0.28)}px 0 ${Math.round(size * 0.36)}px"></div>` +
@@ -248,6 +256,10 @@ const SCENES = {
     region.right = W + 70;                                      // the fourth case runs past the edge
     region.bottom = region.top + (region.bottom - region.top) * 0.72;
     fit(cs.slice(0, 3).map(c => c.root), 0, 20, 22, 1);
+  },
+  row() { // the film's end card: all five closed, in one row
+    const cs = rowOf(ORDER, 40);
+    fit(cs.map(c => c.root), 0, 16, 16, 0.98);
   },
   grid() {
     const back = rowOf(['c12', 'c6', 'c4'], 46, -150), front = rowOf(['c8', 'c7'], 46, 150);

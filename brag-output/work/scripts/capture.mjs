@@ -27,7 +27,7 @@ const [mode, out, ...rest] = process.argv.slice(2);
 fs.mkdirSync(out, { recursive: true });
 const browser = await playwright.chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 if (mode === 'ads') {
-  const ns = rest[0] === 'all' ? Array.from({ length: 30 }, (_, i) => i + 1) : rest.map(Number);
+  const ns = rest[0] === 'all' ? Array.from({ length: Number(process.env.ADS || 34) }, (_, i) => i + 1) : rest.map(Number);
   const p = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
   p.on('pageerror', e => console.log('[pageerror]', e.message));
   for (const n of ns) {
