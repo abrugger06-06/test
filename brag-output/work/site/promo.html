@@ -111,12 +111,12 @@ glassMat.opacity = 0.06; glassMat.envMapIntensity = 3.2; glassMat.color.set(0xf4
 glassMat.onBeforeCompile = sh => {
   sh.fragmentShader = sh.fragmentShader.replace('#include <dithering_fragment>', `#include <dithering_fragment>
     float fres = pow(1.0 - abs(dot(normalize(vViewPosition), normal)), 2.5);
-    gl_FragColor.rgb += vec3(0.85, 0.92, 0.95) * fres * 0.9;
+    gl_FragColor.rgb += vec3(0.85, 0.92, 0.95) * fres * 1.15;
     gl_FragColor.a = max(gl_FragColor.a, fres * 0.8);`);
 };
 
 // A soft fill from camera-left, used only on the knocked case so its lid face falls off from charcoal.
-const FILL = 260000;
+const FILL = 210000;
 const fill = new THREE.PointLight(0xffffff, 0, 0, 2);
 scene.add(fill);
 
@@ -299,7 +299,7 @@ function sTip(t) {
   tip7.root.position.set(R - R * Math.cos(tip), R * Math.sin(tip), 0);
   tip7.root.updateMatrixWorld(true);
   // Spin about the vertical through the body's centre: the lid end swings round and the lid stays seated.
-  fill.intensity = FILL * eio(seg(t, 12.0, 12.3));
+  fill.intensity = FILL * eio(seg(t, 11.9, 12.45));   // a gentle ramp, so only the turning lid face gains tone
   const spin = deg(-50) * eo(seg(t, 12.0, 12.25)) + deg(-3) * Math.sin(Math.PI * seg(t, 12.25, 12.45));
   const ctr = tip7.root.localToWorld(new THREE.Vector3(0, (tip7.baseH + tip7.lidH) / 2, 0));
   const qs = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), spin);
@@ -364,8 +364,9 @@ function sKick(t) {
   setLook('teal');
   show(hero12); reset(hero12);
   hero12.root.rotation.y = deg(-30 + (t - 16.5) * 6);
-  const lid = t < 16.5 ? 0 : t < 16.62 ? eo(seg(t, 16.5, 16.62)) * 44 : closeGap(t, 16.62, 17.0, 44);
-  hero12.set({ lift: lid });
+  // open on 16.5, hold the peak through 16.75 so the discs read, then the magnets pull it shut on 17.0
+  const lid = t < 16.5 ? 0 : t < 16.62 ? eo(seg(t, 16.5, 16.62)) * 44 : t < 16.78 ? 44 : 44 * (1 - ei(seg(t, 16.78, 17.0))) + Math.max(0, Math.sin(seg(t, 17.0, 17.18) * Math.PI) * 1.2);
+  hero12.set({ lift: lid, tiltX: -0.22 * clamp(lid / 44) });   // tipped back a little so the gap faces camera
   hero12.contact.scale.set(hero12.dia * 1.05, hero12.dia * 1.05, 1);   // tighter contact on the teal set
   const tgt = [0, 26, 0];
   const p = sph(lerp(420, 390, seg(t, 16.5, 18.0)) * (1 - 0.04 * hit(t, 17.0, 0.3)), -6, 20, tgt);

@@ -5,7 +5,7 @@
 
   0.0-3.0   hook: a tick and air on 0.0, drone, heartbeat kick, riser, magnet snap + impact on 1.5
   3.0-4.0   snap montage: cuts on 3.0 / 3.5, snaps on 3.25 / 3.75; snare roll and riser into the drop
-  4.0       DROP + crash: title card. Full kit, bass, plucks (Dm Bb F C), lead at -4 dB. Lid pops 5.0, snaps 5.5
+  4.0       DROP + crash: title card. Full kit, bass, plucks (Dm Bb F C), lead. Lid pops 5.0, snaps 5.5
   6.5-10.5  breakdown (no kick): pad and held bass from 6.5, an eighth-note glass-tick pulse, magnet
             clacks 7.0 (lid) and 7.5 (base), glass ticks as the vials rise 8.0, riser from 8.0, snap on 10.0
   10.5      groove back with a lead. The case falls onto its side on 11.0 (thud), is knocked round on 12.0
@@ -286,9 +286,9 @@ for bar in range(9):          # 4.0 .. 21.0
             if k in (0, 2):
                 place(bass(root, 0.22, 0.6, 420), tb, 1.0, bus='music')
             place(bass(root + 12, 0.12, 0.6, 600), tb + 0.25, 1.0, bus='music')
-            if tb >= 4.0:   # lead arpeggio: about -4 dB under the title, full from the groove's return
+            if tb >= 4.0:   # lead arpeggio from the drop; about 2 dB up again at the groove's return
                 for j, off in enumerate((0, 0.25)):
-                    place(lead(chord[(k * 2 + j) % 3] + 24, 0.2), tb + off, 2.3 if tb >= 10.5 else 1.45, pan=0.35 - 0.7 * j, bus='music')
+                    place(lead(chord[(k * 2 + j) % 3] + 24, 0.2), tb + off, 2.9 if tb >= 10.5 else 2.3, pan=0.35 - 0.7 * j, bus='music')
         else:
             # breakdown pulse: hats and a soft glass tick on the off-beats keep time without a kick
             place(hat(0.45), tb + 0.25, 1.0, pan=0.3, bus='drums')
@@ -300,6 +300,8 @@ for bar in range(9):          # 4.0 .. 21.0
             if t0 + off < 21.0:
                 place(pluck([n + 12 for n in chord], g=0.8 if 6.5 <= t0 + off < 10.5 else 1.0), t0 + off, 4.0,
                       pan=-0.25 + 0.25 * k, bus='music')
+                if 4.0 <= t0 + off < 6.5:   # title drop: an octave-up pluck layer for presence on phones
+                    place(pluck([n + 24 for n in chord], dur=0.7), t0 + off, 6.0, pan=0.25 - 0.25 * k, bus='music')
 # breakdown bed: pad and held bass from the cut on 6.5 to the groove's return on 10.5
 for ts, dur, (root, chord) in ((6.5, 1.5, prog[1]), (8.0, 2.0, prog[2]), (10.0, 0.5, prog[3])):
     place(pad(chord, dur, 2.8, 0.08), ts, 1.0, bus='music')
