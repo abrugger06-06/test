@@ -107,6 +107,10 @@ magnetMat.envMap = (() => {
   const top = g.createLinearGradient(0, 0, 0, 150);
   top.addColorStop(0, 'rgba(255,255,255,1)'); top.addColorStop(0.55, 'rgba(255,255,255,0.85)'); top.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = top; g.fillRect(0, 0, 1024, 150);
+  // Low band just below the horizon, for discs seen at a grazing angle (rim discs under a hovering lid).
+  const low = g.createLinearGradient(0, 262, 0, 340);
+  low.addColorStop(0, 'rgba(255,255,255,0)'); low.addColorStop(0.45, 'rgba(255,255,255,0.95)'); low.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = low; g.fillRect(0, 262, 1024, 78);
   // Vertical strips all round, so a disc facing the camera always crosses one.
   for (const [x, w] of [[20, 60], [150, 70], [300, 110], [470, 70], [600, 60], [730, 90], [880, 110]]) {
     const s = g.createLinearGradient(x, 0, x + w, 0);
