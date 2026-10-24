@@ -28,7 +28,7 @@ wordmark with a deep-teal rule, a heavy headline with one deep-teal accent, a se
 
 ## Allowed facts
 Magnets (solid discs, never rings) in the base and lid pull the case shut and hold it there; no clips, no friction-fit lid.
-PETG, 3D printed to order in Texas. Five cases: 12-Vial 3 mL, 6-Vial 3 mL, 4-Vial 10 mL, 8-Vial 10 mL,
+PETG, 3D printed to order. (Do not mention Texas: owner removed it.) Five cases: 12-Vial 3 mL, 6-Vial 3 mL, 4-Vial 10 mL, 8-Vial 10 mL,
 7-Vial Mixed (holds 3 mL and 10 mL vials). For 3 mL and 10 mL vials. Kickstarter launch November 1, 2026.
 
 ## What to review (in the round folder you are given)

@@ -103,7 +103,12 @@ magnetMat.envMap = (() => {
   const sky = g.createLinearGradient(0, 0, 0, 512);
   sky.addColorStop(0, '#b4b7ba'); sky.addColorStop(0.5, '#5c5f62'); sky.addColorStop(1, '#3a3c3f');
   g.fillStyle = sky; g.fillRect(0, 0, 1024, 512);
-  for (const [x, w] of [[90, 70], [330, 120], [600, 60], [820, 140]]) {
+  // Overhead softbox: up-facing base and rim discs reflect the top of the map.
+  const top = g.createLinearGradient(0, 0, 0, 150);
+  top.addColorStop(0, 'rgba(255,255,255,1)'); top.addColorStop(0.55, 'rgba(255,255,255,0.85)'); top.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = top; g.fillRect(0, 0, 1024, 150);
+  // Vertical strips all round, so a disc facing the camera always crosses one.
+  for (const [x, w] of [[20, 60], [150, 70], [300, 110], [470, 70], [600, 60], [730, 90], [880, 110]]) {
     const s = g.createLinearGradient(x, 0, x + w, 0);
     s.addColorStop(0, 'rgba(255,255,255,0)'); s.addColorStop(0.5, 'rgba(255,255,255,1)'); s.addColorStop(1, 'rgba(255,255,255,0)');
     g.fillStyle = s; g.fillRect(x, 0, w, 512);

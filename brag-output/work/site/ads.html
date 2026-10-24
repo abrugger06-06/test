@@ -37,7 +37,7 @@ const THEMES = {
 };
 const SIZES = { feed: [1080, 1350], square: [1080, 1080], story: [1080, 1920] };
 const ASK = 'Back it on <span class="acc">Kickstarter.</span> Nov 1, 2026.';
-const MADE = 'Black PETG. Printed in Texas.';
+const MADE = 'Black PETG. 3D printed to order.';
 const LAUNCH = 'Launching November 1, 2026.';
 
 // ---------- the 30 ads ----------
@@ -62,8 +62,8 @@ const ADS = [
   { head: 'Silver\n*magnets.*', line: 'Set into the base and the lid.', scene: ['macro', 'c8'] },
   { head: 'Pulls shut.\n*Holds shut.*', scene: ['hover', 'c4'], theme: 'grey' },
   { head: 'Just\n*magnets.*', line: 'No clips. No friction-fit lid.', scene: ['closed', 'c8'] },
-  { head: '*Magnetic.*\nBlack PETG.', line: '3D printed to order in Texas.', scene: ['closed', 'c7'], theme: 'grey' },
-  { head: 'Printed to order\nin *Texas.*', size: 84, line: 'Black PETG.', scene: ['closed', 'c4', { el: 12 }] },
+  { head: '*Magnetic.*\nBlack PETG.', line: '3D printed to order.', scene: ['closed', 'c7'], theme: 'grey' },
+  { head: 'Printed\nto *order.*', line: 'Black PETG.', scene: ['closed', 'c4', { el: 12 }] },
   { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['bleed'], fmt: 'square', launch: true },
   { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['pair'], fmt: 'story', launch: true },
   { head: 'It closes\n*itself.*', line: 'Magnets pull it shut.', scene: ['open', 'c8', { vials: true }], fmt: 'story' },
@@ -261,7 +261,7 @@ const SCENES = {
   },
   row() { // the film's end card: all five closed, in one row
     const cs = rowOf(ORDER, 16);
-    fit(cs.map(c => c.root), 0, 26, 16, 1);
+    fit(cs.map(c => c.root), 0, square ? 26 : 40, 16, 1);   // higher in 4:5 so the row has height
   },
   grid() {
     const back = rowOf(['c12', 'c6', 'c4'], 46, -150), front = rowOf(['c8', 'c7'], 46, 150);
