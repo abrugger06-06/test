@@ -1,4 +1,4 @@
-# Judge brief: Fluxcase static Instagram ads (set of 30)
+# Judge brief: Fluxcase static Instagram ads (set of 34)
 
 You are an independent judge. Score the SET out of 10, and give every ad its own score out of 10.
 Be honest: do not inflate and do not invent problems. A 10 means you would run that ad unchanged in a
@@ -6,7 +6,7 @@ paid Instagram campaign and can name nothing concrete that would make it better.
 only if every ad scores 10. Every point off needs a specific, fixable reason and the exact fix.
 
 ## What they are
-30 static ads for Fluxcase, rendered from the real CAD (no stock, no AI images), announcing the
+34 static ads for Fluxcase (30, plus 31-34: two film frames the owner picked, each as 4:5 and 1:1), rendered from the real CAD (no stock, no AI images), announcing the
 Kickstarter launch on November 1, 2026. Formats: 4:5 feed (1080x1350), 1:1 (1080x1080) and 9:16 story
 (1080x1920; keep copy out of the top 250 px and bottom 330 px that Instagram's UI covers).
 The owner asked for them to be short and simple, and sent a reference picture they love
@@ -32,8 +32,8 @@ PETG, 3D printed to order in Texas. Five cases: 12-Vial 3 mL, 6-Vial 3 mL, 4-Via
 7-Vial Mixed (holds 3 mL and 10 mL vials). For 3 mL and 10 mL vials. Kickstarter launch November 1, 2026.
 
 ## What to review (in the round folder you are given)
-- `ads-sheet-1.jpg` .. `ads-sheet-3.jpg`: all 30 at a glance, numbered.
-- `ad-01.png` .. `ad-30.png`: each ad at full resolution. Open every one.
+- `ads-sheet-1.jpg` .. `ads-sheet-4.jpg`: all 34 at a glance, numbered.
+- `ad-01.png` .. `ad-34.png`: each ad at full resolution. Open every one.
 
 ## Your answer (keep it under 600 words)
 SET SCORE: <integer 0-10>

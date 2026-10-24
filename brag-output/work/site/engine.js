@@ -81,7 +81,7 @@ function discGeometry(mags) {
     g.rotateX(Math.PI / 2);
     g.translate(m.x, m.y, 0);
     g.computeVertexNormals();
-    const p = g.attributes.position, n = g.attributes.normal, k = 0.16;
+    const p = g.attributes.position, n = g.attributes.normal, k = 0.26;
     for (let i = 0; i < p.count; i++) {
       const dx = p.getX(i) - m.x, dy = p.getY(i) - m.y, z = p.getZ(i);
       const face = Math.abs(z - z1) < 1e-3 ? 1 : Math.abs(z - z0) < 1e-3 ? -1 : 0;
@@ -94,7 +94,7 @@ function discGeometry(mags) {
   });
   return mergeGeometries(gs);
 }
-const magnetMat = new THREE.MeshStandardMaterial({ color: 0xCDD1D5, metalness: 1, roughness: 0.14, envMapIntensity: 1.5, emissive: 0xC8CBCE, emissiveIntensity: 0 });
+const magnetMat = new THREE.MeshStandardMaterial({ color: 0xCDD1D5, metalness: 1, roughness: 0.1, envMapIntensity: 1.5, emissive: 0xC8CBCE, emissiveIntensity: 0 });
 // Soft contact shadow under each case.
 const contactTex = (() => {
   // 512 px with a little noise, so the soft falloff has no visible steps.
