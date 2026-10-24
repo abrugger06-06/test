@@ -95,6 +95,25 @@ function discGeometry(mags) {
   return mergeGeometries(gs);
 }
 const magnetMat = new THREE.MeshStandardMaterial({ color: 0xCDD1D5, metalness: 1, roughness: 0.1, envMapIntensity: 1.5, emissive: 0xC8CBCE, emissiveIntensity: 0 });
+// A studio reflection just for the magnets: dark room with soft light strips, so even a disc that
+// faces the camera head-on sweeps from highlight to shadow instead of reflecting one flat patch.
+magnetMat.envMap = (() => {
+  const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 512;
+  const g = cv.getContext('2d');
+  const sky = g.createLinearGradient(0, 0, 0, 512);
+  sky.addColorStop(0, '#b4b7ba'); sky.addColorStop(0.5, '#5c5f62'); sky.addColorStop(1, '#3a3c3f');
+  g.fillStyle = sky; g.fillRect(0, 0, 1024, 512);
+  for (const [x, w] of [[90, 70], [330, 120], [600, 60], [820, 140]]) {
+    const s = g.createLinearGradient(x, 0, x + w, 0);
+    s.addColorStop(0, 'rgba(255,255,255,0)'); s.addColorStop(0.5, 'rgba(255,255,255,1)'); s.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = s; g.fillRect(x, 0, w, 512);
+  }
+  const t = new THREE.CanvasTexture(cv);
+  t.mapping = THREE.EquirectangularReflectionMapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+})();
+magnetMat.envMapIntensity = 1.6;
 // Soft contact shadow under each case.
 const contactTex = (() => {
   // 512 px with a little noise, so the soft falloff has no visible steps.

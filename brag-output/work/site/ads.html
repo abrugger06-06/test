@@ -69,15 +69,15 @@ const ADS = [
   { head: 'It closes\n*itself.*', line: 'Magnets pull it shut.', scene: ['open', 'c8', { vials: true }], fmt: 'story' },
   { head: 'Drop the lid.\nThe magnets\n*close it.*', size: 76, scene: ['hover', 'c6'], fmt: 'square', theme: 'grey' },
   { head: 'Closed.\n*Open.*', line: 'Magnets pull it shut.', scene: ['pair', null, { keys: ['c6', 'c4'] }] },
-  { head: 'Magnets in.\n*Clips out.*', scene: ['open', 'c12', { magOut: 8 }], theme: 'grey' },
+  { head: 'Magnets in.\n*Clips out.*', scene: ['open', 'c12'], theme: 'grey' },
   { head: 'Back it on\n*Kickstarter.*', line: 'Launching November 1, 2026.\nFive magnetic vial cases.', size: 88, scene: ['grid'], launch: true },
   { head: 'The magnets\n*do the work.*', size: 84, line: 'Set the lid on. They pull it shut.', scene: ['hover', 'c7'] },
   { head: '3 mL and\n*10 mL vials.*', line: 'Five sizes. All black PETG.', scene: ['top', 'c8', { vials: true }], theme: 'grey' },
   { head: '*Magnetic*\nvial cases.', line: 'Back it on Kickstarter.\nLaunching November 1, 2026.', scene: ['bleed'], fmt: 'story', launch: true, noKick: true },
   // 31-34: the two film frames the owner picked, as posts (4:5 and 1:1).
-  { plain: 'Magnets in the<br>base and lid.', head: 'No clips.', scene: ['open', 'c8', { vials: true }], theme: 'grey' },
+  { head: 'No *clips.*', line: 'Magnets in the base and lid.', scene: ['open', 'c8', { vials: true }], theme: 'grey' },
   { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['row'], launch: true },
-  { plain: 'Magnets in the<br>base and lid.', head: 'No clips.', scene: ['open', 'c8', { vials: true }], theme: 'grey', fmt: 'square' },
+  { head: 'No *clips.*', line: 'Magnets in the base and lid.', scene: ['open', 'c8', { vials: true }], theme: 'grey', fmt: 'square' },
   { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['row'], launch: true, fmt: 'square' },
 ];
 
@@ -260,8 +260,8 @@ const SCENES = {
     fit(cs.slice(0, 3).map(c => c.root), 0, 22, 22, 1, false, true);
   },
   row() { // the film's end card: all five closed, in one row
-    const cs = rowOf(ORDER, 40);
-    fit(cs.map(c => c.root), 0, 16, 16, 0.98);
+    const cs = rowOf(ORDER, 16);
+    fit(cs.map(c => c.root), 0, 26, 16, 1);
   },
   grid() {
     const back = rowOf(['c12', 'c6', 'c4'], 46, -150), front = rowOf(['c8', 'c7'], 46, 150);
