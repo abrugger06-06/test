@@ -211,12 +211,15 @@ function passport() {
 function pouch() {
   const g = new THREE.Group();
   const bodyM = std({ map: linenTex('#a8916f'), roughness: 0.95 });
-  const body = mesh(new RoundedBoxGeometry(300, 70, 170, 4, 22), bodyM);
-  body.position.y = 35;
+  const body = mesh(new RoundedBoxGeometry(250, 64, 160, 4, 22), bodyM);
+  body.position.y = 32;
+  const opening = mesh(new RoundedBoxGeometry(190, 2, 104, 3, 1), std({ color: '#241f19', roughness: 1 }), { cast: false });
+  opening.position.y = 64.5;
   const zipM = std({ color: '#2e2a24', roughness: 0.45, metalness: 0.5 });
-  const zip = mesh(new THREE.BoxGeometry(280, 4, 8), zipM); zip.position.set(0, 71, 0);
-  const pull = mesh(new RoundedBoxGeometry(10, 4, 34, 2, 1.5), zipM); pull.position.set(150, 70, 14); pull.rotation.y = 0.3;
-  g.add(body, zip, pull);
+  const zipF = mesh(new THREE.BoxGeometry(200, 4, 6), zipM); zipF.position.set(0, 64, 56);
+  const zipB = zipF.clone(); zipB.position.z = -56;
+  const pull = mesh(new RoundedBoxGeometry(10, 4, 34, 2, 1.5), zipM); pull.position.set(112, 63, 70); pull.rotation.y = 0.3;
+  g.add(body, opening, zipF, zipB, pull);
   return g;
 }
 function towel() {
@@ -258,7 +261,7 @@ export function buildSets(scene) {
   mk('kitchen', g => {
     g.add(surface(marbleTex(), 3200, 2400, 0.5), wall(tileTex(), 5000, 2400, -500, 0.4));
     const b = board(); b.position.set(-520, 0, -330); b.rotation.y = 0.15; g.add(b);
-    const j = jar(); j.position.set(420, 0, -330); g.add(j);
+    const j = jar(); j.position.set(170, 0, -290); g.add(j);
     const pl = plant(); pl.position.set(-620, 0, -380); pl.scale.setScalar(0.8); g.add(pl);
   });
   // Nightstand: walnut top, dusk-blue wall, warm lamp, book stack.
@@ -271,8 +274,8 @@ export function buildSets(scene) {
   mk('travel', g => {
     g.add(surface(linenTex('#d8d2c5'), 3200, 2400, 1), wall(plasterTex('#e9e4dc', '#dcd5ca')));
     const tw = towel(); tw.position.set(-420, 0, -260); tw.rotation.y = 0.2; g.add(tw);
-    const ps = passport(); ps.position.set(-150, 0, 50); ps.rotation.y = 0.35; g.add(ps);
-    const po = pouch(); po.position.set(190, 0, -150); po.rotation.y = -0.25; g.add(po);
+    const ps = passport(); ps.position.set(-230, 0, 70); ps.rotation.y = 0.35; g.add(ps);
+    const po = pouch(); po.position.set(20, 0, 0); po.rotation.y = -0.15; g.add(po);
   });
   // Shelf for the size line-up: pale oak, paper wall.
   mk('shelf', g => {
@@ -283,7 +286,7 @@ export function buildSets(scene) {
     for (const x of [-900, 900]) { const b = mesh(new THREE.BoxGeometry(12, 160, 240), brM); b.position.set(x, -112, -130); g.add(b); }
     const bk = books(); bk.position.set(-1050, 0, -170); bk.rotation.y = 0.1; bk.scale.setScalar(0.9);
     const pl = plant(); pl.position.set(1060, 0, -180); pl.scale.setScalar(0.75);
-    const below = mesh(new THREE.PlaneGeometry(6000, 1200), std({ color: '#d9d3c9', roughness: 1 }), { cast: false }); below.position.set(0, -640, -261);
+    const below = mesh(new THREE.PlaneGeometry(6000, 1200), std({ map: plasterTex('#ddd6cb', '#cfc7ba'), roughness: 1 }), { cast: false }); below.position.set(0, -640, -261);
     g.add(board, w, below, bk, pl);
   });
   return S;

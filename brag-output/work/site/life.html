@@ -33,12 +33,13 @@
   #vig { background: radial-gradient(ellipse 75% 70% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.32) 100%); }
   #grain { opacity: 0.07; mix-blend-mode: overlay; }
   .sh { text-shadow: none; }
+  .nightType { text-shadow: 0 0 3px #111413, 0 2px 24px rgba(17,20,19,0.9); }
   .legal { font-family: JBM; font-weight: 700; letter-spacing: 0.02em; color: var(--ink); text-shadow: 0 0 10px rgba(243,244,242,0.95), 0 0 3px rgba(243,244,242,0.9); }
   .call { text-shadow: 0 0 2px #111413, 0 0 2px #111413, 0 2px 12px rgba(0,0,0,0.75); }
   .scrim { position: absolute; pointer-events: none; opacity: 0;
     background: radial-gradient(ellipse 100% 100% at 0% 0%, rgba(243,244,242,0.9) 0%, rgba(243,244,242,0.78) 42%, rgba(243,244,242,0) 100%); }
   #scrimB { background: radial-gradient(ellipse 100% 100% at 0% 100%, rgba(243,244,242,0.85) 0%, rgba(243,244,242,0.6) 45%, rgba(243,244,242,0) 100%); }
-  #panel { position: absolute; left: 0; top: 0; width: 1060px; height: 1080px; background: var(--deep); visibility: hidden; }
+  #panel { position: absolute; left: 0; top: 0; width: 900px; height: 1080px; background: var(--deep); visibility: hidden; }
 </style>
 </head>
 <body>
@@ -75,9 +76,9 @@
   <div id="labels"></div>
   <!-- S7 Kickstarter, a deep teal panel over the desk (14.5-16.0) -->
   <div id="ks0" class="t s light" style="left:122px; top:300px; font-size:64px">Launching on</div>
-  <div id="ks1" class="t h light" style="left:116px; top:390px; font-size:116px">Kickstarter.</div>
-  <div id="ks2" class="t s light" style="left:122px; top:560px; font-size:76px">November 1, 2026.</div>
-  <div id="ksRule" class="rule" style="left:124px; top:664px; width:0; background:var(--teal)"></div>
+  <div id="ks1" class="t h light" style="left:116px; top:390px; font-size:100px">Kickstarter.</div>
+  <div id="ks2" class="t s light" style="left:122px; top:540px; font-size:66px">November 1, 2026.</div>
+  <div id="ksRule" class="rule" style="left:124px; top:632px; width:0; background:var(--teal)"></div>
   <!-- S8 end card on the oak shelf (16.0-19.5) -->
   <div id="end0" class="t h dark" style="left:120px; top:80px; font-size:72px">FLUXCASE</div>
   <div id="endRule" class="rule" style="left:124px; top:170px; width:0"></div>
@@ -90,7 +91,7 @@
 <script type="module">
 window.STAGE = { W: 1920, H: 1080, ao: true };
 const { THREE, scene, camera, renderer, makeCase, partsFor, CASES, ORDER, COL, look, sph, render, magnetMat, glassMat, key, rim, kick, floor } = await import('./engine.js');
-const { buildSets, windowFrame, makeHand } = await import('./sets.js');
+const { buildSets, windowFrame } = await import('./sets.js');
 const { EffectComposer } = await import('./vendor/pp/EffectComposer.js');
 const { RenderPass } = await import('./vendor/pp/RenderPass.js');
 const { BokehPass } = await import('./vendor/pp/BokehPass.js');
@@ -206,7 +207,7 @@ key.shadow.normalBias = 1.2;
 const LIGHT = {
   desk:    { color: 0xffe2bc, k: 3.4, dir: [-700, 520, 120], win: true,  kick: 0.45, rim: 0.6, env: 0.5,  contact: 0.85 },
   kitchen: { color: 0xfff0dc, k: 2.0, dir: [-500, 620, -200], win: true, kick: 0.55, rim: 0.6, env: 0.42, contact: 1.0 },
-  night:   { color: 0xc9d1dc, k: 0.55, dir: [-500, 500, 200], win: false, kick: 0.3, rim: 1.8, env: 0.22, contact: 0.7 },
+  night:   { color: 0xdedad2, k: 0.3, dir: [-500, 500, 200], win: false, kick: 0.3, rim: 1.8, env: 0.22, contact: 0.7 },
   travel:  { color: 0xffeedb, k: 2.3, dir: [-500, 700, 400], win: true,  kick: 0.6, rim: 0.6, env: 0.45, contact: 1.0 },
   shelf:   { color: 0xfff1e0, k: 2.4, dir: [-450, 650, 600], win: true,  kick: 0.55, rim: 0.6, env: 0.5,  contact: 0.9 },
 };
@@ -292,25 +293,17 @@ function reset(c) {
 }
 const rowAt = gap => { const w = row.reduce((s, c) => s + c.dia, 0) + gap * 4; let a = -w / 2; return row.map(c => { const x = a + c.dia / 2; a += c.dia + gap; return x; }); };
 const rowX = rowAt(44), endX = rowAt(40);
-const hand = makeHand(); scene.add(hand); hand.visible = false;
+const fill = new THREE.PointLight(0xfff1e0, 0, 0, 2); scene.add(fill);
 
 // ---------- scenes (120 BPM, beat 0.5 s). Cuts: 2.0, 2.5, 3.0, 3.5, 4.0, 6.5, 9.5, 12.0, 14.5, 16.0; ends 19.5 ----------
 function sHook(t) {
-  // Morning desk. A hand lowers the lid by its rim and lets go just above the case; the magnets pull it shut on 1.0.
+  // Morning desk. The lid drops in from above the frame and the magnets pull it shut on 1.0.
   pulse = hit(t, 1.0);
   setSet('desk');
   show(hook8); reset(hook8);
   hook8.root.rotation.y = deg(-18 + t * 4);
-  const lid = t < 0.55 ? lerp(42, 12, eio(seg(t, 0, 0.55))) : closeGap(t, 0.55, 1.0, 12);
+  const lid = t < 0.55 ? lerp(150, 14, ei(seg(t, 0, 0.55))) : closeGap(t, 0.55, 1.0, 14);
   hook8.set({ lift: lid });
-  // the hand pinches the lid's right rim, then opens and lifts away up-right
-  hook8.root.updateMatrixWorld(true);
-  const rimP = hook8.lid.localToWorld(new THREE.Vector3(hook8.dia / 2 - 4, 0, 0));
-  const away = eo(seg(t, 0.55, 1.15));
-  hand.visible = t < 1.4;
-  hand.pose({ curl: 0.35, pinch: 1 - away * 0.8 });
-  hand.rotation.set(0.25, -Math.PI / 2 - 0.35, 0.15);
-  hand.position.set(rimP.x + 70 + away * 120, rimP.y + 18 + away * 150, rimP.z + 10 - away * 40);
   const tgt = [0, 55, 0];
   const p = sph(lerp(400, 345, eio(seg(t, 0, 1.0))) + (t > 1 ? (t - 1) * 30 : 0), lerp(-34, -22, seg(t, 0, 2)), 14, tgt);
   p[1] += shake(t, 1.0);
@@ -323,10 +316,10 @@ function sHook(t) {
 }
 // Four sets, one per beat. One text treatment across the cuts: ink on a soft paper scrim.
 const MONT = [
-  { set: 'kitchen', c: mK, t0: 2.0, az: -26, el: 12, r: 330 },
+  { set: 'kitchen', c: mK, t0: 2.0, az: -26, el: 9, r: 270 },
   { set: 'night',   c: mN, t0: 2.5, az: 44,  el: 6, r: 470 },
-  { set: 'travel',  c: mT, t0: 3.0, az: -14, el: 20, r: 420 },
-  { set: 'desk',    c: mD, t0: 3.5, az: 34,  el: 12, r: 330 },
+  { set: 'travel',  c: mT, t0: 3.0, az: -20, el: 26, r: 640 },
+  { set: 'desk',    c: mD, t0: 3.5, az: -40, el: 12, r: 330 },
 ];
 function sMontage(t) {
   const s = MONT[Math.min(3, Math.floor((t - 2.0) / 0.5))];
@@ -334,32 +327,30 @@ function sMontage(t) {
   setSet(s.set);
   show(s.c); reset(s.c);
   s.c.root.rotation.y = deg(-20 + (t - s.t0) * 40);
-  hand.visible = false;
   if (s.set === 'travel') {
-    // a hand sets the closed case down beside the passport and the pouch, landing on the off-beat
+    // the closed case drops in from above the frame and settles half inside the open pouch on the off-beat
     const down = seg(t, s.t0, s.t0 + 0.25);
-    s.c.root.position.set(20, (1 - eio(down)) * 70, 30);
-    s.c.ring.visible = down > 0.95;
-    hand.visible = true;
-    const rel = eo(seg(t, s.t0 + 0.27, s.t0 + 0.5));
-    hand.pose({ curl: 0.55 - rel * 0.35, spread: 0.6 });
-    hand.rotation.set(1.05 - rel * 0.3, Math.PI * 0.08, 0);
-    hand.position.set(20 + 6, s.c.root.position.y + s.c.baseH + s.c.lidH + 22 + rel * 90, 30 - 70 - rel * 40);
+    s.c.root.position.set(20, lerp(260, 30, ei(down)) + (t > s.t0 + 0.25 ? Math.sin(seg(t, s.t0 + 0.25, s.t0 + 0.4) * Math.PI) * 4 : 0), 0);
+    s.c.contact.visible = false; s.c.ring.visible = false;
   } else {
     s.c.set({ lift: closeGap(t, s.t0 - 0.1, s.t0 + 0.25, 30) });
   }
   // nightstand: the lamp clicks on as the lid shuts
   if (s.set === 'night') {
-    const on = t >= s.t0 + 0.25 ? 1 : 0.06;
-    SETS.night.userData.light.intensity = 400000 * on;
+    const on = t >= s.t0 + 0.25 ? 1 : 0.03;
+    SETS.night.userData.light.intensity = 260000 * on;
     SETS.night.userData.shade.material.emissiveIntensity = 0.9 * on;
+    key.intensity = on > 0.5 ? 0.3 : 0.12; kick.intensity = 0.12; rim.intensity = on > 0.5 ? 1.0 : 0.5;
   }
-  const tgt = [s.c.root.position.x, s.c.baseH * 0.7, s.c.root.position.z];
+  const tgt = s.set === 'travel' ? [-10, 60, 20] : [s.c.root.position.x, s.c.baseH * 0.7, s.c.root.position.z];
   const drift = eo(seg(t, s.t0, s.t0 + 0.5));
   const p = sph(lerp(s.r, s.r * 0.86, drift), s.az + drift * 8, s.el, tgt);
   p[1] += shake(t, s.t0 + 0.25, 1.1);
-  frame(p, tgt, 30, 380, 30, [tgt[0], 0, tgt[2]]);
-  scrimOn(scrim, 1150, 420, s.set === 'night' ? 0.9 : 1);
+  frame(p, tgt, 30, s.set === 'travel' ? 200 : 380, 30, [tgt[0], 0, tgt[2]]);
+  // dark set, light type (with an ink halo); every light set keeps ink on the paper scrim
+  const night = s.set === 'night';
+  TXT.noclip.className = night ? 't h light nightType' : 't h dark';
+  if (!night) scrimOn(scrim, 1150, 420);
   text('noclip', t, 2.0, 4.0, 'slam');
 }
 function sTitle(t) {
@@ -402,7 +393,7 @@ function sExplode(t) {
   camera.updateMatrixWorld();
   const lidP = x8.lid.getWorldPosition(new THREE.Vector3());
   const baseP = new THREE.Vector3(0, x8.baseH + baseMag + 2, 0);
-  const kl = seg(t, 6.75, 7.0) * (1 - seg(t, 8.35, 8.5)), kb = seg(t, 7.0, 7.25) * (1 - seg(t, 8.35, 8.5));
+  const kl = seg(t, 6.75, 7.0) * (1 - seg(t, 8.45, 8.6)), kb = seg(t, 6.9, 7.15) * (1 - seg(t, 8.45, 8.6));
   svg.innerHTML = callout(callLid, proj(lidP), 560, 230, kl, false) + callout(callBase, proj(baseP), 1390, 820, kb, true);
   scrimOn(scrimB, 900, 300);
   text('legal4', t, 6.0, 9.5, 'unit');
@@ -410,19 +401,19 @@ function sExplode(t) {
   text('pulls', t, 9.0, 12.0, 'slam');
 }
 function sTip(t) {
-  // A new angle, high and from the other side: a fingertip nudges the empty 7-Vial at 9.7, it lands on its side on
-  // 10.0 with the lid seated, and is knocked a quarter turn round on 11.0.
-  pulse = hit(t, 10.0) * 0.6 + hit(t, 11.25) * 0.4;
+  // A new angle, high and from the other side: the empty 7-Vial tips and lands on its side on 10.0 with the lid
+  // seated; the camera keeps pushing and drifting round it to the cut.
+  pulse = hit(t, 10.0) * 0.6;
   setSet('desk');
   show(tip7); reset(tip7);
-  const k = seg(t, 9.7, 10.0);
+  const k = seg(t, 9.5, 10.0);
   const tipK = t < 10.0 ? ei(k) : 1 + 0.035 * Math.sin(Math.PI * seg(t, 10.0, 10.2));
   const tip = deg(90) * tipK, R = tip7.dia / 2;
   tip7.root.rotation.order = 'ZYX';
   tip7.root.rotation.set(0, deg(-30), -tip);
   tip7.root.position.set(R - R * Math.cos(tip), R * Math.sin(tip), 0);
   tip7.root.updateMatrixWorld(true);
-  const spin = deg(-50) * eo(seg(t, 11.0, 11.25)) + deg(-3) * Math.sin(Math.PI * seg(t, 11.25, 11.45));
+  const spin = 0;
   const ctr = tip7.root.localToWorld(new THREE.Vector3(0, (tip7.baseH + tip7.lidH) / 2, 0));
   const qs = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), spin);
   tip7.root.position.sub(ctr).applyQuaternion(qs).add(ctr);
@@ -438,14 +429,11 @@ function sTip(t) {
   const cs = tip7.dia * 1.22, len = (tip7.baseH + tip7.lidH) * 1.3;
   tip7.contact.scale.set(lerp(cs, len, lie), lerp(cs, tip7.dia * 0.6, lie), 1);
   tip7.ring.visible = tipK < 0.05;
-  // the nudge: a fingertip from the left touches the upper rim at 9.7 and withdraws
-  const nudge = seg(t, 9.5, 9.72), back = seg(t, 9.75, 10.1);
-  hand.visible = t < 10.15;
-  hand.pose({ curl: 0.75, point: 1 });
-  hand.rotation.set(0.15, Math.PI / 2 + 0.1, 0);
-  hand.position.set(lerp(-260, -170, eo(nudge)) - eo(back) * 140, tip7.baseH + tip7.lidH - 6, -18);
+  tip7.contact.material.opacity = 1.0;
+  fill.position.copy(ctr).add(new THREE.Vector3(-80, 140, 160));
+  fill.intensity = 120000 * eio(seg(t, 9.9, 10.4));
   const tg = [lerp(10, 52, eo(seg(t, 9.8, 10.2))), 40, 0];
-  const p = sph(lerp(420, 370, eio(seg(t, 9.5, 12.0))), 150, 38, tg);
+  const p = sph(lerp(420, 350, eio(seg(t, 9.5, 12.0))), lerp(150, 132, eio(seg(t, 10.0, 12.0))), 38, tg);
   p[1] += shake(t, 10.0, 0.9);
   frame(p, tg, 30, 440, 60, [tg[0], 0, tg[2]]);
   scrimOn(scrim, 1350, 520);
@@ -456,10 +444,10 @@ function sTip(t) {
 function sSizes(t) {
   setSet('shelf');
   show(...row);
-  const landAt = i => 12.0 + i * 0.4;
+  const landAt = i => 12.0 + i * 0.375;
   row.forEach((c, i) => {
     reset(c);
-    const land = landAt(i), t0 = land - 0.32;
+    const land = landAt(i), t0 = land - 0.3;
     c.root.visible = t >= t0;
     c.root.position.set(rowX[i], (1 - ei(seg(t, t0, land))) * 80, 0);
     c.ring.visible = t >= land;
@@ -474,10 +462,10 @@ function sSizes(t) {
   row.forEach((c, i) => {
     const land = landAt(i);
     if (t < land) return;
-    const p = new THREE.Vector3(rowX[i], 0, 0).project(camera), l = labels[i], k = eo5(seg(t, land, land + 0.3));
+    const p = new THREE.Vector3(rowX[i], 0, 0).project(camera), l = labels[i], k = eo5(seg(t, land + 0.05, land + 0.3));
     l.style.visibility = 'visible'; l.style.opacity = k;
     l.style.left = `${(p.x * .5 + .5) * W}px`;
-    l.style.top = `${(base * .5 + .5) * H + 26 + (1 - k) * 20}px`;
+    l.style.top = `${(base * .5 + .5) * H - 14 + (1 - k) * 20}px`;
   });
   text('five', t, 11.75, 14.5);
   text('fiveSub', t, 12.0, 14.5, 'slam');
@@ -499,15 +487,15 @@ function sKick(t) {
   const tgt = [0, 26, 0];
   const p = sph(lerp(400, 370, seg(t, 14.5, 16.0)) * (1 - 0.04 * hit(t, 15.0, 0.3)), -16, 16, tgt);
   p[1] += shake(t, 15.0, 0.8);
-  frame(p, tgt, 30, 600, 60);
+  frame(p, tgt, 30, 480, 60);
   panel.style.visibility = 'visible';
-  panel.style.transform = `translateX(${(1 - eo5(seg(t, 14.4, 14.55))) * -1060}px)`;
+  panel.style.transform = `translateX(${(1 - eo5(seg(t, 14.4, 14.55))) * -900}px)`;
   text('ks0', t, 14.4, 16.0, 'unit');
   text('ks1', t, 14.5, 16.0, 'slam');
   text('ks2', t, 15.0, 16.0, 'slam');
   document.getElementById('ksRule').style.width = `${eo(seg(t, 15.0, 15.3)) * 300}px`;
 }
-const END_R0 = 1250, END_R1 = 1185, END_SY = 200;
+const END_R0 = 1250, END_R1 = 1185, END_SY = 120;
 function sEnd(t) {
   // The owner's end card, staged on the oak shelf: all five cases; the lids lift on 17.5 and snap shut on 18.0.
   pulse = hit(t, 18.0) * 0.6;
@@ -540,7 +528,7 @@ function renderAt(t) {
   panel.style.visibility = 'hidden';
   magnetMat.emissiveIntensity = 0;
   lidShade.visible = false;
-  hand.visible = false;
+  fill.intensity = 0;
   SETS.night.userData.light.intensity = 400000; SETS.night.userData.shade.material.emissiveIntensity = 0.9;
   if (t < 2.0) sHook(t);
   else if (t < 4.0) sMontage(t);

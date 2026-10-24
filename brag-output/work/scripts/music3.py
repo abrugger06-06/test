@@ -4,14 +4,14 @@
 keys, claps, shaker, tambourine and open hats, with light foley from each set. The magnet clacks stay the
 hero sound. The cue list is the contract with the picture (life.html):
 
-  0.0       full hit on frame 0 (kick, clap, crash, clack); the hand lowers the lid, clack + impact on 1.0
-  2.0-4.0   montage, a cut per beat: counter clink (2.0) and snap 2.25; lamp click with the snap 2.75;
-            zipper and the case set down beside the passport 3.25; snap 3.75; fill into the drop
+  0.0       full hit on frame 0 (kick, clap, crash, clack); the lid drops in, clack + impact on 1.0
+  2.0-4.0   montage, a cut per beat: snap with a quartz clink 2.25; lamp click with the snap 2.75;
+            the case drops into the open pouch 3.25 (soft set-down); snap 3.75; fill into the drop
   4.0       DROP + crash: title on the kitchen counter. Lid pops 5.0, snaps 5.5
   6.5-9.5   how it works, groove kept light: clacks 6.75 (lid) and 7.0 (base), glass on 7.25, riser,
             snap and impact on 9.0
-  9.7       fingertip tap; the case lands on its side 10.0 (thud); knocked round 11.0-11.25 (clack)
-  12.0-13.6 five sizes land on the shelf every 0.4 s; full drop-out 14.375-14.5
+  10.0      the case lands on its side (thud + clack); the camera pushes on to the cut
+  12.0-13.5 five sizes land on the shelf every 0.375 s (16th grid); full drop-out 14.375-14.5
   14.5      Kickstarter panel + crash; snap, impact and bells on the date at 15.0
   16.0      end card on the shelf + crash + bell; lids lift 17.5, final hit 18.0 (the loudest); ring out
 Mix: bass high-passed at 50 Hz, drums shelved down below 80 Hz, music bus ducked by the kick; gained to
@@ -306,12 +306,12 @@ place(impact(0.8, 38), 1.0, 1.0)
 K(1.0, 1.0, 0.5)
 
 # Montage 2.0-4.0
-place(clink(0.8), 2.0, 1.0, pan=-0.3)
 place(clack(84, 1.4), 2.25, 1.0, pan=-0.3)
+place(clink(0.9), 2.25, 1.0, pan=-0.3)   # the lid meeting the case on quartz
 place(click(1.0), 2.75, 1.0, pan=0.3)
 place(clack(88, 1.4), 2.75, 1.0, pan=0.3)
-place(zipper(0.25, 0.9), 3.0, 1.0, pan=0.25)
-place(setdown(1.0), 3.25, 1.0)
+place(whoosh(0.25, 0.8), 3.0, 1.0, pan=0.25)
+place(setdown(2.0), 3.25, 1.0)   # the case drops into the pouch
 place(clack(91, 1.4), 3.75, 1.0, pan=0.2)
 for k in range(4):
     place(snare(0.3 + 0.15 * k), 3.5 + k * 0.125, 1.0, bus='drums')
@@ -351,7 +351,7 @@ for bar in range(10):        # 0.0 .. 20.0
         if light:
             for j, off in enumerate((0, 0.25)):
                 place(glass(chord[(k * 2 + j) % 3] + 12, 1.3), tb + off, 1.0, pan=-0.3 + 0.6 * j, bus='music')
-            if j == 0 and k in (0, 2):
+            if k in (0, 2):
                 place(kick(0.45, 0.3), tb, 0.6, bus='drums')   # a soft pulse keeps time under the explainer
     if t0 < 18.0:
         place(rhodes([n - 12 for n in chord] + [chord[0]], 1.9), t0, 2.4, bus='music')
@@ -378,19 +378,17 @@ place(clack(86, 1.6), 9.0, 1.0)
 place(impact(0.7, 38), 9.0, 1.0)
 K(9.0, 1.0, 0.5)
 
-# The nudge, the fall and the knock
-place(tap(1.0), 9.7, 1.0, pan=0.3)
+# The fall on 10.0
+place(whoosh(0.4, 0.6), 9.6, 1.0)
 K(10.0, 1.0, 0.5)
-place(impact(0.55, 33), 10.0, 1.0)
-place(clack(74, 0.8), 10.0, 0.8)
-place(whoosh(0.3, 0.5), 11.0, 1.0)
-place(clack(79, 1.3), 11.25, 1.0)
+place(impact(0.6, 33), 10.0, 1.0)
+place(clack(74, 1.4), 10.0, 1.0)
 
 # Five sizes, every 0.4 s
-for i, ts in enumerate((12.0, 12.4, 12.8, 13.2, 13.6)):
-    place(impact(0.4, 38 + [0, 2, 4, 5, 7][i]), ts, 1.0, pan=-0.4 + 0.2 * i)
-    place(clack(81 + [0, 2, 4, 5, 7][i], 0.7), ts, 0.8, pan=-0.4 + 0.2 * i)
-place(riser(0.375, 0.9, 400, 9000), 14.0, 1.0)
+for i, ts in enumerate((12.0, 12.375, 12.75, 13.125, 13.5)):
+    place(impact(0.55, 38 + [0, 2, 4, 5, 7][i]), ts, 1.0, pan=-0.4 + 0.2 * i)
+    place(clack(81 + [0, 2, 4, 5, 7][i], 1.1), ts, 1.0, pan=-0.4 + 0.2 * i)
+place(riser(0.35, 0.9, 400, 9000), 14.0, 1.0)
 
 # Kickstarter panel 14.5-16.0
 place(impact(1.0, 38), 14.5, 1.0)
@@ -413,12 +411,12 @@ place(clack(93, 0.6), 17.5, 0.7)
 place(clack(86, 2.0), 18.0, 1.0)
 place(impact(0.7, 38), 18.0, 1.0)
 place(crash(0.8), 18.0, 1.0)
-K(18.0, 1.0, 0.6)
-place(clap(1.0), 18.0, 1.3, bus='drums')
+K(18.0, 0.7, 0.6)
+place(clap(0.9), 18.0, 1.3, bus='drums')
 place(rhodes([50, 57, 62, 66, 69], 1.5, 1.4), 18.0, 1.0, bus='music')
 place(pad([50, 57, 62, 66, 69, 74], 1.5, 1.2, 0.02), 18.0, 1.0, bus='music')
 for nt, d in ((74, 0), (78, 0.03), (81, 0.06), (86, 0.09)):
-    place(bell(nt, 1.5, 2.0), 18.0 + d, 1.0, pan=(nt - 80) / 15, bus='music')
+    place(bell(nt, 1.5, 1.7), 18.0 + d, 1.0, pan=(nt - 80) / 15, bus='music')
 
 # ---------- mix ----------
 # Sidechain: the music bus dips under each kick (6 dB, 120 ms recovery).
@@ -431,7 +429,9 @@ for tk, g in KICKS:
     duck[i:i + n] = np.minimum(duck[i:i + n], d[:n])
 for bb in ('drums', 'music'):
     i0, i1 = int(DROP[0] * SR), int(DROP[1] * SR)
-    BUS[bb][:, i0:i1] *= np.linspace(1, 0.05, i1 - i0) ** 0.5
+    ramp = np.full(i1 - i0, 0.02); ramp[:480] = np.linspace(1, 0.02, 480)   # down within 10 ms
+    BUS[bb][:, i0:i1] *= ramp
+    BUS['fx'][:, i0:i1] *= ramp
 dr = BUS['drums']
 dr = dr - 0.3 * np.stack([lowpass(dr[0], 80), lowpass(dr[1], 80)])   # about -3 dB below 80 Hz
 mix = dr * 0.8 + BUS['music'] * duck + BUS['fx']   # drums about 2 dB down into the limiter
@@ -444,7 +444,7 @@ for d, g in ((0.019, 0.16), (0.031, 0.12), (0.053, 0.09), (0.083, 0.06)):
     mix[0, k:] += Rc[:-k] * g
     mix[1, k:] += Lc[:-k] * g
 
-f = int(1.0 * SR)
+f = int(0.5 * SR)
 mix[:, -f:] *= np.linspace(1, 0, f) ** 1.5
 mix[:, :240] *= np.linspace(0, 1, 240)   # 5 ms fade-in so frame 0 cannot click
 CEIL, BL, OS = 10 ** (-1.6 / 20), 240, 4
