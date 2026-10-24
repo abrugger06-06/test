@@ -9,8 +9,11 @@ only if every ad scores 10. Every point off needs a specific, fixable reason and
 30 static ads for Fluxcase, rendered from the real CAD (no stock, no AI images), announcing the
 Kickstarter launch on November 1, 2026. Formats: 4:5 feed (1080x1350), 1:1 (1080x1080) and 9:16 story
 (1080x1920; keep copy out of the top 250 px and bottom 330 px that Instagram's UI covers).
-The owner asked for them to be short and simple, in the direction of the end card of the launch video
-(FLUXCASE wordmark, "Back it on Kickstarter.", deep-teal accent, black cases on light grounds).
+The owner asked for them to be short and simple, and sent a reference picture they love
+(`owner-reference.png` in the round folder: the launch video's end card, an older version that still
+had the maker line, which has since been removed). Judge each ad against that direction: FLUXCASE
+wordmark with a deep-teal rule, a heavy headline with one deep-teal accent, a second line in Archivo
+800, black cases large on a light ground, lineups that run off the edge.
 
 ## Rules
 - No invented claims: no backer counts, funding goals, reviews, ratings, dimensions, weights, prices,

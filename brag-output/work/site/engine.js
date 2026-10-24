@@ -86,10 +86,16 @@ function ringGeometry(mags) {
 }
 // Soft contact shadow under each case.
 const contactTex = (() => {
-  const cv = document.createElement('canvas'); cv.width = cv.height = 256;
-  const g = cv.getContext('2d'); const gr = g.createRadialGradient(128, 128, 0, 128, 128, 128);
-  gr.addColorStop(0, 'rgba(0,0,0,0.55)'); gr.addColorStop(0.62, 'rgba(0,0,0,0.42)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
-  g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+  // 512 px with a little noise, so the soft falloff has no visible steps.
+  const N = 512, cv = document.createElement('canvas'); cv.width = cv.height = N;
+  const g = cv.getContext('2d'), img = g.createImageData(N, N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const r = Math.hypot(x - N / 2 + 0.5, y - N / 2 + 0.5) / (N / 2);
+    const a = r >= 1 ? 0 : (r < 0.62 ? 0.55 - 0.13 * r / 0.62 : 0.42 * (1 - (r - 0.62) / 0.38) ** 1.6);
+    const i = (y * N + x) * 4;
+    img.data[i + 3] = Math.max(0, Math.min(255, a * 255 + (Math.random() - 0.5) * 3));
+  }
+  g.putImageData(img, 0, 0);
   return new THREE.CanvasTexture(cv);
 })();
 const contactMat = new THREE.MeshBasicMaterial({ map: contactTex, transparent: true, depthWrite: false, toneMapped: false });

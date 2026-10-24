@@ -9,16 +9,15 @@
   @font-face { font-family: JBM; font-weight: 700; src: url(fonts/JetBrainsMono-Bold.ttf); font-display: block; }
   html, body { margin: 0; overflow: hidden; }
   canvas { position: absolute; left: 0; top: 0; }
-  #top { position: absolute; left: 64px; right: 64px; display: flex; flex-direction: column; gap: 18px; }
+  #top { position: absolute; left: 64px; right: 64px; display: flex; flex-direction: column; }
   .h { font-family: Archivo; font-weight: 900; font-stretch: 125%; letter-spacing: -0.01em; line-height: 0.98; }
   .s { font-family: Archivo; font-weight: 800; font-stretch: 125%; line-height: 1.1; }
-  .m { font-family: JBM; font-weight: 700; letter-spacing: 0.02em; font-size: 26px; line-height: 1.35; }
   .acc { color: var(--acc); }
   .rule { width: 150px; height: 6px; background: var(--acc); }
   #foot { position: absolute; left: 64px; right: 64px; display: flex; justify-content: space-between; align-items: baseline; }
-  #foot b { font-family: Archivo; font-weight: 900; font-stretch: 125%; font-size: 34px; }
-  #foot span { font-family: JBM; font-weight: 700; font-size: 22px; }
-  #note { position: absolute; left: 64px; font-family: JBM; font-weight: 700; font-size: 21px; }
+  #foot .ask { font-family: Archivo; font-weight: 800; font-stretch: 125%; font-size: 32px; }
+  .fine { font-family: JBM; font-weight: 700; font-size: 22px; }
+  .kick { font-family: Archivo; font-weight: 800; font-stretch: 125%; }
   .label { position: absolute; transform: translateX(-50%); font-family: JBM; font-weight: 700; font-size: 23px; white-space: nowrap; text-align: center; }
   .label i { display: block; height: 3px; background: currentColor; margin: 0 auto 10px; width: 100%; }
 </style>
@@ -28,55 +27,57 @@
 <div id="ui"></div>
 <script type="module">
 // Fluxcase static ads: ads.html?n=<1..30>. Each ad is a spec below; layout is automatic:
-// copy block at the top, footer at the bottom, and the camera fits the product into the space between.
+// the launch end card's header (wordmark, teal rule, headline, one line) at the top, a small print
+// line at the bottom, and the camera fits the product into the space between.
 const N = Number(new URLSearchParams(location.search).get('n') || 1);
 
 const THEMES = {
-  grey:  { bg: '#E2E2E2', ink: '#111413', acc: '#1D6B62', dark: false },
-  light: { bg: '#F3F4F2', ink: '#111413', acc: '#1D6B62', dark: false },
-  ink:   { bg: '#111413', ink: '#F3F4F2', acc: '#74CABF', dark: true },
-  teal:  { bg: '#1D6B62', ink: '#F3F4F2', acc: '#F3F4F2', dark: true },
+  light: { bg: '#F3F4F2', ink: '#111413', acc: '#1D6B62' },
+  grey:  { bg: '#E2E2E2', ink: '#111413', acc: '#1D6B62' },
 };
 const SIZES = { feed: [1080, 1350], square: [1080, 1080], story: [1080, 1920] };
-const DATE = 'Kickstarter. November 1, 2026.';
+const ASK = 'Back it on <span class="acc">Kickstarter.</span> Nov 1, 2026.';
+const MADE = 'Black PETG. Printed in Texas.';
+const LAUNCH = 'Launching November 1, 2026.';
 
 // ---------- the 30 ads ----------
-// head: headline (\n = line break, *word* = accent colour); sub: small mono line; scene: what is shown.
+// head: headline (\n = line break, *word* = the one teal accent); line: the second line under it;
+// scene: what is shown. Launch ads put the date in `line`, so they drop the small date at the bottom.
 const ADS = [
-  { head: 'It closes\nitself.', sub: 'Ring magnets pull the lid shut.', theme: 'grey', scene: ['hover', 'c12'] },
-  { head: 'Magnetic\nvial cases.', sub: 'For 3 mL and 10 mL vials.', theme: 'light', scene: ['closed', 'c12'] },
-  { head: 'Ring magnets\nin the base\nand lid.', size: 84, theme: 'grey', scene: ['open', 'c8', { vials: true }] },
-  { head: 'No clips.', sub: 'Ring magnets pull it shut and hold it there.', theme: 'ink', scene: ['open', 'c8', { magOut: 10 }] },
-  { head: 'Tip it over.\nThe lid stays on.', size: 84, theme: 'grey', scene: ['tipped', 'c7'] },
-  { head: 'Five sizes.', sub: 'For 3 mL and 10 mL vials.', theme: 'light', scene: ['lineup'] },
-  { head: '3 mL.\n10 mL.\nMixed.', theme: 'grey', scene: ['grid'] },
-  { head: '12 vials.\n3 mL.', sub: '12-Vial 3 mL', theme: 'light', scene: ['open', 'c12'] },
-  { head: '6 vials.\n3 mL.', sub: '6-Vial 3 mL', theme: 'grey', scene: ['open', 'c6'] },
-  { head: '4 vials.\n10 mL.', sub: '4-Vial 10 mL', theme: 'light', scene: ['open', 'c4'] },
-  { head: '8 vials.\n10 mL.', sub: '8-Vial 10 mL', theme: 'grey', scene: ['open', 'c8', { vials: true }] },
-  { head: '3 mL and\n10 mL in\none case.', size: 88, sub: '7-Vial Mixed', theme: 'light', scene: ['open', 'c7', { vials: true }] },
-  { head: 'Back it on\n*Kickstarter.*', sub: 'Launching November 1, 2026.', theme: 'teal', scene: ['pair'], foot: 'Black PETG. Printed in Texas.' },
-  { head: 'November 1,\n2026.', sub: 'Fluxcase launches on Kickstarter.', theme: 'ink', scene: ['lineup'], foot: 'Black PETG. Printed in Texas.' },
-  { head: 'A well for\nevery vial.', theme: 'grey', scene: ['top', 'c7', { vials: true }] },
-  { head: 'Silver ring\nmagnets.', sub: 'Set into the base and the lid.', theme: 'light', scene: ['macro', 'c8'] },
-  { head: 'Pulls shut.\nHolds shut.', theme: 'grey', scene: ['hover', 'c4'] },
-  { head: 'No clips.\nNo friction lid.', size: 88, sub: 'The magnets do the work.', theme: 'light', scene: ['closed', 'c8'] },
-  { head: 'Black PETG.', sub: '3D printed to order in Texas.', theme: 'ink', scene: ['closed', 'c7'] },
-  { head: 'Printed to\norder in Texas.', size: 88, sub: 'Black PETG.', theme: 'light', scene: ['lineup'] },
-  { head: 'Back it on\n*Kickstarter.*', sub: 'Launching November 1, 2026.', theme: 'light', scene: ['pair'], fmt: 'square', foot: 'Black PETG. Printed in Texas.' },
-  { head: 'Back it on\n*Kickstarter.*', sub: 'Launching November 1, 2026.', theme: 'light', scene: ['pair'], fmt: 'story', foot: 'Black PETG. Printed in Texas.' },
-  { head: 'It closes\nitself.', sub: 'Ring magnets in the base and lid.', theme: 'grey', scene: ['open', 'c8', { vials: true }], fmt: 'story' },
-  { head: 'Drop the lid.\nThe magnets\nclose it.', size: 80, theme: 'grey', scene: ['hover', 'c6'], fmt: 'square' },
-  { head: 'Open.\nClosed.', theme: 'light', scene: ['pair'] },
-  { head: 'Magnets in.\nClips out.', theme: 'teal', scene: ['open', 'c12', { magOut: 8 }] },
-  { head: 'Kickstarter.\nNov 1.', sub: 'Five magnetic vial cases.', theme: 'grey', scene: ['grid'] },
-  { head: 'It closes\nitself.', sub: 'Ring magnets pull the lid shut.', theme: 'ink', scene: ['hover', 'c8'] },
-  { head: '3 mL and\n10 mL vials.', sub: 'Five sizes. All black PETG.', theme: 'light', scene: ['top', 'c8', { vials: true }] },
-  { head: 'FLUXCASE', size: 120, sub: 'Magnetic vial cases. On Kickstarter November 1, 2026.', theme: 'teal', scene: ['closed', 'c12'], rule: true, foot: 'Black PETG. Printed in Texas.' },
+  { head: 'It closes\n*itself.*', line: 'Ring magnets pull the lid shut.', scene: ['hover', 'c12'] },
+  { head: 'Magnetic\n*vial cases.*', line: 'For 3 mL and 10 mL vials.', scene: ['closed', 'c12'] },
+  { head: 'Ring *magnets*\nin the base\nand lid.', size: 80, scene: ['open', 'c8', { vials: true }] },
+  { head: 'No *clips.*', line: 'Ring magnets pull it shut\nand hold it there.', scene: ['open', 'c8', { magOut: 10 }], theme: 'grey' },
+  { head: 'Held shut\nby *magnets.*', line: 'Ring magnets in the base and lid.', scene: ['tipped', 'c7'] },
+  { head: '*Five* sizes.', line: 'For 3 mL and 10 mL vials.', scene: ['grid'] },
+  { head: '3 mL. 10 mL.\n*Mixed.*', scene: ['grid'], theme: 'grey' },
+  { head: '*12 vials.*\n3 mL.', line: 'Ring magnets in the base and lid.', scene: ['open', 'c12'] },
+  { head: '*6 vials.*\n3 mL.', line: 'No clips. Magnets pull it shut.', scene: ['open', 'c6'], theme: 'grey' },
+  { head: '*4 vials.*\n10 mL.', line: 'No friction-fit lid.', scene: ['open', 'c4'] },
+  { head: '*8 vials.*\n10 mL.', line: 'Ring magnets hold the lid shut.', scene: ['open', 'c8', { vials: true }], theme: 'grey' },
+  { head: '3 mL *and*\n10 mL in\none case.', size: 84, line: '7-Vial Mixed', scene: ['open', 'c7', { vials: true }] },
+  { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['pair'], launch: true },
+  { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['bleed'], launch: true },
+  { head: 'One well\nper *vial.*', line: 'For 3 mL and 10 mL vials.', scene: ['top', 'c7', { vials: true }], theme: 'grey' },
+  { head: 'Silver *ring*\n*magnets.*', line: 'Set into the base and the lid.', scene: ['macro', 'c8'] },
+  { head: 'Pulls shut.\n*Holds shut.*', scene: ['hover', 'c4'], theme: 'grey' },
+  { head: 'No clips.\nNo *friction lid.*', size: 84, line: 'The magnets do the work.', scene: ['closed', 'c8'] },
+  { head: 'Black *PETG.*', line: '3D printed to order in Texas.', scene: ['closed', 'c7'], theme: 'grey' },
+  { head: 'Printed to order\nin *Texas.*', size: 84, line: 'Black PETG.', scene: ['closed', 'c4', { el: 12 }] },
+  { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['bleed'], fmt: 'square', launch: true },
+  { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['pair'], fmt: 'story', launch: true },
+  { head: 'It closes\n*itself.*', line: 'Ring magnets pull it shut.', scene: ['open', 'c8', { vials: true }], fmt: 'story' },
+  { head: 'Drop the lid.\nThe magnets\n*close it.*', size: 76, scene: ['hover', 'c6'], fmt: 'square', theme: 'grey' },
+  { head: 'Closed.\n*Open.*', line: 'Ring magnets pull it shut.', scene: ['pair'] },
+  { head: 'Magnets in.\n*Clips out.*', scene: ['open', 'c12', { magOut: 8 }], theme: 'grey' },
+  { head: '*Kickstarter.*\nNov 1.', line: 'Five magnetic vial cases.', scene: ['grid'], launch: true },
+  { head: 'Closes on\nits *own.*', line: 'Set the lid close. The magnets\npull it shut.', size: 88, scene: ['closed', 'c6', { el: 10 }] },
+  { head: '3 mL and\n*10 mL vials.*', line: 'Five sizes. All black PETG.', scene: ['top', 'c8', { vials: true }], theme: 'grey' },
+  { head: 'Five *magnetic*\nvial cases.', size: 84, line: LAUNCH, scene: ['bleed'], fmt: 'story', launch: true },
 ];
 
 const ad = ADS[N - 1];
-const T = THEMES[ad.theme];
+const T = THEMES[ad.theme || 'light'];
 const [W, H] = SIZES[ad.fmt || 'feed'];
 window.STAGE = { W, H };
 document.body.style.cssText = `width:${W}px; height:${H}px; background:${T.bg}; color:${T.ink}; --acc:${T.acc}`;
@@ -84,54 +85,54 @@ const cv = document.getElementById('c');
 cv.width = W; cv.height = H; cv.style.width = W + 'px'; cv.style.height = H + 'px';
 
 const E = await import('./engine.js');
-const { THREE, scene, camera, makeCase, partsFor, CASES, ORDER, COL, render, key, rim, kick, floor } = E;
+const { THREE, scene, camera, makeCase, partsFor, CASES, ORDER, COL, render } = E;
 const deg = THREE.MathUtils.degToRad;
 
-// ---------- copy ----------
-const story = (ad.fmt === 'story');
+// ---------- copy: the end card's header ----------
+const fmt = ad.fmt || 'feed';
+const story = fmt === 'story', square = fmt === 'square';
 const ui = document.getElementById('ui');
 const top = document.createElement('div');
 top.id = 'top';
-top.style.top = (story ? 250 : 72) + 'px';
-const size = ad.size || (story ? 116 : 104);
-const headHtml = ad.head.split('\n').map(l => l.replace(/\*(.+?)\*/g, '<span class="acc">$1</span>')).join('<br>');
-if (ad.rule) top.innerHTML += `<div class="h" style="font-size:${size}px">${headHtml}</div><div class="rule"></div>`;
-else top.innerHTML += `<div class="h" style="font-size:${size}px">${headHtml}</div>`;
-if (ad.sub) top.innerHTML += `<div class="m">${ad.sub}</div>`;
+top.style.top = (story ? 250 : square ? 60 : 72) + 'px';
+const size = ad.size || (story ? 104 : square ? 84 : 92);
+const markSize = Math.round(size * 0.62);
+const acc = t => t.replace(/\*(.+?)\*/g, '<span class="acc">$1</span>');
+top.innerHTML =
+  `<div style="display:flex; justify-content:space-between; align-items:baseline"><div class="h" style="font-size:${markSize}px">FLUXCASE</div>` +
+  `<div class="kick" style="font-size:${Math.round(markSize * 0.46)}px">Magnetic vial cases</div></div>` +
+  `<div class="rule" style="margin:${Math.round(markSize * 0.28)}px 0 ${Math.round(size * 0.36)}px"></div>` +
+  `<div class="h" style="font-size:${size}px">${acc(ad.head).split('\n').join('<br>')}</div>` +
+  (ad.line ? `<div class="s" style="font-size:${Math.round(size * 0.5)}px; margin-top:${Math.round(size * 0.24)}px">${ad.line.split('\n').join('<br>')}</div>` : '');
 ui.appendChild(top);
 
-const footY = story ? H - 330 : H - 88;
+// Small print: the launch date (unless the line already carries it) and the vials note.
+const [kind, k, opt = {}] = ad.scene;
+const vials = !!opt.vials || kind === 'pair';
+const footY = story ? H - 330 - 70 : H - 80;   // stories: clear of Instagram's bottom 330 px
 const foot = document.createElement('div');
 foot.id = 'foot';
 foot.style.top = footY + 'px';
-foot.innerHTML = ad.head === 'FLUXCASE' ? `<b></b><span>${ad.foot}</span>` : `<b>FLUXCASE</b><span>${ad.foot || DATE}</span>`;
-ui.appendChild(foot);
-
-const vials = ad.scene[2]?.vials;
+foot.innerHTML = `<span class="ask">${ad.launch ? MADE : ASK}</span>`;
 if (vials) {
   const note = document.createElement('div');
-  note.id = 'note'; note.textContent = 'Vials not included.';
-  note.style.top = (footY - 46) + 'px';
+  note.className = 'fine'; note.textContent = 'Vials not included.';
+  note.style.cssText = `position:absolute; left:64px; top:${footY - 38}px`;
   ui.appendChild(note);
 }
+ui.appendChild(foot);
 
 await document.fonts.load('900 40px Archivo');
 await document.fonts.load('800 40px Archivo');
 await document.fonts.load('700 20px JBM');
 await document.fonts.ready;
 
-// The product fills the space between the copy and the footer.
+// The product fills the space between the copy and the small print.
 const region = {
-  top: top.getBoundingClientRect().bottom + 44,
-  bottom: footY - (vials ? 76 : 40),
+  top: top.getBoundingClientRect().bottom + 48,
+  bottom: footY - (vials ? 84 : 52),
   left: 64, right: W - 64,
 };
-
-// ---------- lighting per theme ----------
-if (T.dark) {
-  kick.intensity = 4.2; rim.intensity = 2.2;   // black PETG needs edge light to read on a dark ground
-  floor.material.opacity = 0.35;
-}
 
 // ---------- scenes ----------
 const add = (k, opts) => { const c = makeCase(partsFor(k), opts); scene.add(c.root); c.set({ color: COL.black }); return c; };
@@ -141,7 +142,8 @@ const OPEN = { lift: 62, back: 58, tiltX: -1.62 };          // lid swung back, i
 function fit(objs, az, el, fov = 30, fill = 0.9) {
   const box = new THREE.Box3();
   objs.forEach(o => o.traverse(m => {
-    if (m.isMesh && m.visible && !m.userData.noFit) {
+    let shown = true; for (let q = m; q; q = q.parent) if (!q.visible) shown = false;
+    if (m.isMesh && shown && !m.userData.noFit) {
       m.updateWorldMatrix(true, false);
       box.union(new THREE.Box3().setFromObject(m, true));
     }
@@ -176,17 +178,17 @@ function rowOf(keys, gap, z = 0) {
   cs.forEach(c => { c.root.position.set(x + c.dia / 2, 0, z); c.root.rotation.y = deg(-10); x += c.dia + gap; });
   return cs;
 }
-function labelUnder(c, k) {
+function labelUnder(c, k, baseY) {
   const v = new THREE.Vector3(c.root.position.x, 0, c.root.position.z + c.dia / 2 + 8).project(camera);
+  v.y = -baseY;
   const d = document.createElement('div');
   d.className = 'label'; d.innerHTML = `<i></i>${CASES[k].label}`;
   d.style.left = `${(v.x * .5 + .5) * W}px`; d.style.top = `${(-v.y * .5 + .5) * H + 16}px`;
   ui.appendChild(d);
 }
 
-const [kind, k, opt = {}] = ad.scene;
 const SCENES = {
-  closed() { const c = add(k); c.root.rotation.y = deg(-16); fit([c.root], -6, 22); },
+  closed() { const c = add(k); c.root.rotation.y = deg(-16); fit([c.root], -6, opt.el ?? 22); },
   hover() { const c = add(k); c.root.rotation.y = deg(-14); c.set({ lift: 9, tiltX: 0.03, color: COL.black }); fit([c.root], -8, 18); },
   open() {
     const c = add(k, { vials: !!opt.vials });
@@ -198,7 +200,7 @@ const SCENES = {
     const c = add(k, { vials: !!opt.vials });
     c.lid.visible = false;
     c.root.rotation.y = deg(-8);
-    fit([c.root], 0, 62, 30, 0.86);
+    fit([c.root], -4, 36, 30, 0.9);
   },
   macro() { // close on the silver rings in the base, lid swung back out of frame
     const c = add(k);
@@ -210,6 +212,7 @@ const SCENES = {
   tipped() { // on its side, lid held shut by the magnets
     const c = add(k);
     const R = c.dia / 2, tip = deg(90);
+    c.mat.clearcoat = 0; c.mat.roughness = 0.55;
     c.root.rotation.order = 'ZYX';
     c.root.rotation.set(0, deg(-24), -tip);
     c.root.position.set(R, R, 0);
@@ -229,13 +232,22 @@ const SCENES = {
     });
     fit(cs.map(c => c.root), -4, 24, 24, 0.94);
   },
+  bleed() { // the launch end card's row: big, running off the right edge
+    const cs = rowOf(ORDER, 44);
+    cs.forEach(c => c.root.rotation.y = deg(-10));
+    fit(cs.slice(0, story ? 2 : 3).map(c => c.root), 0, 17, 22, 1.08);
+  },
   grid() {
     const back = rowOf(['c12', 'c6', 'c4'], 46, -150), front = rowOf(['c8', 'c7'], 46, 150);
     const all = [...back, ...front];
     region.bottom -= 46;                       // room for the labels
     fit(all.map(c => c.root), 0, 40, 16, 0.9);
     camera.updateMatrixWorld();
-    all.forEach((c, i) => labelUnder(c, ['c12', 'c6', 'c4', 'c8', 'c7'][i]));
+    const KS = ['c12', 'c6', 'c4', 'c8', 'c7'];
+    [back, front].forEach(rw => {
+      const y = Math.max(...rw.map(c => -new THREE.Vector3(c.root.position.x, 0, c.root.position.z + c.dia / 2 + 8).project(camera).y));
+      rw.forEach(c => labelUnder(c, KS[all.indexOf(c)], y));
+    });
   },
   pair() {  // one closed, one open with vials
     const a = add('c12'); a.root.position.set(-62, 0, 20); a.root.rotation.y = deg(-16);
@@ -244,14 +256,6 @@ const SCENES = {
     fit([a.root, b.root], -6, 22);
   },
 };
-// The pair scene shows vials, so it carries the note too.
-if (kind === 'pair' && !vials) {
-  const note = document.createElement('div');
-  note.id = 'note'; note.textContent = 'Vials not included.';
-  note.style.top = (footY - 46) + 'px';
-  ui.appendChild(note);
-  region.bottom = footY - 76;
-}
 SCENES[kind]();
 render(T.bg);
 window.__ready = true;
