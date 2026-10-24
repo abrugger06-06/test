@@ -10,7 +10,7 @@
             clacks 7.0 (lid) and 7.5 (base), glass ticks as the vials rise 8.0, riser from 8.0, snap on 10.0
   10.5      groove back with a lead. The case falls onto its side on 11.0 (thud), is knocked round on 12.0
   13.0      five sizes: tuned impacts as the cases land at 13.0, 13.5, 14.0, 14.5, 15.0; build to 16.5
-  16.5      Kickstarter card + crash: lid pops 16.75, snaps with the date impact on 17.0, roll into 18.0
+  16.5      Kickstarter card + crash: lid pops 16.5, snaps with the date impact and bells on 17.0, roll into 18.0
   18.0      end card + crash: groove carries on under the copy; the five lids lift on 20.5 and the
             magnets pull them shut on 21.0, the final hit; Dm chord and bells ring out to 23.0
 Mix: drone and bass high-passed at 50 Hz, drums shelved down below 80 Hz, music bus ducked by the
@@ -107,8 +107,17 @@ def snare(g=1.0):
 
 
 def saw(f, t):
+    """Band-limited sawtooth (PolyBLEP), so high notes do not alias."""
     ph = (f * t) % 1.0
-    return 2 * ph - 1
+    dt = f / SR
+    y = 2 * ph - 1
+    a = ph < dt
+    x = ph[a] / dt
+    y[a] -= x + x - x * x - 1
+    b = ph > 1 - dt
+    x = (ph[b] - 1) / dt
+    y[b] -= x * x + x + x + 1
+    return y
 
 
 def bass(note, dur, g=1.0, cutoff=500):
@@ -223,8 +232,9 @@ def lead(note, dur=0.2, g=1.0):
     """A short square-ish lead in the 1-3 kHz band for presence on phone speakers."""
     t = tt(dur)
     f = midi(note)
-    x = np.sign(np.sin(2 * np.pi * f * t)) * 0.5 + np.sin(2 * np.pi * 2 * f * t) * 0.3
-    x = lowpass(x, 4000)
+    # band-limited square: odd harmonics up to 16 kHz, plus a soft octave
+    x = sum(np.sin(2 * np.pi * f * h * t) / h for h in range(1, int(16000 / f) + 1, 2)) * (2 / np.pi) * 0.5
+    x = lowpass(x + np.sin(2 * np.pi * 2 * f * t) * 0.3, 4000)
     return x * np.minimum(1, t / 0.004) * np.exp(-t / 0.09) * 0.22 * g
 
 
@@ -320,7 +330,7 @@ K(11.0, 1.0, 0.5)
 place(impact(0.6, 31), 11.0, 1.0)
 place(clack(74, 0.8), 11.0, 0.8)
 place(whoosh(0.35, 0.6), 12.0, 1.0)
-place(clack(79, 0.8), 12.3, 0.8)
+place(clack(79, 0.8), 12.25, 0.8)
 
 # Five sizes: a tuned impact per landing, then a build into 16.5
 for i, ts in enumerate((13.0, 13.5, 14.0, 14.5, 15.0)):
@@ -331,11 +341,13 @@ for k in range(4):
     place(snare(0.3 + 0.15 * k), 16.0 + k * 0.125, 1.0, bus='drums')
 
 # Kickstarter card 16.5-18.0
-place(impact(1.2, 26), 16.5, 1.0)
+place(impact(1.2, 38), 16.5, 1.0)
 place(crash(1.0), 16.5, 1.0)
-place(clack(93, 0.6), 16.75, 0.7, pan=0.3)
+place(clack(93, 0.6), 16.5, 0.7, pan=0.3)
 place(clack(86, 1.4), 17.0, 1.0, pan=0.3)
-place(impact(1.0, 29), 17.0, 1.0)
+place(impact(1.0, 41), 17.0, 1.0)
+place(bell(86, 1.0, 0.9), 17.0, 1.0, bus='music')
+place(bell(81, 1.0, 0.6), 17.02, 1.0, pan=-0.3, bus='music')
 for k in range(8):
     place(snare(0.25 + 0.1 * k), 17.5 + k * 0.0625, 1.0, bus='drums')
 place(riser(0.5, 0.8, 500, 10000), 17.5, 1.0)

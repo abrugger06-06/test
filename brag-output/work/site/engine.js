@@ -65,8 +65,42 @@ async function loadPart(entry) {
   let g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   g.setIndex(new THREE.BufferAttribute(idx, 1));
+  if (window.STAGE.ao) bakeCavityAO(g);
   g = toCreasedNormals(g, THREE.MathUtils.degToRad(32));
   return g;
+}
+
+// Cheap baked ambient occlusion: a vertex whose neighbours (within R mm) sit above its surface is in a
+// crevice (well walls, the lid seam, the grip notch) and gets a darker vertex colour. Diffuse only.
+function bakeCavityAO(g, R = 3.0) {
+  g.computeVertexNormals();
+  const p = g.attributes.position.array, n = g.attributes.normal.array, N = p.length / 3;
+  const cell = new Map(), key = (x, y, z) => `${Math.floor(x / R)},${Math.floor(y / R)},${Math.floor(z / R)}`;
+  for (let i = 0; i < N; i++) {
+    const k = key(p[i * 3], p[i * 3 + 1], p[i * 3 + 2]);
+    let a = cell.get(k); if (!a) cell.set(k, a = []); a.push(i);
+  }
+  const col = new Float32Array(N * 3), R2 = R * R;
+  for (let i = 0; i < N; i++) {
+    const x = p[i * 3], y = p[i * 3 + 1], z = p[i * 3 + 2];
+    const cx = Math.floor(x / R), cy = Math.floor(y / R), cz = Math.floor(z / R);
+    let acc = 0, cnt = 0;
+    for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let c = -1; c <= 1; c++) {
+      const list = cell.get(`${cx + a},${cy + b},${cz + c}`); if (!list) continue;
+      for (const j of list) {
+        if (j === i) continue;
+        const dx = p[j * 3] - x, dy = p[j * 3 + 1] - y, dz = p[j * 3 + 2] - z, d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 > R2 || d2 < 1e-6) continue;
+        const d = Math.sqrt(d2);
+        acc += Math.max(0, (dx * n[i * 3] + dy * n[i * 3 + 1] + dz * n[i * 3 + 2]) / d);
+        cnt++;
+      }
+    }
+    const ao = 1 - Math.min(0.6, cnt ? (acc / cnt) * 1.4 : 0);
+    col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = ao;
+  }
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  g.deleteAttribute('normal');
 }
 
 // Magnets are always silver: solid discs at the CAD's size, thickness and position. A flat face
@@ -163,7 +197,7 @@ function vial(x, y, z0, small = false) {
 }
 
 function plastic(hex) {
-  return new THREE.MeshPhysicalMaterial({ color: hex, roughness: 0.4, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.4, envMapIntensity: 1.2 });
+  return new THREE.MeshPhysicalMaterial({ color: hex, roughness: 0.4, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.4, envMapIntensity: 1.2, vertexColors: !!window.STAGE.ao });
 }
 
 // One instance of a case. CAD space is Z-up; `root` is Y-up world space.
