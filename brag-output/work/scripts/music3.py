@@ -1,20 +1,21 @@
 """Fluxcase Kickstarter promo soundtrack (v3, lifestyle cut), written as code.
 
-120 BPM (beat 0.5 s, bar 2 s), D minor, 21 s, 48 kHz stereo. Energy from frame 1: the kit is in from
-0.0. Every hit is tied to the picture (life.html); the cue list below is the contract between the two.
+120 BPM (beat 0.5 s, bar 2 s), D major (D A Bm G), 19.5 s, 48 kHz stereo. Warm and organic: Rhodes-style
+keys, claps, shaker, tambourine and open hats, with light foley from each set. The magnet clacks stay the
+hero sound. The cue list is the contract with the picture (life.html):
 
-  0.0       tick + kick on frame 0, riser into the desk snap on 1.0 (clack + impact)
-  2.0-4.0   montage, a cut per beat (whoosh on 2.0 / 2.5 / 3.0 / 3.5), snaps on 2.25 / 2.75 / 3.25 /
-            3.75, snare roll into the drop
+  0.0       full hit on frame 0 (kick, clap, crash, clack); the hand lowers the lid, clack + impact on 1.0
+  2.0-4.0   montage, a cut per beat: counter clink (2.0) and snap 2.25; lamp click with the snap 2.75;
+            zipper and the case set down beside the passport 3.25; snap 3.75; fill into the drop
   4.0       DROP + crash: title on the kitchen counter. Lid pops 5.0, snaps 5.5
-  6.5-9.5   how it works, groove kept light (hats, bass, glass pulse): clacks 7.0 (lid) and 7.25
-            (base), glass ticks on 7.5, riser from 8.0, snap and impact on 9.0
-  10.0      the case falls onto its side beside the coffee (thud; no groove kick on this beat)
-  12.0-14.0 five sizes land on the shelf, one per beat; build, roll stops 14.375 for the dip
-  14.5      Kickstarter card + crash, lid tick; snap, impact and bells on the date at 15.0
-  16.0      end card + crash + bell; groove under the copy; lids lift 18.5, final hit 19.0; ring out
-Mix: drone and bass high-passed at 50 Hz, drums shelved down below 80 Hz, music bus ducked by the
-kick; gained to -14 LUFS (ffmpeg ebur128) into a 4x-oversampled true-peak limiter.
+  6.5-9.5   how it works, groove kept light: clacks 6.75 (lid) and 7.0 (base), glass on 7.25, riser,
+            snap and impact on 9.0
+  9.7       fingertip tap; the case lands on its side 10.0 (thud); knocked round 11.0-11.25 (clack)
+  12.0-13.6 five sizes land on the shelf every 0.4 s; full drop-out 14.375-14.5
+  14.5      Kickstarter panel + crash; snap, impact and bells on the date at 15.0
+  16.0      end card on the shelf + crash + bell; lids lift 17.5, final hit 18.0 (the loudest); ring out
+Mix: bass high-passed at 50 Hz, drums shelved down below 80 Hz, music bus ducked by the kick; gained to
+-14 LUFS (ffmpeg ebur128) into a 4x-oversampled true-peak limiter.
 Usage: python3 music3.py out.wav
 """
 import re
@@ -26,7 +27,7 @@ import numpy as np
 
 SR = 48000
 BEAT = 0.5
-DUR = 21.0
+DUR = 19.5
 N = int(SR * DUR)
 rng = np.random.default_rng(7)
 BUS = {b: np.zeros((2, N)) for b in ('drums', 'music', 'fx')}
@@ -238,115 +239,186 @@ def lead(note, dur=0.2, g=1.0):
     return x * np.minimum(1, t / 0.004) * np.exp(-t / 0.09) * 0.22 * g
 
 
-# Hook 0.0-2.0: in on frame 0
-place(clack(91, 1.0), 0.0, 1.0)
-place(crash(0.6), 0.0, 1.0)
-place(sub_drone(2.1), 0.0, 1.0, bus='music')
-for b in (0.0, 0.25, 0.5, 0.75):
-    K(b, 0.8, 0.35, 0.8)
-place(riser(0.95, 0.9, 400, 6000), 0.05, 1.0)
-place(clack(86, 1.6), 1.0, 1.0)
-place(impact(1.0, 33), 1.0, 1.0)
-K(1.0, 1.1, 0.5)
+def rhodes(notes, dur=0.6, g=1.0):
+    """Electric-piano style keys: a bell-ish attack over a warm sine body, with a soft tremolo."""
+    t = tt(dur)
+    x = np.zeros_like(t)
+    for n in notes:
+        f = midi(n)
+        x += np.sin(2 * np.pi * f * t) + 0.35 * np.sin(2 * np.pi * 2 * f * t) * np.exp(-t / 0.15) \
+            + 0.12 * np.sin(2 * np.pi * 3.0 * f * t) * np.exp(-t / 0.05)
+    x *= (1 + 0.15 * np.sin(2 * np.pi * 5.5 * t)) / len(notes)
+    return x * np.minimum(1, t / 0.004) * np.exp(-t / (dur * 0.6)) * 0.35 * g
 
-# Montage 2.0-4.0: a whoosh on each cut, a snap on each off-beat
-for i, ts in enumerate((2.25, 2.75, 3.25, 3.75)):
-    place(whoosh(0.25, 0.7), ts - 0.35, 1.0, pan=(-0.3, 0.3, -0.2, 0.2)[i])
-    place(clack([81, 84, 88, 91][i], 1.4), ts, 1.0, pan=(-0.3, 0.3, -0.2, 0.2)[i])
+
+def shaker(g=1.0):
+    t = tt(0.09)
+    return highpass(highpass(noise(0.09), 5000), 5000) * np.minimum(1, t / 0.012) * np.exp(-t / 0.03) * 0.25 * g
+
+
+def tamb(g=1.0):
+    t = tt(0.18)
+    jing = sum(np.sin(2 * np.pi * f * t) for f in (6800, 8200, 9600, 11100)) * 0.15
+    return (highpass(noise(0.18), 6000) * 0.5 + jing) * np.exp(-t / 0.06) * 0.3 * g
+
+
+def clink(g=1.0):
+    """Ceramic or glass set down on stone."""
+    t = tt(0.5)
+    x = sum(np.sin(2 * np.pi * f * t) * np.exp(-t / d) for f, d in ((2200, 0.12), (3450, 0.08), (5100, 0.05)))
+    return (x * 0.3 + noise(0.5) * np.exp(-t / 0.004) * 0.5) * g
+
+
+def click(g=1.0):
+    """A lamp switch."""
+    t = tt(0.06)
+    return (noise(0.06) * np.exp(-t / 0.002) + np.sin(2 * np.pi * 1800 * t) * np.exp(-t / 0.01) * 0.6) * 0.7 * g
+
+
+def zipper(dur=0.25, g=1.0):
+    t = tt(dur)
+    teeth = (np.sin(2 * np.pi * 95 * t / dur * dur * (1 + t / dur)) > 0.6).astype(float)
+    x = highpass(noise(dur), 2500) * (0.3 + 0.7 * teeth) * np.sin(np.pi * t / dur)
+    return x * 0.35 * g
+
+
+def setdown(g=1.0):
+    """A plastic case set down on fabric: soft low thud."""
+    t = tt(0.25)
+    return (np.sin(2 * np.pi * 110 * t) * np.exp(-t / 0.05) + lowpass(noise(0.25), 900) * np.exp(-t / 0.03) * 0.6) * 0.6 * g
+
+
+def tap(g=1.0):
+    """A fingertip on plastic."""
+    t = tt(0.08)
+    return (lowpass(noise(0.08), 3000) * np.exp(-t / 0.006) + np.sin(2 * np.pi * 620 * t) * np.exp(-t / 0.015) * 0.5) * 0.6 * g
+
+
+# Hook 0.0-2.0: a full hit on frame 0
+K(0.0, 1.2, 0.45)
+place(impact(0.8, 38), 0.0, 1.0)
+place(clap(1.0), 0.0, 1.2, bus='drums')
+place(crash(0.8), 0.0, 1.0)
+place(clack(91, 1.0), 0.0, 1.0)
+place(riser(0.95, 0.8, 600, 7000), 0.05, 1.0)
+place(clack(86, 1.6), 1.0, 1.0)
+place(impact(0.8, 38), 1.0, 1.0)
+K(1.0, 1.0, 0.5)
+
+# Montage 2.0-4.0
+place(clink(0.8), 2.0, 1.0, pan=-0.3)
+place(clack(84, 1.4), 2.25, 1.0, pan=-0.3)
+place(click(1.0), 2.75, 1.0, pan=0.3)
+place(clack(88, 1.4), 2.75, 1.0, pan=0.3)
+place(zipper(0.25, 0.9), 3.0, 1.0, pan=0.25)
+place(setdown(1.0), 3.25, 1.0)
+place(clack(91, 1.4), 3.75, 1.0, pan=0.2)
 for k in range(4):
     place(snare(0.3 + 0.15 * k), 3.5 + k * 0.125, 1.0, bus='drums')
-place(riser(0.9, 0.9, 400, 9000), 3.1, 1.0)
+place(riser(0.9, 0.8, 400, 9000), 3.1, 1.0)
 
-# Groove: Dm Bb F C, a chord per bar, 1.0-19.0; lighter (no kick) under the 6.5-9.0 explainer.
-prog = [(38, [62, 65, 69]), (34, [58, 62, 65]), (41, [60, 65, 69]), (36, [60, 64, 67])]
-SKIP_KICK = {10.0, 14.5}   # the fall and the card hit own these beats
+# Groove: D A Bm G, a chord per bar, from frame 0 to 18.0; lighter (no kick, no clap) under the 6.5-9.0 explainer.
+prog = [(38, [62, 66, 69]), (33, [61, 64, 69]), (35, [62, 66, 71]), (31, [62, 67, 71])]
+SKIP_KICK = {0.0, 1.0, 10.0, 14.5}
+DROP = (14.375, 14.5)
 for bar in range(10):        # 0.0 .. 20.0
     t0 = bar * 2.0
     root, chord = prog[bar % 4]
     for k in range(4):
         tb = t0 + k * BEAT
-        if tb < 1.0 or tb >= 19.0:
+        if tb >= 18.0:
             continue
         light = 6.5 <= tb < 9.0
         if not light and tb not in SKIP_KICK:
             K(tb)
         if not light and k in (1, 3):
             place(clap(1.0), tb, 1.3, bus='drums')
-        place(hat(0.8), tb + 0.25, 1.0, pan=0.3, bus='drums')
-        place(hat(0.5), tb + 0.125, 1.0, pan=-0.2, bus='drums')
-        place(hat(0.4), tb + 0.375, 1.0, pan=-0.2, bus='drums')
+            place(clap(0.6), tb + 0.012, 0.9, pan=0.35, bus='drums')
+        for q in range(4):   # shaker sixteenths
+            ts = tb + q * 0.125
+            if not (DROP[0] <= ts < DROP[1]):
+                place(shaker(1.0 if q % 2 else 0.6), ts, 1.0, pan=-0.35, bus='drums')
+        if not (DROP[0] <= tb + 0.25 < DROP[1]):
+            place(hat(0.7, open_=True), tb + 0.25, 1.0, pan=0.3, bus='drums')
+            if k in (1, 3):
+                place(tamb(1.0), tb + 0.25, 1.0, pan=0.4, bus='drums')
         if k in (0, 2):
-            place(bass(root, 0.22, 0.6, 420), tb, 1.0, bus='music')
-        place(bass(root + 12, 0.12, 0.6, 600), tb + 0.25, 1.0, bus='music')
-        if tb >= 4.0:   # lead arpeggio from the drop
+            place(bass(root + 12, 0.24, 0.7, 520), tb, 1.0, bus='music')
+        if not (DROP[0] <= tb + 0.25 < DROP[1]):
+            place(bass(root + 24, 0.14, 0.75, 700), tb + 0.25, 1.0, bus='music')
+        if tb >= 4.0 and not light:   # rhodes on the off-beats from the drop
+            place(rhodes([n + 12 for n in chord], 0.4), tb + 0.25, 2.8, pan=-0.2, bus='music')
+        if light:
             for j, off in enumerate((0, 0.25)):
-                place(lead(chord[(k * 2 + j) % 3] + 24, 0.2), tb + off, 2.6, pan=0.35 - 0.7 * j, bus='music')
-        if light:       # glass pulse keeps time under the explainer
-            for j, off in enumerate((0, 0.25)):
-                place(glass(chord[(k * 2 + j) % 3] + 24, 0.6), tb + off, 1.0, pan=-0.3 + 0.6 * j, bus='music')
-    if 1.0 <= t0 < 19.0 or t0 == 0:
-        st = max(t0, 1.0)
-        place(pad(chord, min(2.0, 19.0 - st), 0.9), st, 1.0, bus='music')
+                place(glass(chord[(k * 2 + j) % 3] + 12, 1.3), tb + off, 1.0, pan=-0.3 + 0.6 * j, bus='music')
+            if j == 0 and k in (0, 2):
+                place(kick(0.45, 0.3), tb, 0.6, bus='drums')   # a soft pulse keeps time under the explainer
+    if t0 < 18.0:
+        place(rhodes([n - 12 for n in chord] + [chord[0]], 1.9), t0, 2.4, bus='music')
+        place(pad([n + 12 for n in chord], min(2.0, 18.0 - t0), 1.1), t0, 1.0, bus='music')
         for k, off in enumerate((0, 0.75, 1.5)):
-            if 1.0 <= t0 + off < 19.0:
-                place(pluck([n + 12 for n in chord]), t0 + off, 4.0, pan=-0.25 + 0.25 * k, bus='music')
-                place(pluck([n + 24 for n in chord], dur=0.7), t0 + off, 3.0, pan=0.25 - 0.25 * k, bus='music')
+            if t0 + off < 18.0:
+                place(pluck([n + 12 for n in chord], dur=0.5), t0 + off, 2.6, pan=-0.25 + 0.25 * k, bus='music')
+                place(pluck([n + 24 for n in chord], dur=0.6), t0 + off, 3.2, pan=0.25 - 0.25 * k, bus='music')
 
 # Title drop on 4.0; lid pop 5.0, snap 5.5
-place(impact(1.1, 33), 4.0, 1.0)
+place(impact(1.0, 38), 4.0, 1.0)
 place(crash(1.0), 4.0, 1.0)
 place(clack(93, 0.6), 5.0, 0.7, pan=0.3)
 place(clack(86, 1.4), 5.5, 1.0, pan=0.3)
 
 # How it works 6.5-9.5
 place(whoosh(0.5, 0.8), 6.3, 1.0)
-place(clack(81, 1.6), 7.0, 1.0, pan=-0.2)
-place(clack(84, 1.6), 7.25, 1.0, pan=0.2)
+place(clack(81, 1.6), 6.75, 1.0, pan=-0.2)
+place(clack(84, 1.6), 7.0, 1.0, pan=0.2)
 for j, nt in enumerate((93, 96, 100, 98)):
-    place(glass(nt, 1.4), 7.5 + j * 0.06, 1.0, pan=-0.3 + 0.2 * j)
+    place(glass(nt, 1.4), 7.25 + j * 0.06, 1.0, pan=-0.3 + 0.2 * j)
 place(riser(1.0, 0.9, 300, 7000), 8.0, 1.0)
 place(clack(86, 1.6), 9.0, 1.0)
-place(impact(0.8, 33), 9.0, 1.0)
+place(impact(0.7, 38), 9.0, 1.0)
 K(9.0, 1.0, 0.5)
 
-# The fall beside the coffee, 10.0
-place(whoosh(0.4, 0.6), 9.6, 1.0)
+# The nudge, the fall and the knock
+place(tap(1.0), 9.7, 1.0, pan=0.3)
 K(10.0, 1.0, 0.5)
-place(impact(0.6, 31), 10.0, 1.0)
+place(impact(0.55, 33), 10.0, 1.0)
 place(clack(74, 0.8), 10.0, 0.8)
+place(whoosh(0.3, 0.5), 11.0, 1.0)
+place(clack(79, 1.3), 11.25, 1.0)
 
-# Five sizes 12.0-14.0, then the dip before the card
-for i, ts in enumerate((12.0, 12.5, 13.0, 13.5, 14.0)):
-    place(impact(0.4, 33 + [0, 3, 5, 7, 10][i]), ts, 1.0, pan=-0.4 + 0.2 * i)
-    place(clack(81 + [0, 3, 5, 7, 10][i], 0.7), ts, 0.8, pan=-0.4 + 0.2 * i)
+# Five sizes, every 0.4 s
+for i, ts in enumerate((12.0, 12.4, 12.8, 13.2, 13.6)):
+    place(impact(0.4, 38 + [0, 2, 4, 5, 7][i]), ts, 1.0, pan=-0.4 + 0.2 * i)
+    place(clack(81 + [0, 2, 4, 5, 7][i], 0.7), ts, 0.8, pan=-0.4 + 0.2 * i)
 place(riser(0.375, 0.9, 400, 9000), 14.0, 1.0)
 
-# Kickstarter card 14.5-16.0
-place(impact(1.05, 38), 14.5, 1.0)
+# Kickstarter panel 14.5-16.0
+place(impact(1.0, 38), 14.5, 1.0)
 place(crash(1.0), 14.5, 1.0)
 place(clack(93, 0.6), 14.5, 0.7, pan=0.3)
 place(clack(86, 1.4), 15.0, 1.0, pan=0.3)
-place(impact(0.9, 41), 15.0, 1.0)
+place(impact(0.8, 45), 15.0, 1.0)
 place(bell(86, 1.0, 0.9), 15.0, 1.0, bus='music')
 place(bell(81, 1.0, 0.6), 15.02, 1.0, pan=-0.3, bus='music')
 for k in range(8):
     place(snare(0.25 + 0.1 * k), 15.5 + k * 0.0625, 1.0, bus='drums')
 place(riser(0.5, 0.8, 500, 10000), 15.5, 1.0)
 
-# End card 16.0-21.0: lids lift on 18.5, final hit on 19.0
-place(impact(1.1, 38), 16.0, 1.0)
+# End card 16.0-19.5: lids lift on 17.5, final hit on 18.0
+place(impact(0.9, 38), 16.0, 1.0)
 place(bell(86, 1.2, 0.9), 16.0, 1.0, bus='music')
 place(crash(0.9), 16.0, 1.0)
-place(riser(0.5, 0.6, 400, 6000), 18.5, 1.0)
-place(clack(93, 0.6), 18.5, 0.7)
-place(clack(86, 1.7), 19.0, 1.0)
-place(impact(0.8, 33), 19.0, 1.0)
-place(crash(0.8), 19.0, 1.0)
-K(19.0, 0.8, 0.6)
-place(sub_drone(2.0, 38, 1.1), 19.0, 1.0, bus='music')
-place(pad([50, 57, 62, 65, 69, 76], 2.0, 1.2, 0.02), 19.0, 1.0, bus='music')
-for nt, d in ((74, 0), (77, 0.03), (81, 0.06), (86, 0.09)):
-    place(bell(nt, 2.0, 1.8), 19.0 + d, 1.0, pan=(nt - 80) / 15, bus='music')
+place(riser(0.5, 0.6, 400, 6000), 17.5, 1.0)
+place(clack(93, 0.6), 17.5, 0.7)
+place(clack(86, 2.0), 18.0, 1.0)
+place(impact(0.7, 38), 18.0, 1.0)
+place(crash(0.8), 18.0, 1.0)
+K(18.0, 1.0, 0.6)
+place(clap(1.0), 18.0, 1.3, bus='drums')
+place(rhodes([50, 57, 62, 66, 69], 1.5, 1.4), 18.0, 1.0, bus='music')
+place(pad([50, 57, 62, 66, 69, 74], 1.5, 1.2, 0.02), 18.0, 1.0, bus='music')
+for nt, d in ((74, 0), (78, 0.03), (81, 0.06), (86, 0.09)):
+    place(bell(nt, 1.5, 2.0), 18.0 + d, 1.0, pan=(nt - 80) / 15, bus='music')
 
 # ---------- mix ----------
 # Sidechain: the music bus dips under each kick (6 dB, 120 ms recovery).
@@ -357,6 +429,9 @@ for tk, g in KICKS:
     d = 1 - 0.5 * min(1.0, g) * np.exp(-t / 0.12)
     n = min(len(d), N - i)
     duck[i:i + n] = np.minimum(duck[i:i + n], d[:n])
+for bb in ('drums', 'music'):
+    i0, i1 = int(DROP[0] * SR), int(DROP[1] * SR)
+    BUS[bb][:, i0:i1] *= np.linspace(1, 0.05, i1 - i0) ** 0.5
 dr = BUS['drums']
 dr = dr - 0.3 * np.stack([lowpass(dr[0], 80), lowpass(dr[1], 80)])   # about -3 dB below 80 Hz
 mix = dr * 0.8 + BUS['music'] * duck + BUS['fx']   # drums about 2 dB down into the limiter
@@ -426,4 +501,4 @@ for _ in range(3):
         break
     gain *= 10 ** ((-14 - lv) / 20)
 print('wrote', out, DUR, 's', 'LUFS', lv, 'true peak dBTP', tp, 'max GR dB', round(20 * np.log10(g.min()), 1))
-print('limiter GR dB at hits:', {t: round(20 * np.log10(g[int(t * SR / BL)] + 1e-9), 1) for t in (1.0, 4.0, 9.0, 14.5, 15.0, 16.0, 19.0)})
+print('limiter GR dB at hits:', {t: round(20 * np.log10(g[int(t * SR / BL)] + 1e-9), 1) for t in (0.0, 1.0, 4.0, 9.0, 14.5, 15.0, 16.0, 18.0)})

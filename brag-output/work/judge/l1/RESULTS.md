@@ -1,0 +1,10 @@
+G1 CD: 7. Ending 14.5-21 back to studio look (stage KS card + end card on sets, motion); no in-use moments (drop into pouch w/ passport, lamp clicks on, slide into frame); copy contrast on light sets (scrim or ink text).
+G4 type: 6. Contrast on warm sets (ink/deep teal on light sets or scrim); keep props out of headline box (lamp, mug, pot); legal line on light oak needs shadow/tag; shelf edge through FLUXCASE.
+G7 customer: 8. Travel shot doesn't read (passport/pouch in focus, case into pouch); contrast; ending back to studio (put KS + end on shelf).
+G3 motion: 8. Ending studio + 5 s static end (lifestyle cards, end 16-19.5, snap 18.0, film 19.5 s); tip hold dead (knock on 11.0); No clips flicker (one treatment + drift); 9.5 jump cut (change angle).
+G2 brand: 8. Read times: callouts (in 6.75/7.0, hold to 8.35), size labels (land 12.0+i*0.4); contrast scrim/ink.
+G6 CGI: 5. Grounding (contact opacity per set + AO ring); DOF focus at contact point, aperture -40%; quartz blown (exposure, veining, reflection); linen moire (mipmaps/aniso, towel bevel, passport); props primitive (materials, bevels); shelf void (real shelf edge, bracket, props); KS card on a set.
+A2 claims: FAIL. MUST: copy contrast (ink/deep teal on light sets, scrim; >=4.5:1 subheads, 3:1 headlines). SHOULD: legal line on oak (scrim/shadow). Nits: night case brown (cool rim); hook lid hovers; tip no cause.
+A1 critic: FAIL. MUST: kitchen case floats/blown counter; travel set unreadable. SHOULD: no in-use (a hand), ending studio, contrast. Nits: night silhouette, board through FLUXCASE, shelf bare.
+G5 sound: 7. Score not lifestyle: major key, organic layers (claps, shaker, Rhodes), set foley (mug, clink, lamp click, zipper); denser off-beats (no window < -20 dB); full hit on frame 0, no drone; real drop-out 14.375; finale loudest; pad overlap 2.0.
+A3 QA: FAIL. MUST teal lines 1.1-1.2:1; SHOULD white copy 2-2.7:1 (scrim + outline on mono), shadow stair-stepping on hero case (4096, PCFSoft), floating cases (contact/AO on every set); nits travel unreadable + linen moire, 9.5 jump cut.

@@ -1,18 +1,18 @@
 #!/bin/bash
-# Judge package for the v3 lifestyle promo (life.html, 21 s): every 0.25 s on labeled sheets, key frames, waveform.
+# Judge package for the v3 lifestyle promo (life.html, 19.5 s): every 0.25 s on labeled sheets, key frames, waveform.
 set -e
 cd "$(dirname "$0")/.."
 R=${1:-judge/l1}
 rm -rf "$R" && mkdir -p "$R/frames"
-KEYS="0.00 1.00 2.25 2.75 3.25 3.75 4.00 5.20 7.00 7.60 9.00 10.00 11.00 12.00 14.00 14.70 15.00 16.00 18.60 19.10"
-TS=$(python3 -c "print(' '.join(f'{i*0.25:.2f}' for i in range(84)))")
-PAGE=life.html node scripts/capture.mjs stills "$R/frames" $TS 5.20 7.60 14.70 18.60 19.10 >/dev/null
+KEYS="0.00 0.30 1.00 2.25 2.75 3.25 3.75 4.00 5.20 7.00 7.60 9.00 9.70 10.00 11.50 12.00 13.80 14.75 15.00 16.00 17.60 18.10"
+TS=$(python3 -c "print(' '.join(f'{i*0.25:.2f}' for i in range(78)))")
+PAGE=life.html node scripts/capture.mjs stills "$R/frames" $TS 0.30 5.20 7.60 9.70 13.80 14.75 17.60 18.10 >/dev/null
 python3 - "$R" "$KEYS" <<'PY'
 import sys, glob
 from PIL import Image, ImageDraw, ImageFont
 R, keys = sys.argv[1], sys.argv[2].split()
 font = ImageFont.truetype('site/fonts/JetBrainsMono-Bold.ttf', 22)
-grid = [f'{R}/frames/t-{i*0.25:.2f}.png' for i in range(84)]
+grid = [f'{R}/frames/t-{i*0.25:.2f}.png' for i in range(78)]
 W, H, C, Rw = 640, 360, 4, 5
 for s in range(0, len(grid), C * Rw):
     chunk = grid[s:s + C * Rw]
