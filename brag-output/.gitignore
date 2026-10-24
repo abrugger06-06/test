@@ -1,0 +1,7 @@
+work/frames/
+work/stills/
+work/judge/*/frames/
+work/judge/*/music.wav
+work/music.wav
+work/dev/*.3mf
+work/site/mesh-dev/
