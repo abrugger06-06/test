@@ -99,12 +99,13 @@ const matte = c => { c.mat.clearcoat = 0; c.mat.roughness = 0.7; c.mat.envMapInt
 magnetMat.envMap = (() => {
   const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256;
   const g = cv.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
-  gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.24, '#e4e7e9'); gr.addColorStop(0.31, '#ffffff'); gr.addColorStop(0.38, '#d2d6d9'); gr.addColorStop(0.7, '#aeb2b6'); gr.addColorStop(1, '#969a9e');
+  gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.2, '#e9ecee'); gr.addColorStop(0.28, '#ffffff'); gr.addColorStop(0.36, '#b4b9bd'); gr.addColorStop(0.62, '#8e9397'); gr.addColorStop(1, '#787c80');
   g.fillStyle = gr; g.fillRect(0, 0, 512, 256);
   const t = new THREE.CanvasTexture(cv); t.mapping = THREE.EquirectangularReflectionMapping; t.colorSpace = THREE.SRGBColorSpace; return t;
 })();
-magnetMat.envMapIntensity = 1.4;
-magnetMat.roughness = 0.14;
+magnetMat.envMapIntensity = 1.3;
+magnetMat.roughness = 0.1;
+magnetMat.color.set(0xb8bec4);   // cool mid silver: reads as metal, not white
 // Clearer glass: thinner body, brighter edge reflections.
 glassMat.opacity = 0.06; glassMat.envMapIntensity = 3.2; glassMat.color.set(0xf4fbff);
 glassMat.onBeforeCompile = sh => {
@@ -271,7 +272,7 @@ function sExplode(t) {
   const p = sph(lerp(470, 410, eio(seg(t, 6.5, 7.2))) * (1 - 0.05 * eo(seg(t, 10.0, 10.5))), lerp(-30, 26, eio(seg(t, 6.5, 10.5))), lerp(24, 32, eio(seg(t, 6.5, 8))), tgt);
   p[1] += shake(t, 10.0, 1.3);
   look(p, tgt, 30, 0, 30);
-  magnetMat.emissiveIntensity = (hit(t, 7.0, 0.3) + hit(t, 7.5, 0.3)) * 0.18;
+  magnetMat.emissiveIntensity = (hit(t, 7.0, 0.3) + hit(t, 7.5, 0.3)) * 0.08;
   x8.root.updateMatrixWorld(true);
   camera.updateMatrixWorld();
   const lidP = x8.lid.getWorldPosition(new THREE.Vector3());
@@ -285,6 +286,7 @@ function sTip(t) {
   pulse = hit(t, 11.0) * 0.6 + hit(t, 12.25) * 0.4;
   setLook('grey');
   show(tip7); reset(tip7);
+  tip7.mat.envMapIntensity = 1.1;   // a soft falloff across the lid face once it turns to camera
   const k = seg(t, 10.55, 11.0);
   const tipK = t < 11.0 ? ei(k) : 1 + 0.035 * Math.sin(Math.PI * seg(t, 11.0, 11.2));
   const tip = deg(90) * tipK, R = tip7.dia / 2;

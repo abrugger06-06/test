@@ -330,7 +330,8 @@ K(11.0, 1.0, 0.5)
 place(impact(0.6, 31), 11.0, 1.0)
 place(clack(74, 0.8), 11.0, 0.8)
 place(whoosh(0.35, 0.6), 12.0, 1.0)
-place(clack(79, 0.8), 12.25, 0.8)
+place(clack(79, 1.3), 12.25, 1.0)
+K(12.25, 0.5, 0.3)
 
 # Five sizes: a tuned impact per landing, then a build into 16.5
 for i, ts in enumerate((13.0, 13.5, 14.0, 14.5, 15.0)):
@@ -353,14 +354,15 @@ for k in range(8):
 place(riser(0.5, 0.8, 500, 10000), 17.5, 1.0)
 
 # End card 18.0-23.0: groove under the copy, lids lift on 20.5, final hit on 21.0
-place(impact(1.1, 26), 18.0, 1.0)
+place(impact(1.1, 38), 18.0, 1.0)
+place(bell(86, 1.2, 0.9), 18.0, 1.0, bus='music')
 place(crash(0.9), 18.0, 1.0)
 place(riser(0.5, 0.6, 400, 6000), 20.5, 1.0)
 place(clack(93, 0.6), 20.5, 0.7)
-place(clack(86, 2.0), 21.0, 1.0)
-place(impact(1.3, 26), 21.0, 1.0)
-place(crash(1.1), 21.0, 1.0)
-K(21.0, 1.3, 0.6)
+place(clack(86, 1.4), 21.0, 1.0)
+place(impact(0.8, 33), 21.0, 1.0)
+place(crash(0.8), 21.0, 1.0)
+K(21.0, 0.8, 0.6)
 place(sub_drone(2.0, 38, 1.1), 21.0, 1.0, bus='music')
 place(pad([50, 57, 62, 65, 69, 76], 2.0, 1.2, 0.02), 21.0, 1.0, bus='music')
 for nt, d in ((74, 0), (77, 0.03), (81, 0.06), (86, 0.09)):
@@ -377,7 +379,7 @@ for tk, g in KICKS:
     duck[i:i + n] = np.minimum(duck[i:i + n], d[:n])
 dr = BUS['drums']
 dr = dr - 0.3 * np.stack([lowpass(dr[0], 80), lowpass(dr[1], 80)])   # about -3 dB below 80 Hz
-mix = dr + BUS['music'] * duck + BUS['fx']
+mix = dr * 0.8 + BUS['music'] * duck + BUS['fx']   # drums about 2 dB down into the limiter
 mix[0], mix[1] = highpass(mix[0], 35), highpass(mix[1], 35)
 
 # Room: short stereo reflections
@@ -389,6 +391,7 @@ for d, g in ((0.019, 0.16), (0.031, 0.12), (0.053, 0.09), (0.083, 0.06)):
 
 f = int(1.0 * SR)
 mix[:, -f:] *= np.linspace(1, 0, f) ** 1.5
+mix[:, :240] *= np.linspace(0, 1, 240)   # 5 ms fade-in so frame 0 cannot click
 CEIL, BL, OS = 10 ** (-1.6 / 20), 240, 4
 
 
@@ -443,3 +446,4 @@ for _ in range(3):
         break
     gain *= 10 ** ((-14 - lv) / 20)
 print('wrote', out, DUR, 's', 'LUFS', lv, 'true peak dBTP', tp, 'max GR dB', round(20 * np.log10(g.min()), 1))
+print('limiter GR dB at hits:', {t: round(20 * np.log10(g[int(t * SR / BL)] + 1e-9), 1) for t in (1.5, 4.0, 10.0, 16.5, 17.0, 18.0, 21.0)})
