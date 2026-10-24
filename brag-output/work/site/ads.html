@@ -264,7 +264,7 @@ const SCENES = {
     // Square: straight on, like the film. 4:5: look along the row so it recedes and fills the height.
     if (square) fit(cs.map(c => c.root), 0, 26, 16, 1);
     else {   // low and along the row, wide lens: near case big, row recedes; matte so no lid catches the room light
-      cs.forEach(c => { c.mat.clearcoat = 0; c.mat.roughness = 0.6; });
+      cs.forEach(c => { c.mat.clearcoat = 0; c.mat.roughness = 0.75; c.mat.envMapIntensity = 0.4; });
       fit(cs.map(c => c.root), -56, 12, 36, 1);
     }
   },
