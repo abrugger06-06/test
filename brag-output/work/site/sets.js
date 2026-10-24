@@ -50,9 +50,9 @@ function woodTex(base, dark, light, planks = 4) {
 function marbleTex() {
   return canvasTex(2048, 1024, (g, w, h) => {
     g.fillStyle = '#cfccc5'; g.fillRect(0, 0, w, h);
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < 34; i++) {
       let x = rnd() * w, y = rnd() * h, a = rnd() * Math.PI * 2;
-      g.strokeStyle = `rgba(105,105,112,${0.12 + rnd() * 0.22})`; g.lineWidth = 0.8 + rnd() * 3;
+      g.strokeStyle = `rgba(72,72,80,${0.32 + rnd() * 0.34})`; g.lineWidth = 0.8 + rnd() * 3.4;
       g.beginPath(); g.moveTo(x, y);
       for (let k = 0; k < 60; k++) { a += (rnd() - 0.5) * 0.5; x += Math.cos(a) * 18; y += Math.sin(a) * 18; g.lineTo(x, y); }
       g.stroke();
@@ -128,7 +128,7 @@ function notebook(cover = '#2f3a36') {
   g.add(pages, c0, c1, band);
   return g;
 }
-function pen() {
+export function pen() {
   const m = mesh(new THREE.CylinderGeometry(4.5, 4.5, 140, 20).rotateZ(Math.PI / 2), std({ color: '#1b1c1e', roughness: 0.3, metalness: 0.2 }));
   m.position.y = 4.5;
   return m;
@@ -169,13 +169,28 @@ function board() {
 }
 function jar() {
   const g = new THREE.Group();
-  const glass = mesh(new THREE.CylinderGeometry(55, 55, 150, 40, 1, true), std({ color: '#e8f1ee', roughness: 0.05, transparent: true, opacity: 0.25 }), { cast: false });
-  glass.position.y = 75;
-  const lidM = mesh(new THREE.CylinderGeometry(57, 57, 22, 40), std({ color: '#b98c5a', roughness: 0.5 }));
-  lidM.position.y = 161;
-  const fill = mesh(new THREE.CylinderGeometry(50, 50, 95, 32), std({ color: '#d9c49a', roughness: 0.9 }));
-  fill.position.y = 50;
-  g.add(fill, glass, lidM);
+  const beans = canvasTex(512, 512, (c, w, h) => {
+    c.fillStyle = '#2a170c'; c.fillRect(0, 0, w, h);
+    for (let i = 0; i < 900; i++) {
+      const x = rnd() * w, y = rnd() * h, a = rnd() * Math.PI, l = 0.75 + rnd() * 0.5;
+      c.save(); c.translate(x, y); c.rotate(a);
+      c.fillStyle = `rgb(${48 + rnd() * 26},${27 + rnd() * 12},${14 + rnd() * 6})`;
+      c.beginPath(); c.ellipse(0, 0, 13 * l, 9 * l, 0, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = 'rgba(20,10,4,0.9)'; c.lineWidth = 2; c.beginPath(); c.moveTo(-10 * l, 0); c.quadraticCurveTo(0, 3, 10 * l, 0); c.stroke();
+      c.fillStyle = "rgba(255,230,200,0.12)"; c.beginPath(); c.ellipse(-3, -4, 6 * l, 2.5 * l, 0, 0, Math.PI * 2); c.fill();
+      c.restore();
+    }
+  }, [1.4, 0.5]);
+  const fill = mesh(new THREE.CylinderGeometry(50, 50, 104, 40), std({ map: beans, roughness: 0.6 }));
+  fill.position.y = 56;
+  const top = mesh(new THREE.CircleGeometry(50, 40), std({ map: beans, roughness: 0.6 }), { cast: false }); top.rotation.x = -Math.PI / 2; top.position.y = 108.2;
+  const glassM = new THREE.MeshStandardMaterial({ color: '#f2f8f6', roughness: 0.04, metalness: 0, transparent: true, opacity: 0.16, envMapIntensity: 2.5, depthWrite: false });
+  const glass = mesh(new THREE.CylinderGeometry(55, 55, 150, 48, 1, true), glassM, { cast: false }); glass.position.y = 79; glass.userData.glass = true;
+  const bottom = mesh(new THREE.CylinderGeometry(55, 55, 4, 48), glassM, { cast: false }); bottom.position.y = 2;
+  const lip = mesh(new THREE.TorusGeometry(55, 2.2, 10, 48), std({ color: '#eef4f2', roughness: 0.05, transparent: true, opacity: 0.55 }), { cast: false }); lip.rotation.x = Math.PI / 2; lip.position.y = 154;
+  const lidM = mesh(new THREE.CylinderGeometry(58, 58, 22, 48), std({ map: woodTex('#9a6a3e', '#5b3a1e', '#c8975f', 2), roughness: 0.5 }));
+  lidM.position.y = 165;
+  g.add(fill, top, bottom, glass, lip, lidM);
   return g;
 }
 function lamp() {
@@ -184,6 +199,7 @@ function lamp() {
   const shade = mesh(new THREE.CylinderGeometry(80, 120, 150, 40, 1, true), std({ map: linenTex('#f0e3c8'), roughness: 0.95, emissive: '#ffcf8a', emissiveIntensity: 0.9, side: THREE.DoubleSide }), { cast: false });
   shade.position.y = 260;
   const bulb = new THREE.PointLight(0xffc27a, 400000, 0, 2); bulb.position.y = 250;
+  bulb.castShadow = true; bulb.shadow.mapSize.set(1024, 1024); bulb.shadow.radius = 6; bulb.shadow.bias = -0.002; bulb.shadow.camera.near = 20;
   g.add(base, shade, bulb);
   g.userData.light = bulb; g.userData.shade = shade;
   return g;
@@ -208,18 +224,44 @@ function passport() {
   m.position.y = 3;
   return m;
 }
+// A rounded-rectangle outline (centred), for the pouch walls, rim and zip track.
+function rrect(w, d, r, hole = false) {
+  const sh = hole ? new THREE.Path() : new THREE.Shape(), x = -w / 2, y = -d / 2;
+  sh.moveTo(x + r, y); sh.lineTo(x + w - r, y); sh.quadraticCurveTo(x + w, y, x + w, y + r);
+  sh.lineTo(x + w, y + d - r); sh.quadraticCurveTo(x + w, y + d, x + w - r, y + d);
+  sh.lineTo(x + r, y + d); sh.quadraticCurveTo(x, y + d, x, y + d - r);
+  sh.lineTo(x, y + r); sh.quadraticCurveTo(x, y, x + r, y);
+  return sh;
+}
+// An open travel pouch: canvas walls round a real cavity, a light lining, a toothed zip track along the lip
+// and a slider with its pull. Inner size fits a case up to 96 mm across; the walls stand 46 mm.
+function ring(w, d, r, t, h, mat, bevel = 0) {
+  const sh = rrect(w, d, r); sh.holes.push(rrect(w - 2 * t, d - 2 * t, Math.max(2, r - t), true));
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: h, bevelEnabled: bevel > 0, bevelThickness: bevel, bevelSize: bevel * 0.6, bevelSegments: 3, curveSegments: 10 });
+  geo.rotateX(-Math.PI / 2);
+  return mesh(geo, mat);
+}
 function pouch() {
   const g = new THREE.Group();
-  const bodyM = std({ map: linenTex('#a8916f'), roughness: 0.95 });
-  const body = mesh(new RoundedBoxGeometry(250, 64, 160, 4, 22), bodyM);
-  body.position.y = 32;
-  const opening = mesh(new RoundedBoxGeometry(190, 2, 104, 3, 1), std({ color: '#241f19', roughness: 1 }), { cast: false });
-  opening.position.y = 64.5;
-  const zipM = std({ color: '#2e2a24', roughness: 0.45, metalness: 0.5 });
-  const zipF = mesh(new THREE.BoxGeometry(200, 4, 6), zipM); zipF.position.set(0, 64, 56);
-  const zipB = zipF.clone(); zipB.position.z = -56;
-  const pull = mesh(new RoundedBoxGeometry(10, 4, 34, 2, 1.5), zipM); pull.position.set(112, 63, 70); pull.rotation.y = 0.3;
-  g.add(body, opening, zipF, zipB, pull);
+  const W = 156, D = 124, H = 42, T = 8;
+  const canvas = std({ map: linenTex('#2f3d4c'), roughness: 0.92 });
+  const lining = std({ map: linenTex('#c9b796'), roughness: 1 });
+  const walls = ring(W, D, 30, T, H, canvas, 3);
+  const inner = ring(W - 2 * T + 0.6, D - 2 * T + 0.6, 22, 2.5, H - 1, lining);
+  inner.position.y = 1;
+  const floorGeo = new THREE.ExtrudeGeometry(rrect(W - 2 * T, D - 2 * T, 22), { depth: 4, bevelEnabled: false, curveSegments: 10 }).rotateX(-Math.PI / 2);
+  const floor = mesh(floorGeo, lining); floor.position.y = 0.5;
+  const base = mesh(new THREE.ExtrudeGeometry(rrect(W, D, 30), { depth: 3, bevelEnabled: false, curveSegments: 10 }).rotateX(-Math.PI / 2), canvas);
+  // the zip track: dark tape with metal teeth along the lip
+  const teeth = canvasTex(1024, 32, (c, w, h) => { c.fillStyle = '#26231f'; c.fillRect(0, 0, w, h); c.fillStyle = '#8f8a82'; for (let x = 0; x < w; x += 8) c.fillRect(x, 10, 5, 12); });
+  teeth.repeat.set(0.06, 0.25);
+  const zip = ring(W - 2, D - 2, 29, 7, 2.5, std({ map: teeth, roughness: 0.4, metalness: 0.5 }));
+  zip.position.y = H + 2.6;
+  const zipM = std({ color: '#3a3631', roughness: 0.35, metalness: 0.7 });
+  const slider = mesh(new RoundedBoxGeometry(18, 7, 12, 2, 2), zipM); slider.position.set(W / 2 - 40, H + 6, D / 2 - 4);
+  const pull = mesh(new RoundedBoxGeometry(9, 3, 30, 2, 1.4), zipM); pull.position.set(W / 2 - 40, H + 2, D / 2 + 12); pull.rotation.x = 0.5;
+  g.add(base, walls, inner, floor, zip, slider, pull);
+  g.userData.floorY = 4.5;
   return g;
 }
 function towel() {
@@ -260,7 +302,7 @@ export function buildSets(scene) {
   // Kitchen: quartz counter, subway tile, cutting board, jar, herb pot.
   mk('kitchen', g => {
     g.add(surface(marbleTex(), 3200, 2400, 0.5), wall(tileTex(), 5000, 2400, -500, 0.4));
-    const b = board(); b.position.set(-520, 0, -330); b.rotation.y = 0.15; g.add(b);
+    const b = board(); b.position.set(-250, 0, -250); b.rotation.y = 0.4; g.add(b);
     const j = jar(); j.position.set(170, 0, -290); g.add(j);
     const pl = plant(); pl.position.set(-620, 0, -380); pl.scale.setScalar(0.8); g.add(pl);
   });
@@ -275,17 +317,21 @@ export function buildSets(scene) {
     g.add(surface(linenTex('#d8d2c5'), 3200, 2400, 1), wall(plasterTex('#e9e4dc', '#dcd5ca')));
     const tw = towel(); tw.position.set(-420, 0, -260); tw.rotation.y = 0.2; g.add(tw);
     const ps = passport(); ps.position.set(-230, 0, 70); ps.rotation.y = 0.35; g.add(ps);
-    const po = pouch(); po.position.set(20, 0, 0); po.rotation.y = -0.15; g.add(po);
+    const po = pouch(); po.position.set(20, 0, 0); po.rotation.y = -0.15; g.add(po); g.userData.floorY = po.userData.floorY;
   });
   // Shelf for the size line-up: pale oak, paper wall.
   mk('shelf', g => {
     const oak = std({ map: woodTex('#d2b48c', '#a07a50', '#ead2ae', 1), roughness: 0.55 });
     const board = mesh(new RoundedBoxGeometry(2600, 32, 300, 3, 4), oak); board.position.set(0, -16, -110); board.receiveShadow = true;
     const w = wall(plasterTex('#f1eee8', '#e4dfd6'), 6000, 3000, -262); w.position.y = 0;
-    const brM = std({ color: '#2b2b2b', roughness: 0.5, metalness: 0.4 });
-    for (const x of [-900, 900]) { const b = mesh(new THREE.BoxGeometry(12, 160, 240), brM); b.position.set(x, -112, -130); g.add(b); }
-    const bk = books(); bk.position.set(-1050, 0, -170); bk.rotation.y = 0.1; bk.scale.setScalar(0.9);
-    const pl = plant(); pl.position.set(1060, 0, -180); pl.scale.setScalar(0.75);
+    const brM = std({ color: '#3a3a3a', roughness: 0.4, metalness: 0.6 });
+    for (const x of [-250, 250]) {
+      const up = mesh(new THREE.BoxGeometry(26, 130, 5), brM); up.position.set(x, -97, -257);
+      const arm = mesh(new THREE.BoxGeometry(26, 5, 200), brM); arm.position.set(x, -34.5, -160);
+      g.add(up, arm);
+    }
+    const bk = books(); bk.position.set(-430, 0, -175); bk.rotation.y = 0.1; bk.scale.setScalar(0.9);
+    const pl = plant(); pl.position.set(400, 0, -190); pl.scale.setScalar(0.75);
     const below = mesh(new THREE.PlaneGeometry(6000, 1200), std({ map: plasterTex('#ddd6cb', '#cfc7ba'), roughness: 1 }), { cast: false }); below.position.set(0, -640, -261);
     g.add(board, w, below, bk, pl);
   });

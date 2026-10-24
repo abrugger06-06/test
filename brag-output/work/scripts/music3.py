@@ -6,11 +6,11 @@ hero sound. The cue list is the contract with the picture (life.html):
 
   0.0       full hit on frame 0 (kick, clap, crash, clack); the lid drops in, clack + impact on 1.0
   2.0-4.0   montage, a cut per beat: snap with a quartz clink 2.25; lamp click with the snap 2.75;
-            the case drops into the open pouch 3.25 (soft set-down); snap 3.75; fill into the drop
+            the lid is pulled shut on the case packed in the open pouch 3.25; snap 3.75; fill into the drop
   4.0       DROP + crash: title on the kitchen counter. Lid pops 5.0, snaps 5.5
   6.5-9.5   how it works, groove kept light: clacks 6.75 (lid) and 7.0 (base), glass on 7.25, riser,
             snap and impact on 9.0
-  10.0      the case lands on its side (thud + clack); the camera pushes on to the cut
+  9.5-10.0  the case rolls in on its side (roll rumble) and rocks to rest on 10.0 (knock); close-up cut 11.0
   12.0-13.5 five sizes land on the shelf every 0.375 s (16th grid); full drop-out 14.375-14.5
   14.5      Kickstarter panel + crash; snap, impact and bells on the date at 15.0
   16.0      end card on the shelf + crash + bell; lids lift 17.5, final hit 18.0 (the loudest); ring out
@@ -288,6 +288,21 @@ def setdown(g=1.0):
     return (np.sin(2 * np.pi * 110 * t) * np.exp(-t / 0.05) + lowpass(noise(0.25), 900) * np.exp(-t / 0.03) * 0.6) * 0.6 * g
 
 
+def roll(dur=0.5, g=1.0):
+    """A plastic case rolling on its side across a wooden desk, slowing down: a low rumble with a seam tick
+    once per turn."""
+    t = tt(dur)
+    k = t / dur
+    body = lowpass(noise(dur), 420) * (1 - k) ** 0.6 * 1.6
+    phase = np.cumsum(2.0 * (1 - k) ** 1.2 + 0.4) / SR   # turns per second, slowing
+    ticks = np.zeros_like(t)
+    for n in range(1, int(phase[-1]) + 1):
+        i = int(np.searchsorted(phase, n))
+        if i < len(t) - 400:
+            ticks[i:i + 400] += np.exp(-np.arange(400) / 60.0) * (1 - k[i])
+    return (body + lowpass(noise(dur), 2500) * ticks * 1.2) * 0.6 * g
+
+
 def tap(g=1.0):
     """A fingertip on plastic."""
     t = tt(0.08)
@@ -306,16 +321,18 @@ place(impact(0.8, 38), 1.0, 1.0)
 K(1.0, 1.0, 0.5)
 
 # Montage 2.0-4.0
-place(clack(84, 1.4), 2.25, 1.0, pan=-0.3)
-place(clink(0.9), 2.25, 1.0, pan=-0.3)   # the lid meeting the case on quartz
-place(click(1.0), 2.75, 1.0, pan=0.3)
-place(clack(88, 1.4), 2.75, 1.0, pan=0.3)
-place(whoosh(0.25, 0.8), 3.0, 1.0, pan=0.25)
-place(setdown(2.0), 3.25, 1.0)   # the case drops into the pouch
-place(clack(91, 1.4), 3.75, 1.0, pan=0.2)
+place(clack(84, 1.8), 2.25, 1.0, pan=-0.3)
+place(clink(1.15), 2.25, 1.0, pan=-0.3)   # the lid meeting the case on quartz
+place(click(1.3), 2.75, 1.0, pan=0.3)
+place(clack(88, 1.8), 2.75, 1.0, pan=0.3)
+place(clack(86, 1.8), 3.25, 1.0, pan=0.25)   # the lid pulled shut on the case in the pouch
+place(clack(91, 1.8), 3.75, 1.0, pan=0.2)
 for k in range(4):
     place(snare(0.3 + 0.15 * k), 3.5 + k * 0.125, 1.0, bus='drums')
 place(riser(0.9, 0.8, 400, 9000), 3.1, 1.0)
+for j, tc in enumerate((2.0, 2.5, 3.0, 3.5)):   # a keys stab and a clap on every montage cut
+    place(rhodes([n + 12 for n in (62, 66, 69)], 0.45, 1.0), tc, 2.2, pan=0.15, bus='music')
+    place(clap(0.7), tc, 0.9, pan=-0.2, bus='drums')
 
 # Groove: D A Bm G, a chord per bar, from frame 0 to 18.0; lighter (no kick, no clap) under the 6.5-9.0 explainer.
 prog = [(38, [62, 66, 69]), (33, [61, 64, 69]), (35, [62, 66, 71]), (31, [62, 67, 71])]
@@ -339,14 +356,14 @@ for bar in range(10):        # 0.0 .. 20.0
             if not (DROP[0] <= ts < DROP[1]):
                 place(shaker(1.0 if q % 2 else 0.6), ts, 1.0, pan=-0.35, bus='drums')
         if not (DROP[0] <= tb + 0.25 < DROP[1]):
-            place(hat(0.7, open_=True), tb + 0.25, 1.0, pan=0.3, bus='drums')
+            place(hat(0.9 if 1.0 <= tb < 4.0 else 0.7, open_=True), tb + 0.25, 1.0, pan=0.3, bus='drums')
             if k in (1, 3):
                 place(tamb(1.0), tb + 0.25, 1.0, pan=0.4, bus='drums')
         if k in (0, 2):
             place(bass(root + 12, 0.24, 0.7, 520), tb, 1.0, bus='music')
         if not (DROP[0] <= tb + 0.25 < DROP[1]):
             place(bass(root + 24, 0.14, 0.75, 700), tb + 0.25, 1.0, bus='music')
-        if tb >= 4.0 and not light:   # rhodes on the off-beats from the drop
+        if tb >= 1.0 and not light:   # rhodes on the off-beats from the lid close
             place(rhodes([n + 12 for n in chord], 0.4), tb + 0.25, 2.8, pan=-0.2, bus='music')
         if light:
             for j, off in enumerate((0, 0.25)):
@@ -378,13 +395,14 @@ place(clack(86, 1.6), 9.0, 1.0)
 place(impact(0.7, 38), 9.0, 1.0)
 K(9.0, 1.0, 0.5)
 
-# The fall on 10.0
-place(whoosh(0.4, 0.6), 9.6, 1.0)
+# The roll in, at rest on 10.0
+place(roll(0.5, 1.3), 9.5, 1.0, pan=0.2)
 K(10.0, 1.0, 0.5)
-place(impact(0.6, 33), 10.0, 1.0)
-place(clack(74, 1.4), 10.0, 1.0)
+place(impact(0.45, 33), 10.0, 1.0)
+place(setdown(1.8), 10.0, 1.0)   # the case rocks to rest
+place(setdown(0.7), 10.15, 1.0)
 
-# Five sizes, every 0.4 s
+# Five sizes, every 0.375 s
 for i, ts in enumerate((12.0, 12.375, 12.75, 13.125, 13.5)):
     place(impact(0.55, 38 + [0, 2, 4, 5, 7][i]), ts, 1.0, pan=-0.4 + 0.2 * i)
     place(clack(81 + [0, 2, 4, 5, 7][i], 1.1), ts, 1.0, pan=-0.4 + 0.2 * i)
@@ -408,7 +426,7 @@ place(bell(86, 1.2, 0.9), 16.0, 1.0, bus='music')
 place(crash(0.9), 16.0, 1.0)
 place(riser(0.5, 0.6, 400, 6000), 17.5, 1.0)
 place(clack(93, 0.6), 17.5, 0.7)
-place(clack(86, 2.0), 18.0, 1.0)
+place(clack(86, 1.7), 18.0, 1.0)
 place(impact(0.7, 38), 18.0, 1.0)
 place(crash(0.8), 18.0, 1.0)
 K(18.0, 0.7, 0.6)
@@ -416,7 +434,7 @@ place(clap(0.9), 18.0, 1.3, bus='drums')
 place(rhodes([50, 57, 62, 66, 69], 1.5, 1.4), 18.0, 1.0, bus='music')
 place(pad([50, 57, 62, 66, 69, 74], 1.5, 1.2, 0.02), 18.0, 1.0, bus='music')
 for nt, d in ((74, 0), (78, 0.03), (81, 0.06), (86, 0.09)):
-    place(bell(nt, 1.5, 1.7), 18.0 + d, 1.0, pan=(nt - 80) / 15, bus='music')
+    place(bell(nt, 1.5, 1.3), 18.0 + d, 1.0, pan=(nt - 80) / 15, bus='music')
 
 # ---------- mix ----------
 # Sidechain: the music bus dips under each kick (6 dB, 120 ms recovery).

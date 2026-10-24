@@ -35,11 +35,11 @@
   .sh { text-shadow: none; }
   .nightType { text-shadow: 0 0 3px #111413, 0 2px 24px rgba(17,20,19,0.9); }
   .legal { font-family: JBM; font-weight: 700; letter-spacing: 0.02em; color: var(--ink); text-shadow: 0 0 10px rgba(243,244,242,0.95), 0 0 3px rgba(243,244,242,0.9); }
-  .call { text-shadow: 0 0 2px #111413, 0 0 2px #111413, 0 2px 12px rgba(0,0,0,0.75); }
+  .call { text-shadow: none; background: rgba(17,20,19,0.72); padding: 6px 14px 8px; }
   .scrim { position: absolute; pointer-events: none; opacity: 0;
     background: radial-gradient(ellipse 100% 100% at 0% 0%, rgba(243,244,242,0.9) 0%, rgba(243,244,242,0.78) 42%, rgba(243,244,242,0) 100%); }
   #scrimB { background: radial-gradient(ellipse 100% 100% at 0% 100%, rgba(243,244,242,0.85) 0%, rgba(243,244,242,0.6) 45%, rgba(243,244,242,0) 100%); }
-  #panel { position: absolute; left: 0; top: 0; width: 900px; height: 1080px; background: var(--deep); visibility: hidden; }
+  #panel { position: absolute; left: 0; top: 0; width: 1040px; height: 1080px; background: var(--deep); visibility: hidden; }
 </style>
 </head>
 <body>
@@ -201,12 +201,13 @@ key.shadow.mapSize.set(4096, 4096);
 if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; }
 const SETS = buildSets(scene);
 const win = windowFrame(); scene.add(win);
+SETS.kitchen.traverse(o => { if (o.userData.glass) o.material = glassMat; });
 Object.assign(key.shadow.camera, { left: -800, right: 800, top: 800, bottom: -800, near: 50, far: 4000 });
 key.shadow.camera.updateProjectionMatrix();
 key.shadow.normalBias = 1.2;
 const LIGHT = {
   desk:    { color: 0xffe2bc, k: 3.4, dir: [-700, 520, 120], win: true,  kick: 0.45, rim: 0.6, env: 0.5,  contact: 0.85 },
-  kitchen: { color: 0xfff0dc, k: 2.0, dir: [-500, 620, -200], win: true, kick: 0.55, rim: 0.6, env: 0.42, contact: 1.0 },
+  kitchen: { color: 0xffe6c6, k: 1.6, dir: [-500, 620, -200], win: true, kick: 0.5, rim: 0.6, env: 0.36, contact: 1.0 },
   night:   { color: 0xdedad2, k: 0.3, dir: [-500, 500, 200], win: false, kick: 0.3, rim: 1.8, env: 0.22, contact: 0.7 },
   travel:  { color: 0xffeedb, k: 2.3, dir: [-500, 700, 400], win: true,  kick: 0.6, rim: 0.6, env: 0.45, contact: 1.0 },
   shelf:   { color: 0xfff1e0, k: 2.4, dir: [-450, 650, 600], win: true,  kick: 0.55, rim: 0.6, env: 0.5,  contact: 0.9 },
@@ -302,7 +303,7 @@ function sHook(t) {
   setSet('desk');
   show(hook8); reset(hook8);
   hook8.root.rotation.y = deg(-18 + t * 4);
-  const lid = t < 0.55 ? lerp(150, 14, ei(seg(t, 0, 0.55))) : closeGap(t, 0.55, 1.0, 14);
+  const lid = t < 0.75 ? lerp(62, 7, seg(t, 0, 0.75)) : t < 1.0 ? lerp(7, 0, ei(seg(t, 0.75, 1.0))) : Math.max(0, Math.sin(seg(t, 1.0, 1.18) * Math.PI) * 1.2);
   hook8.set({ lift: lid });
   const tgt = [0, 55, 0];
   const p = sph(lerp(400, 345, eio(seg(t, 0, 1.0))) + (t > 1 ? (t - 1) * 30 : 0), lerp(-34, -22, seg(t, 0, 2)), 14, tgt);
@@ -318,7 +319,7 @@ function sHook(t) {
 const MONT = [
   { set: 'kitchen', c: mK, t0: 2.0, az: -26, el: 9, r: 270 },
   { set: 'night',   c: mN, t0: 2.5, az: 44,  el: 6, r: 470 },
-  { set: 'travel',  c: mT, t0: 3.0, az: -20, el: 26, r: 640 },
+  { set: 'travel',  c: mT, t0: 3.0, az: -18, el: 24, r: 420 },
   { set: 'desk',    c: mD, t0: 3.5, az: -40, el: 12, r: 330 },
 ];
 function sMontage(t) {
@@ -328,25 +329,24 @@ function sMontage(t) {
   show(s.c); reset(s.c);
   s.c.root.rotation.y = deg(-20 + (t - s.t0) * 40);
   if (s.set === 'travel') {
-    // the closed case drops in from above the frame and settles half inside the open pouch on the off-beat
-    const down = seg(t, s.t0, s.t0 + 0.25);
-    s.c.root.position.set(20, lerp(260, 30, ei(down)) + (t > s.t0 + 0.25 ? Math.sin(seg(t, s.t0 + 0.25, s.t0 + 0.4) * Math.PI) * 4 : 0), 0);
+    // packed: the case sits down inside the open pouch, the lining hides most of its body
+    s.c.root.position.set(20, SETS.travel.userData.floorY, 0);
     s.c.contact.visible = false; s.c.ring.visible = false;
-  } else {
-    s.c.set({ lift: closeGap(t, s.t0 - 0.1, s.t0 + 0.25, 30) });
   }
+  s.c.set({ lift: closeGap(t, s.t0 - 0.1, s.t0 + 0.25, 30) });
   // nightstand: the lamp clicks on as the lid shuts
   if (s.set === 'night') {
     const on = t >= s.t0 + 0.25 ? 1 : 0.03;
     SETS.night.userData.light.intensity = 260000 * on;
     SETS.night.userData.shade.material.emissiveIntensity = 0.9 * on;
-    key.intensity = on > 0.5 ? 0.3 : 0.12; kick.intensity = 0.12; rim.intensity = on > 0.5 ? 1.0 : 0.5;
+    key.intensity = on > 0.5 ? 0.3 : 0.12; kick.intensity = 0.12; rim.intensity = on > 0.5 ? 0.5 : 0.4;
+    fill.color.set(0xffb46a); fill.position.set(-120, 140, -90); fill.intensity = 220000 * on;
   }
-  const tgt = s.set === 'travel' ? [-10, 60, 20] : [s.c.root.position.x, s.c.baseH * 0.7, s.c.root.position.z];
+  const tgt = [s.c.root.position.x, s.c.baseH * 0.7 + s.c.root.position.y, s.c.root.position.z];
   const drift = eo(seg(t, s.t0, s.t0 + 0.5));
   const p = sph(lerp(s.r, s.r * 0.86, drift), s.az + drift * 8, s.el, tgt);
   p[1] += shake(t, s.t0 + 0.25, 1.1);
-  frame(p, tgt, 30, s.set === 'travel' ? 200 : 380, 30, [tgt[0], 0, tgt[2]]);
+  frame(p, tgt, 30, 380, 30, [tgt[0], 0, tgt[2]]);
   // dark set, light type (with an ink halo); every light set keeps ink on the paper scrim
   const night = s.set === 'night';
   TXT.noclip.className = night ? 't h light nightType' : 't h dark';
@@ -393,49 +393,59 @@ function sExplode(t) {
   camera.updateMatrixWorld();
   const lidP = x8.lid.getWorldPosition(new THREE.Vector3());
   const baseP = new THREE.Vector3(0, x8.baseH + baseMag + 2, 0);
-  const kl = seg(t, 6.75, 7.0) * (1 - seg(t, 8.45, 8.6)), kb = seg(t, 6.9, 7.15) * (1 - seg(t, 8.45, 8.6));
+  const kl = seg(t, 6.75, 7.0) * (1 - seg(t, 8.45, 8.6)), kb = seg(t, 6.85, 7.0) * (1 - seg(t, 8.45, 8.6));
   svg.innerHTML = callout(callLid, proj(lidP), 560, 230, kl, false) + callout(callBase, proj(baseP), 1390, 820, kb, true);
   scrimOn(scrimB, 900, 300);
   text('legal4', t, 6.0, 9.5, 'unit');
   if (t >= 8.9) scrimOn(scrim, 1150, 420, seg(t, 8.9, 9.0));
   text('pulls', t, 9.0, 12.0, 'slam');
 }
+// A tight contact line where a case lying on its side touches the table.
+const tipLine = (() => {
+  const cv = document.createElement('canvas'); cv.width = 8; cv.height = 64;
+  const g = cv.getContext('2d'), img = g.createImageData(8, 64);
+  for (let y = 0; y < 64; y++) for (let x = 0; x < 8; x++) img.data[(y * 8 + x) * 4 + 3] = 255 * (0.9 * Math.exp(-Math.pow((y - 31.5) / 3, 2)) + 0.45 * Math.exp(-Math.pow((y - 31.5) / 13, 2)));
+  g.putImageData(img, 0, 0);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), color: 0x000000, transparent: true, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.position.y = 0.15; scene.add(m); m.visible = false;
+  return m;
+})();
 function sTip(t) {
-  // A new angle, high and from the other side: the empty 7-Vial tips and lands on its side on 10.0 with the lid
-  // seated; the camera keeps pushing and drifting round it to the cut.
-  pulse = hit(t, 10.0) * 0.6;
+  // Knocked over off frame: the empty 7-Vial rolls in on its side with the lid seated and comes to rest on 10.0
+  // with a small rock back. On 11.0 a cut to a close-up of the shut seam.
+  pulse = hit(t, 10.0) * 0.6 + hit(t, 11.0) * 0.4;
   setSet('desk');
   show(tip7); reset(tip7);
+  const R = tip7.dia / 2, L = tip7.baseH + tip7.lidH;
   const k = seg(t, 9.5, 10.0);
-  const tipK = t < 10.0 ? ei(k) : 1 + 0.035 * Math.sin(Math.PI * seg(t, 10.0, 10.2));
-  const tip = deg(90) * tipK, R = tip7.dia / 2;
+  const z = t < 10.0 ? 320 * Math.pow(1 - k, 2.2) : -5 * Math.sin(seg(t, 10.0, 10.3) * Math.PI) * Math.exp(-(t - 10.0) / 0.25);
   tip7.root.rotation.order = 'ZYX';
-  tip7.root.rotation.set(0, deg(-30), -tip);
-  tip7.root.position.set(R - R * Math.cos(tip), R * Math.sin(tip), 0);
+  tip7.root.rotation.set(0, deg(-30), deg(-90));
+  tip7.root.position.set(R, R, z);
+  tip7.root.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), z / R));
   tip7.root.updateMatrixWorld(true);
-  const spin = 0;
-  const ctr = tip7.root.localToWorld(new THREE.Vector3(0, (tip7.baseH + tip7.lidH) / 2, 0));
-  const qs = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), spin);
-  tip7.root.position.sub(ctr).applyQuaternion(qs).add(ctr);
-  tip7.root.quaternion.premultiply(qs);
-  tip7.root.updateMatrixWorld(true);
-  const axis = new THREE.Vector3(0, 1, 0).applyQuaternion(tip7.root.quaternion);
-  const mid = tip7.root.localToWorld(new THREE.Vector3(0, (tip7.baseH + tip7.lidH) / 2, 0));
-  tip7.contact.position.copy(tip7.root.worldToLocal(new THREE.Vector3(mid.x, 0.05, mid.z)));
-  const lie = clamp(tipK);
-  const qw = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.atan2(-axis.z, axis.x) * lie)
-    .multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)));
-  tip7.contact.quaternion.copy(tip7.root.quaternion).invert().multiply(qw);
-  const cs = tip7.dia * 1.22, len = (tip7.baseH + tip7.lidH) * 1.3;
-  tip7.contact.scale.set(lerp(cs, len, lie), lerp(cs, tip7.dia * 0.6, lie), 1);
-  tip7.ring.visible = tipK < 0.05;
+  // soft contact under the body plus the tight contact line along its length
+  tip7.contact.position.copy(tip7.root.worldToLocal(new THREE.Vector3(R + L / 2, 0.05, z)));
+  tip7.contact.quaternion.copy(tip7.root.quaternion).invert().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)));
+  tip7.contact.scale.set(L * 1.3, tip7.dia * 0.6, 1);
   tip7.contact.material.opacity = 1.0;
+  tip7.ring.visible = false;
+  tipLine.visible = true; tipLine.position.set(R + L / 2, 0.15, z); tipLine.scale.set(L * 1.04, 46, 1);
+  const ctr = new THREE.Vector3(R + L / 2, R, z);
   fill.position.copy(ctr).add(new THREE.Vector3(-80, 140, 160));
   fill.intensity = 120000 * eio(seg(t, 9.9, 10.4));
-  const tg = [lerp(10, 52, eo(seg(t, 9.8, 10.2))), 40, 0];
-  const p = sph(lerp(420, 350, eio(seg(t, 9.5, 12.0))), lerp(150, 132, eio(seg(t, 10.0, 12.0))), 38, tg);
-  p[1] += shake(t, 10.0, 0.9);
-  frame(p, tg, 30, 440, 60, [tg[0], 0, tg[2]]);
+  let p, tg;
+  if (t < 11.0) {
+    tg = [52, 40, 0];
+    p = sph(lerp(420, 380, eio(seg(t, 9.5, 11.0))), lerp(150, 140, eio(seg(t, 9.5, 11.0))), 38, tg);
+    p[1] += shake(t, 10.0, 0.9);
+  } else {
+    // close-up on the lid seam, drifting slowly
+    tg = [R + tip7.baseH, R, 0];
+    p = sph(lerp(300, 285, seg(t, 11.0, 12.0)), lerp(118, 112, seg(t, 11.0, 12.0)), 18, tg);
+    p[1] += shake(t, 11.0, 0.5);
+  }
+  frame(p, tg, 30, t < 11.0 ? 440 : 600, t < 11.0 ? 60 : 30, [tg[0], 0, tg[2]]);
   scrimOn(scrim, 1350, 520);
   text('pulls', t, 9.0, 12.0, 'slam');
   text('holds', t, 10.0, 12.0, 'slam');
@@ -462,7 +472,7 @@ function sSizes(t) {
   row.forEach((c, i) => {
     const land = landAt(i);
     if (t < land) return;
-    const p = new THREE.Vector3(rowX[i], 0, 0).project(camera), l = labels[i], k = eo5(seg(t, land + 0.05, land + 0.3));
+    const p = new THREE.Vector3(rowX[i], 0, 0).project(camera), l = labels[i], k = eo5(seg(t, land - 0.04, land + 0.1));
     l.style.visibility = 'visible'; l.style.opacity = k;
     l.style.left = `${(p.x * .5 + .5) * W}px`;
     l.style.top = `${(base * .5 + .5) * H - 14 + (1 - k) * 20}px`;
@@ -477,8 +487,8 @@ function sKick(t) {
   setSet('desk');
   show(hero12); reset(hero12);
   hero12.root.rotation.y = deg(-30 + (t - 14.5) * 6);
-  const LH = 24;
-  const lid = t < 14.5 ? 0 : t < 14.62 ? eo(seg(t, 14.5, 14.62)) * LH : t < 14.78 ? lerp(LH, LH * 0.8, seg(t, 14.62, 14.78)) : LH * 0.8 * (1 - ei(seg(t, 14.78, 15.0))) + Math.max(0, Math.sin(seg(t, 15.0, 15.18) * Math.PI) * 1.2);
+  const LH = 15;
+  const lid = t < 14.4 ? 0 : t < 14.55 ? eo(seg(t, 14.4, 14.55)) * LH : t < 14.78 ? lerp(LH, LH * 0.8, seg(t, 14.55, 14.78)) : LH * 0.8 * (1 - ei(seg(t, 14.78, 15.0))) + Math.max(0, Math.sin(seg(t, 15.0, 15.18) * Math.PI) * 1.2);
   hero12.set({ lift: lid, tiltX: -0.3 * clamp(lid / LH) });
   const kl = clamp(lid / LH);
   lidShade.visible = lid > 0.5;
@@ -489,7 +499,7 @@ function sKick(t) {
   p[1] += shake(t, 15.0, 0.8);
   frame(p, tgt, 30, 480, 60);
   panel.style.visibility = 'visible';
-  panel.style.transform = `translateX(${(1 - eo5(seg(t, 14.4, 14.55))) * -900}px)`;
+  panel.style.transform = `translateX(${(1 - eo5(seg(t, 14.4, 14.55))) * -1040}px)`;
   text('ks0', t, 14.4, 16.0, 'unit');
   text('ks1', t, 14.5, 16.0, 'slam');
   text('ks2', t, 15.0, 16.0, 'slam');
@@ -528,7 +538,8 @@ function renderAt(t) {
   panel.style.visibility = 'hidden';
   magnetMat.emissiveIntensity = 0;
   lidShade.visible = false;
-  fill.intensity = 0;
+  fill.intensity = 0; fill.color.set(0xfff1e0);
+  tipLine.visible = false;
   SETS.night.userData.light.intensity = 400000; SETS.night.userData.shade.material.emissiveIntensity = 0.9;
   if (t < 2.0) sHook(t);
   else if (t < 4.0) sMontage(t);
@@ -542,6 +553,7 @@ function renderAt(t) {
   renderer.setClearColor(0x000000, 1); comp.render();
 }
 window.renderAt = renderAt;
+window.__cast = { tip7, mT, hero12, row, THREE };
 await document.fonts.load('900 40px Archivo');
 await document.fonts.load('800 40px Archivo');
 await document.fonts.load('700 20px JBM');
