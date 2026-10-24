@@ -263,7 +263,10 @@ const SCENES = {
     const cs = rowOf(ORDER, 16);
     // Square: straight on, like the film. 4:5: look along the row so it recedes and fills the height.
     if (square) fit(cs.map(c => c.root), 0, 26, 16, 1);
-    else fit(cs.map(c => c.root), -24, 16, 22, 1);
+    else {   // low and along the row, wide lens: near case big, row recedes; matte so no lid catches the room light
+      cs.forEach(c => { c.mat.clearcoat = 0; c.mat.roughness = 0.6; });
+      fit(cs.map(c => c.root), -56, 12, 36, 1);
+    }
   },
   grid() {
     const back = rowOf(['c12', 'c6', 'c4'], 46, -150), front = rowOf(['c8', 'c7'], 46, 150);
