@@ -19,7 +19,8 @@
   .w { display: inline-block; }
   .label { position: absolute; transform: translateX(-50%); font-family: JBM; font-weight: 700; font-size: 27px; color: var(--ink); white-space: nowrap; }
   .label i { display: block; width: 100%; height: 3px; background: var(--ink); margin-bottom: 12px; font-style: normal; }
-  #rule { position: absolute; height: 6px; background: var(--ink); }
+  .rule { position: absolute; height: 6px; background: var(--deep); }
+  #ks1 .w:last-child { color: var(--deep); }
 </style>
 </head>
 <body>
@@ -29,11 +30,11 @@
   <div id="hook" class="t h" style="left:120px; top:640px; font-size:120px">It closes<br>itself.</div>
 
   <div id="mark" class="t h" style="left:120px; top:350px; font-size:146px">FLUXCASE</div>
-  <div id="rule" style="left:124px; top:516px; width:0"></div>
-  <div id="sub" class="t s" style="left:120px; top:560px; font-size:50px">Magnetic vial cases<br>for 3 mL and 10 mL vials.</div>
+  <div id="rule" class="rule" style="left:124px; top:516px; width:0"></div>
+  <div id="sub" class="t s" style="left:120px; top:560px; font-size:50px">Magnetic cases for<br>3 mL and 10 mL vials.</div>
 
-  <div id="mag1" class="t s" style="left:120px; top:118px; font-size:62px">Ring magnets in<br>the base and lid.</div>
-  <div id="mag2" class="t h" style="left:120px; top:282px; font-size:96px">No clips.</div>
+  <div id="mag1" class="t s" style="left:120px; top:330px; font-size:62px">Ring magnets in<br>the base and lid.</div>
+  <div id="mag2" class="t h" style="left:120px; top:494px; font-size:96px">No clips.</div>
 
   <div id="five" class="t h" style="left:120px; top:110px; font-size:112px">Five sizes.</div>
   <div id="labels"></div>
@@ -41,15 +42,17 @@
   <div id="col1" class="t h" style="left:120px; top:118px; font-size:112px">Pulls shut.<br>Holds shut.</div>
   <div id="col2" class="t m" style="left:124px; top:368px; font-size:24px">Black PETG. 3D printed to order in Texas.</div>
 
-  <div id="ks1" class="t h" style="left:120px; top:104px; font-size:124px">Kickstarter.</div>
-  <div id="ks2" class="t h" style="left:120px; top:232px; font-size:124px">November 1, 2026.</div>
-  <div id="ks3" class="t m" style="left:124px; top:396px; font-size:30px">Fluxcase by The 3D Print Depot</div>
+  <div id="ks0" class="t h" style="left:120px; top:86px; font-size:64px">FLUXCASE</div>
+  <div id="ksrule" class="rule" style="left:124px; top:166px; width:0"></div>
+  <div id="ks1" class="t h" style="left:120px; top:206px; font-size:92px">Back it on Kickstarter.</div>
+  <div id="ks2" class="t s" style="left:120px; top:316px; font-size:58px">Launching November 1, 2026.</div>
+  <div id="ks3" class="t m" style="left:124px; top:410px; font-size:26px">by The 3D Print Depot</div>
 </div>
 
 <script type="module">
 import * as THREE from './vendor/three.module.js';
 import { RoomEnvironment } from './vendor/RoomEnvironment.js';
-import { toCreasedNormals } from './vendor/BufferGeometryUtils.js';
+import { toCreasedNormals, mergeGeometries } from './vendor/BufferGeometryUtils.js';
 
 const W = 1920, H = 1080;
 const MESH = new URLSearchParams(location.search).get('mesh') || 'mesh';
@@ -72,7 +75,7 @@ renderer.setSize(W, H, false);
 renderer.toneMapping = THREE.NeutralToneMapping;
 renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
@@ -80,19 +83,24 @@ scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = 0.85;
 
 const key = new THREE.DirectionalLight(0xffffff, 2.2);
-key.position.set(-220, 420, 260);
+key.position.set(-150, 520, 220);
 key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048);
-key.shadow.radius = 6;
+key.shadow.radius = 7;
+key.shadow.blurSamples = 16;
 key.shadow.bias = -0.0004;
 key.shadow.normalBias = 0.6;
-Object.assign(key.shadow.camera, { left: -320, right: 320, top: 320, bottom: -320, near: 50, far: 1200 });
+Object.assign(key.shadow.camera, { left: -420, right: 420, top: 420, bottom: -420, near: 50, far: 1400 });
 scene.add(key, key.target);
 const rim = new THREE.DirectionalLight(0xffffff, 0.9);
 rim.position.set(300, 200, -300);
 scene.add(rim);
+// Cool kick from back-left so black PETG separates from the background.
+const kick = new THREE.DirectionalLight(0xd8e6ff, 2.4);
+kick.position.set(-280, 170, -320);
+scene.add(kick);
 
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.ShadowMaterial({ opacity: 0.16 }));
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.ShadowMaterial({ opacity: 0.13 }));
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
@@ -120,14 +128,53 @@ async function loadPart(entry) {
   return g;
 }
 
-const magnetMat = new THREE.MeshStandardMaterial({ color: 0xC8CBCE, metalness: 1, roughness: 0.2, emissive: 0xffffff, emissiveIntensity: 0 });
+// Magnets are always silver. The CAD models them as plain discs; the brief says ring magnets,
+// so they are drawn as rings with the CAD's outer diameter, thickness and position.
+const magnetMat = new THREE.MeshStandardMaterial({ color: 0xD4D7DA, metalness: 1, roughness: 0.16, envMapIntensity: 1.5, emissive: 0xC8CBCE, emissiveIntensity: 0 });
+function ringGeometry(mags) {
+  const gs = mags.map(m => {
+    const r = m.r, ri = r * 0.42, c = Math.min(0.3, r * 0.08), z0 = m.z0, z1 = m.z1;
+    const pts = [[ri, z0 + c], [ri + c, z0], [r - c, z0], [r, z0 + c], [r, z1 - c], [r - c, z1], [ri + c, z1], [ri, z1 - c], [ri, z0 + c]]
+      .map(([x, y]) => new THREE.Vector2(x, y));
+    const g = new THREE.LatheGeometry(pts, 48);
+    g.rotateX(Math.PI / 2);
+    g.translate(m.x, m.y, 0);
+    return toCreasedNormals(g, THREE.MathUtils.degToRad(40));
+  });
+  return mergeGeometries(gs);
+}
+// Soft contact shadow under each case.
+const contactTex = (() => {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 256;
+  const g = cv.getContext('2d'); const gr = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  gr.addColorStop(0, 'rgba(0,0,0,0.55)'); gr.addColorStop(0.62, 'rgba(0,0,0,0.42)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+  return new THREE.CanvasTexture(cv);
+})();
+const contactMat = new THREE.MeshBasicMaterial({ map: contactTex, transparent: true, depthWrite: false, toneMapped: false });
+// Plain 10 mL glass vial with a teal flip cap (no label, no claim).
+const glassMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.04, transparent: true, opacity: 0.32, envMapIntensity: 2.2, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide });
+const crimpMat = new THREE.MeshStandardMaterial({ color: 0xA9ADB1, metalness: 0.35, roughness: 0.55 });
+const capMat = new THREE.MeshPhysicalMaterial({ color: 0x74CABF, roughness: 0.5, clearcoat: 0.2 });
+function vial(x, y, z0) {
+  const g = new THREE.Group();
+  const body = [[0, 0], [9.6, 0], [11, 1.4], [11, 35], [10.4, 37.5], [7.2, 40.5], [6.4, 42], [6.4, 43]].map(([a, b]) => new THREE.Vector2(a, b));
+  const bodyG = new THREE.LatheGeometry(body, 48); bodyG.rotateX(Math.PI / 2);
+  const glass = new THREE.Mesh(bodyG, glassMat); glass.renderOrder = 2;
+  const crimp = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 4, 48).rotateX(Math.PI / 2).translate(0, 0, 45), crimpMat);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(9.6, 9.6, 3.2, 48).rotateX(Math.PI / 2).translate(0, 0, 48.6), capMat);
+  crimp.castShadow = cap.castShadow = true;
+  g.add(glass, crimp, cap);
+  g.position.set(x, y, z0);
+  return g;
+}
 
 function plastic(hex) {
-  return new THREE.MeshPhysicalMaterial({ color: hex, roughness: 0.42, metalness: 0, clearcoat: 0.18, clearcoatRoughness: 0.45 });
+  return new THREE.MeshPhysicalMaterial({ color: hex, roughness: 0.4, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.4, envMapIntensity: 1.2 });
 }
 
 // One instance of a case. CAD space is Z-up; `root` is Y-up world space.
-function makeCase(parts) {
+function makeCase(parts, { vials = false } = {}) {
   const { base, baseMag, lid, lidMag } = parts;
   const bb = base.entry, lb = lid.entry;
   const cx = (bb.min[0] + bb.max[0]) / 2, cy = (bb.min[1] + bb.max[1]) / 2;
@@ -145,10 +192,19 @@ function makeCase(parts) {
   const baseMesh = mk(base.geo, mat);
   baseMesh.position.set(-cx, -cy, 0);
   const baseMagGrp = new THREE.Group();
-  const bm = mk(baseMag.geo, magnetMat);
+  const bm = mk(ringGeometry(MAGS[baseMag.entry.name]), magnetMat);
   bm.position.set(-cx, -cy, 0);
   baseMagGrp.add(bm);
   cad.add(baseMesh, baseMagGrp);
+  if (vials) {
+    bb.pockets.filter(p => p.up && p.d > 20).forEach(p => cad.add(vial(p.x - cx, p.y - cy, p.z)));
+  }
+  const contact = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), contactMat);
+  const cs = (bb.max[0] - bb.min[0]) * 1.22;
+  contact.scale.set(cs, cs, 1);
+  contact.rotation.x = -Math.PI / 2;
+  contact.position.y = 0.05;
+  root.add(contact);
 
   // Lid is printed upside down (z=0 is the outer top) and mirrored in Y on the plate.
   // Flip 180 deg about X: (x,y,z) -> (x,-y,-z), then shift so the lid's open face sits on the base.
@@ -158,7 +214,7 @@ function makeCase(parts) {
   lidInner.position.set(-lcx, lcy, lidH / 2);
   const lidMesh = mk(lid.geo, mat);
   const lidMagGrp = new THREE.Group();
-  lidMagGrp.add(mk(lidMag.geo, magnetMat));
+  lidMagGrp.add(mk(ringGeometry(MAGS[lidMag.entry.name]), magnetMat));
   lidInner.add(lidMesh, lidMagGrp);
   lidPivot.add(lidInner);
   cad.add(lidPivot);
@@ -176,6 +232,7 @@ function makeCase(parts) {
 }
 
 const manifest = await (await fetch(`${MESH}/manifest.json`)).json();
+const MAGS = await (await fetch(`${MESH}/magnets.json`)).json();
 const geos = {};
 await Promise.all(manifest.map(async e => { geos[e.name] = { entry: e, geo: await loadPart(e) }; }));
 function partsFor(k) {
@@ -186,7 +243,7 @@ function partsFor(k) {
 
 // Instances: hero cases + a row of five.
 const hero12 = makeCase(partsFor('c12'));
-const hero8 = makeCase(partsFor('c8'));
+const hero8 = makeCase(partsFor('c8'), { vials: true });
 const hero7 = makeCase(partsFor('c7'));
 const row = ORDER.map(k => makeCase(partsFor(k)));
 const all = [hero12, hero8, hero7, ...row];
@@ -221,18 +278,20 @@ function wordify(id) {
   return el;
 }
 const TXT = {};
-['hook', 'mark', 'sub', 'mag1', 'mag2', 'five', 'col1', 'col2', 'ks1', 'ks2', 'ks3'].forEach(id => TXT[id] = wordify(id));
+['hook', 'mark', 'sub', 'mag1', 'mag2', 'five', 'col1', 'col2', 'ks0', 'ks1', 'ks2', 'ks3'].forEach(id => TXT[id] = wordify(id));
 
-// Show text `id` from tIn to tOut (both on beats). Words rise in with 50 ms stagger.
-function text(id, t, tIn, tOut) {
+// Show text `id` from tIn to tOut (both on beats). Words rise in with a 30 ms stagger,
+// or all together when `unit` is set (small print, long lines).
+function text(id, t, tIn, tOut, unit = false) {
   const el = TXT[id];
   const on = t >= tIn && t < tOut;
   el.style.visibility = on ? 'visible' : 'hidden';
   if (!on) return;
   [...el.querySelectorAll('.w')].forEach((w, i) => {
-    const k = eo5(seg(t, tIn + i * 0.05, tIn + i * 0.05 + 0.32));
+    const d = unit ? 0 : i * 0.03;
+    const k = eo5(seg(t, tIn + d, tIn + d + 0.25));
     w.style.opacity = k;
-    w.style.transform = `translateY(${(1 - k) * 46}px)`;
+    w.style.transform = `translateY(${(1 - k) * (unit ? 14 : 40)}px)`;
   });
 }
 
@@ -258,7 +317,9 @@ function bg(hex) { renderer.setClearColor(hex, 1); document.body.style.backgroun
 function renderAt(t) {
   labels.forEach(l => l.style.visibility = 'hidden');
   document.getElementById('rule').style.width = '0';
+  document.getElementById('ksrule').style.width = '0';
   magnetMat.emissiveIntensity = 0;
+  magnetMat.envMapIntensity = 1.5;
 
   if (t < 5) {
     // HOOK + REVEAL: the 12-vial.
@@ -277,15 +338,15 @@ function renderAt(t) {
       const k = seg(t, 0, 2);
       look(sph(lerp(300, 270, k), -8, 14, [0, 40, 0]), [0, 40, 0], 30, 440);
     } else {
-      const k = eio(seg(t, 2, 3.2));
+      const k = eo(seg(t, 2, 3.0));
       const r = lerp(270, 470, k), el = lerp(14, 26, k), az = lerp(-8, 12, eo(seg(t, 2, 5)));
       const ty = lerp(40, 28, k);
       look(sph(r, az, el, [0, ty, 0]), [0, ty, 0], 30, lerp(440, 500, k));
     }
     text('hook', t, 0.0, 2.0);
-    text('mark', t, 2.0, 5.0);
-    text('sub', t, 2.5, 5.0);
-    if (t >= 2) document.getElementById('rule').style.width = `${eo(seg(t, 2.2, 2.7)) * 340}px`;
+    text('mark', t, 2.25, 5.0);
+    text('sub', t, 2.25, 5.0, true);
+    if (t >= 2) document.getElementById('rule').style.width = `${eo(seg(t, 2.35, 2.8)) * 340}px`;
   } else if (t < 9) {
     // HOW IT STAYS SHUT: 8-vial in black, lid lifts back and opens, magnets light up.
     bg('#E2E2E2');
@@ -296,9 +357,10 @@ function renderAt(t) {
     const out = backOut(seg(t, 6.5, 7.0)) * 3.2;                      // magnets rise on beat
     hero8.set({ lift: k * 46, back: k * 52, tiltX: -k * 1.95, magOut: out, color: COL.black });
     const flash = Math.max(0, 1 - seg(t, 6.5, 7.1)) * (t >= 6.5 ? 1 : 0);
-    magnetMat.emissiveIntensity = flash * 0.55;
+    magnetMat.emissiveIntensity = flash * 0.22;
+    magnetMat.envMapIntensity = 1.5 + flash * 1.6;
     const cam = eio(seg(t, 5, 9));
-    look(sph(lerp(560, 520, cam), lerp(-6, 8, cam), lerp(28, 36, cam), [0, 72, 10]), [0, 72, 10], 30, 420);
+    look(sph(lerp(470, 445, cam), lerp(-6, 8, cam), lerp(28, 34, cam), [0, 66, 10]), [0, 66, 10], 30, 440);
     text('mag1', t, 5.5, 9.0);
     text('mag2', t, 7.0, 9.0);
   } else if (t < 13) {
@@ -307,16 +369,18 @@ function renderAt(t) {
     show(...row);
     row.forEach((c, i) => {
       const land = 9.5 + i * 0.5;
-      const k = eo5(seg(t, land - 0.45, land));
-      c.root.visible = t >= land - 0.45;
-      c.root.position.set(rowX[i] + (1 - k) * 700, 0, 0);
+      const k = eo5(seg(t, land - 0.5, land));
+      c.root.visible = true;
+      c.root.position.set(rowX[i] + (1 - k) * 520, 0, 0);
       c.root.rotation.y = THREE.MathUtils.degToRad(-10);
       c.set({ color: COL.black });
     });
     const cam = eio(seg(t, 9, 13));
     const tgt = [0, 42, 0];
-    look(sph(lerp(760, 720, cam), lerp(-4, 3, cam), 19, tgt), tgt, 30, 0);
+    look(sph(lerp(1040, 990, cam), lerp(-4, 3, cam), 19, tgt), tgt, 22, 0);
     camera.updateMatrixWorld();
+    // One shared baseline: the lowest front edge of the five, at their landed positions.
+    const base = Math.max(...row.map((c, i) => -new THREE.Vector3(rowX[i], 0, c.dia / 2 + 10).project(camera).y));
     row.forEach((c, i) => {
       const land = 9.5 + i * 0.5;
       if (t < land) return;
@@ -325,7 +389,7 @@ function renderAt(t) {
       l.style.visibility = 'visible';
       const k = eo5(seg(t, land, land + 0.3));
       l.style.left = `${(p.x * 0.5 + 0.5) * W}px`;
-      l.style.top = `${(-p.y * 0.5 + 0.5) * H + 34 + (1 - k) * 20}px`;
+      l.style.top = `${(base * 0.5 + 0.5) * H + 30 + (1 - k) * 20}px`;
       l.style.opacity = k;
     });
     text('five', t, 9.0, 13.0);
@@ -343,7 +407,7 @@ function renderAt(t) {
     const cam = eio(seg(t, 13, 16));
     look(sph(lerp(470, 430, cam), lerp(6, -4, cam), lerp(30, 20, cam), [0, 60, 10]), [0, 60, 10], 30, 420);
     text('col1', t, 13.0, 16.0);
-    text('col2', t, 13.5, 16.0);
+    text('col2', t, 13.0, 16.0, true);
   } else {
     // OUTRO: the row, closed. Launch date.
     bg('#F3F4F2');
@@ -357,10 +421,12 @@ function renderAt(t) {
     });
     const cam = eio(seg(t, 16, 20));
     const tgt = [0, 118, 0];
-    look(sph(lerp(800, 760, cam), 0, 15, tgt), tgt, 30, 0);
-    text('ks1', t, 16.0, 99);
-    text('ks2', t, 16.5, 99);
-    text('ks3', t, 17.0, 99);
+    look(sph(lerp(1100, 1050, cam), 0, 15, tgt), tgt, 22, 0);
+    text('ks0', t, 16.0, 99);
+    document.getElementById('ksrule').style.width = `${eo(seg(t, 16.1, 16.6)) * 150}px`;
+    text('ks1', t, 16.25, 99);
+    text('ks2', t, 16.75, 99, true);
+    text('ks3', t, 17.25, 99, true);
   }
   renderer.render(scene, camera);
 }

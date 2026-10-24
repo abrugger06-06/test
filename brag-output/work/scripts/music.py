@@ -190,7 +190,7 @@ for b, line in mel.items():
 
 # SFX on the grid, under the music.
 place(tick(81, 0.8), 2.0, 0.8)  # reveal pull-back lands
-for i, t in enumerate([5.0, 5.5, 6.0, 6.5]):  # magnets light up
+for i, t in enumerate([6.5, 6.625, 6.75, 6.875]):  # magnets light up
     place(tick([74, 78, 81, 86][i], 0.6), t, 0.8, pan=0.2)
 for i in range(5):  # five bases land on beats
     place(tick([74, 76, 78, 81, 83][i], 0.9), 9.5 + i * BEAT, 0.9, pan=-0.4 + 0.2 * i)
