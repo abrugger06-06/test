@@ -197,6 +197,10 @@ for i in range(5):  # five bases land on beats
 for i, nt in enumerate([74, 78, 81]):  # lid swings back down
     place(tick(nt, 0.7 + 0.2 * i), 13.0 + i * BEAT, 0.8, pan=0.3)
 place(snap(), 14.5, 1.8)  # second snap shut, beat 2 of bar 7
+place(kick(0.6), 15.0, 0.5)  # case tips onto its side, lid stays put
+place(tick(74, 0.9), 15.0, 0.9, pan=0.3)
+place(kick(0.5), 15.625, 0.45)  # back upright
+place(tick(81, 0.7), 15.625, 0.8, pan=0.3)
 
 # Outro: final chord on 16 s, ring out to 20 s.
 place(kick(1.2), 16.0, 1.0)

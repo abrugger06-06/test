@@ -1,6 +1,7 @@
 // Serve site/ and capture frames from video.html with headless Chromium.
 //   node scripts/capture.mjs frames OUT_DIR FPS T0 T1      every frame in [T0, T1)
 //   node scripts/capture.mjs stills OUT_DIR t1 t2 ...       named stills (t-<time>.png)
+//   node scripts/capture.mjs insta OUT_DIR design ...       Instagram stills from insta.html (<design>.png)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -24,6 +25,21 @@ const port = server.address().port;
 const [mode, out, ...rest] = process.argv.slice(2);
 fs.mkdirSync(out, { recursive: true });
 const browser = await playwright.chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+if (mode === 'insta') {
+  for (const d of rest) {
+    const [w, h] = d.startsWith('story') ? [1080, 1920] : d.startsWith('square') ? [1080, 1080] : [1080, 1350];
+    const p = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
+    p.on('pageerror', e => console.log('[pageerror]', e.message));
+    await p.goto(`http://127.0.0.1:${port}/insta.html?d=${d}`);
+    await p.waitForFunction('window.__ready === true', null, { timeout: 300000 });
+    await p.screenshot({ path: path.join(out, `${d}.png`) });
+    await p.close();
+    console.log('wrote', d);
+  }
+  await browser.close();
+  server.close();
+  process.exit(0);
+}
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
 page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') console.log('[page]', m.text()); });
 page.on('pageerror', e => console.log('[pageerror]', e.message));

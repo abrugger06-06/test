@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fluxcase Instagram</title>
+<style>
+  @font-face { font-family: Archivo; font-weight: 800; font-stretch: 125%; src: url(fonts/archivo-800.ttf); font-display: block; }
+  @font-face { font-family: Archivo; font-weight: 900; font-stretch: 125%; src: url(fonts/archivo-900.ttf); font-display: block; }
+  @font-face { font-family: JBM; font-weight: 700; src: url(fonts/JetBrainsMono-Bold.ttf); font-display: block; }
+  :root { --ink: #111413; --bg: #F3F4F2; --grey: #E2E2E2; --deep: #1D6B62; }
+  html, body { margin: 0; overflow: hidden; }
+  canvas { position: absolute; left: 0; top: 0; }
+  .t { position: absolute; color: var(--ink); white-space: nowrap; }
+  .h { font-family: Archivo; font-weight: 900; font-stretch: 125%; letter-spacing: -0.01em; line-height: 0.98; }
+  .s { font-family: Archivo; font-weight: 800; font-stretch: 125%; line-height: 1.12; }
+  .m { font-family: JBM; font-weight: 700; letter-spacing: 0.02em; }
+  .deep { color: var(--deep); }
+  .rule { position: absolute; height: 6px; background: var(--deep); }
+  .label { position: absolute; transform: translateX(-50%); font-family: JBM; font-weight: 700; font-size: 24px; color: var(--ink); white-space: nowrap; text-align: center; }
+  .label i { display: block; height: 3px; background: var(--ink); margin: 0 auto 10px; width: 100%; }
+  .foot { position: absolute; left: 64px; right: 64px; display: flex; justify-content: space-between; align-items: baseline; }
+  .foot b { font-family: Archivo; font-weight: 900; font-stretch: 125%; font-size: 34px; color: var(--ink); }
+  .foot span { font-family: JBM; font-weight: 700; font-size: 22px; color: var(--ink); }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui"></div>
+<script type="module">
+// Instagram stills: insta.html?d=<design>. Sizes: feed 1080x1350, square 1080x1080, story 1080x1920.
+const D = new URLSearchParams(location.search).get('d') || 'feed-launch';
+const SIZE = D.startsWith('story') ? [1080, 1920] : D.startsWith('square') ? [1080, 1080] : [1080, 1350];
+window.STAGE = { W: SIZE[0], H: SIZE[1] };
+const [W, H] = SIZE;
+document.body.style.width = W + 'px';
+document.body.style.height = H + 'px';
+const c = document.getElementById('c');
+c.width = W; c.height = H;
+c.style.width = W + 'px'; c.style.height = H + 'px';
+
+const { THREE, scene, camera, makeCase, partsFor, CASES, ORDER, COL, look, sph, render } = await import('./engine.js');
+
+const ui = document.getElementById('ui');
+const el = (html, style, cls = 't') => {
+  const d = document.createElement('div');
+  d.className = cls; d.innerHTML = html; d.style.cssText = style;
+  ui.appendChild(d); return d;
+};
+const foot = (y, right = 'Kickstarter. November 1, 2026.') =>
+  el(`<b>FLUXCASE</b><span>${right}</span>`, `top:${y}px`, 'foot');
+const add = (k, opts) => { const c = makeCase(partsFor(k), opts); scene.add(c.root); c.set({ color: COL.black }); return c; };
+const deg = THREE.MathUtils.degToRad;
+let bg = '#E2E2E2';
+
+const designs = {
+  // 1. The hook: the lid a few mm from shut, magnets about to take it.
+  'feed-closes'() {
+    el('It closes<br>itself.', 'left:64px; top:84px; font-size:112px', 't h');
+    el('Ring magnets pull the lid shut.', 'left:68px; top:330px; font-size:26px', 't m');
+    const a = add('c12');
+    a.root.rotation.y = deg(-14);
+    a.set({ lift: 7, tiltX: 0.03, color: COL.black });
+    look(sph(330, -8, 18, [0, 34, 0]), [0, 34, 0], 30, 0, 170);
+    foot(1262);
+  },
+  // 2. How it stays shut: exploded 8-vial with vials and silver ring magnets.
+  'feed-magnets'() {
+    el('Ring magnets in<br>the base and lid.', 'left:64px; top:84px; font-size:66px', 't s');
+    el('No clips.', 'left:64px; top:250px; font-size:104px', 't h');
+    const a = add('c8', { vials: true });
+    a.root.rotation.y = deg(-12);
+    a.set({ lift: 62, back: 58, tiltX: -1.95, magOut: 3.2, vialLift: 20, color: COL.black });
+    look(sph(600, -2, 34, [0, 66, 10]), [0, 66, 10], 30, 0, 250);
+    foot(1262);
+  },
+  // 3. Five sizes, 3 over 2, labeled.
+  'feed-sizes'() {
+    el('Five sizes.', 'left:64px; top:84px; font-size:112px', 't h');
+    el('For 3 mL and 10 mL vials.', 'left:68px; top:218px; font-size:26px', 't m');
+    const rows = [['c12', 'c6', 'c4'], ['c8', 'c7']];
+    const placed = [];
+    const GAP = 46, rowZ = [-150, 150];
+    rows.forEach((ks, r) => {
+      const cs = ks.map(k => add(k));
+      const w = cs.reduce((s, c) => s + c.dia, 0) + GAP * (cs.length - 1);
+      let x = -w / 2;
+      cs.forEach((c, i) => {
+        c.root.position.set(x + c.dia / 2, 0, rowZ[r]);
+        c.root.rotation.y = deg(-10);
+        placed.push({ c, k: ks[i], x: x + c.dia / 2, z: rowZ[r] });
+        x += c.dia + GAP;
+      });
+    });
+    const tgt = [0, 10, 0];
+    look(sph(2000, 0, 40, tgt), tgt, 16, 0, 110);
+    camera.updateMatrixWorld();
+    placed.forEach(p => {
+      const v = new THREE.Vector3(p.x, 0, p.z + p.c.dia / 2 + 8).project(camera);
+      el(`<i></i>${CASES[p.k].label}`, `left:${(v.x * .5 + .5) * W}px; top:${(-v.y * .5 + .5) * H + 18}px`, 'label');
+    });
+    foot(1262);
+  },
+  // 4. The launch card.
+  'feed-launch'() { launch({ top: 84, size: 76, dist: 800, caseY: 250, foot: 1262 }); },
+  'square-launch'() { launch({ top: 64, size: 62, dist: 980, caseY: 300, foot: 1000 }); },
+  'story-launch'() { launch({ top: 250, size: 80, dist: 1080, caseY: 250, foot: 1600 }); },
+};
+
+function launch({ top, size, dist, caseY, foot: fy }) {
+  bg = '#F3F4F2';
+  el('FLUXCASE', `left:64px; top:${top}px; font-size:${Math.round(size * 0.75)}px`, 't h');
+  el('', `left:68px; top:${top + size * 0.86}px; width:150px`, 'rule');
+  el('Back it on<br><span class="deep">Kickstarter.</span>', `left:64px; top:${top + size * 1.3}px; font-size:${size + 24}px`, 't h');
+  const headH = 2 * (size + 24) * 0.98;   // two lines of the headline
+  el('Launching November 1, 2026.', `left:66px; top:${top + size * 1.3 + headH + 18}px; font-size:${Math.round(size * 0.52)}px`, 't s');
+  // One closed, one open with vials: what it is and why it is different, in one picture.
+  const closed = add('c12');
+  closed.root.position.set(-62, 0, 20);
+  closed.root.rotation.y = deg(-16);
+  const open = add('c8', { vials: true });
+  open.root.position.set(70, 0, -30);
+  open.root.rotation.y = deg(-8);
+  // Lid opened a little less than in the film, so its inner face is not square to the key light.
+  open.set({ lift: 58, back: 56, tiltX: -1.62, vialLift: 20, color: COL.black });
+  const tgt = [6, 48, 0];
+  look(sph(dist, -6, 22, tgt), tgt, 30, 0, caseY);
+  el(`<b>by The 3D Print Depot</b><span>Black PETG. Printed in Texas.</span>`, `top:${fy}px`, 'foot');
+}
+
+designs[D]();
+await document.fonts.load('900 40px Archivo');
+await document.fonts.load('800 40px Archivo');
+await document.fonts.load('700 20px JBM');
+await document.fonts.ready;
+document.body.style.background = bg;
+render(bg);
+window.__ready = true;
+</script>
+</body>
+</html>
