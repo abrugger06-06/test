@@ -44,36 +44,36 @@ const LAUNCH = 'Launching November 1, 2026.';
 // head: headline (\n = line break, *word* = the one teal accent); line: the second line under it;
 // scene: what is shown. Launch ads put the date in `line`, so they drop the small date at the bottom.
 const ADS = [
-  { head: 'It closes\n*itself.*', line: 'Ring magnets pull the lid shut.', scene: ['hover', 'c12'] },
-  { head: 'Magnetic\n*vial cases.*', line: 'For 3 mL and 10 mL vials.', scene: ['closed', 'c12'] },
-  { head: 'Ring *magnets*\nin the base\nand lid.', size: 80, scene: ['open', 'c8', { vials: true }] },
-  { head: 'No *clips.*', line: 'Ring magnets pull it shut\nand hold it there.', scene: ['open', 'c8', { magOut: 10 }], theme: 'grey' },
-  { head: 'Held shut\nby *magnets.*', line: 'Ring magnets in the base and lid.', scene: ['tipped', 'c7'] },
+  { head: 'It closes\n*itself.*', line: 'Magnets pull the lid shut.', scene: ['hover', 'c12'] },
+  { head: 'Magnetic\n*vial cases.*', line: 'For 3 mL and 10 mL vials.', scene: ['closed', 'c12'], noKick: true },
+  { head: '*Magnets* in\nthe base\nand lid.', size: 84, scene: ['open', 'c8', { vials: true }] },
+  { head: 'No *clips.*', line: 'Magnets pull it shut\nand hold it there.', scene: ['open', 'c8', { magOut: 10 }], theme: 'grey' },
+  { head: 'Held shut\nby *magnets.*', line: 'Set into the base and the lid.', scene: ['tipped', 'c7'] },
   { head: '*Five* sizes.', line: 'For 3 mL and 10 mL vials.', scene: ['grid'] },
-  { head: '3 mL. 10 mL.\n*Mixed.*', scene: ['grid'], theme: 'grey' },
-  { head: '*12 vials.*\n3 mL.', line: 'Ring magnets in the base and lid.', scene: ['open', 'c12'] },
+  { head: '3 mL, 10 mL,\nor *both.*', line: 'Five cases. Pick yours.', scene: ['trio'], theme: 'grey' },
+  { head: '*12 vials.*\n3 mL.', line: 'Magnets in the base and lid.', scene: ['open', 'c12'] },
   { head: '*6 vials.*\n3 mL.', line: 'No clips. Magnets pull it shut.', scene: ['open', 'c6'], theme: 'grey' },
   { head: '*4 vials.*\n10 mL.', line: 'No friction-fit lid.', scene: ['open', 'c4'] },
-  { head: '*8 vials.*\n10 mL.', line: 'Ring magnets hold the lid shut.', scene: ['open', 'c8', { vials: true }], theme: 'grey' },
-  { head: '3 mL *and*\n10 mL in\none case.', size: 84, line: '7-Vial Mixed', scene: ['open', 'c7', { vials: true }] },
+  { head: '*8 vials.*\n10 mL.', line: 'Magnets hold the lid shut.', scene: ['open', 'c8', { vials: true }], theme: 'grey' },
+  { head: '3 mL and\n10 mL in\n*one case.*', size: 84, line: '7-Vial Mixed', scene: ['open', 'c7', { vials: true }] },
   { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['pair'], launch: true },
   { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['bleed'], launch: true },
   { head: 'One well\nper *vial.*', line: 'For 3 mL and 10 mL vials.', scene: ['top', 'c7', { vials: true }], theme: 'grey' },
-  { head: 'Silver *ring*\n*magnets.*', line: 'Set into the base and the lid.', scene: ['macro', 'c8'] },
+  { head: 'Silver\n*magnets.*', line: 'Set into the base and the lid.', scene: ['macro', 'c8'] },
   { head: 'Pulls shut.\n*Holds shut.*', scene: ['hover', 'c4'], theme: 'grey' },
-  { head: 'No clips.\nNo *friction lid.*', size: 84, line: 'The magnets do the work.', scene: ['closed', 'c8'] },
-  { head: 'Black *PETG.*', line: '3D printed to order in Texas.', scene: ['closed', 'c7'], theme: 'grey' },
+  { head: 'Just\n*magnets.*', line: 'No clips. No friction-fit lid.', scene: ['closed', 'c8'] },
+  { head: '*Magnetic.*\nBlack PETG.', line: '3D printed to order in Texas.', scene: ['closed', 'c7'], theme: 'grey' },
   { head: 'Printed to order\nin *Texas.*', size: 84, line: 'Black PETG.', scene: ['closed', 'c4', { el: 12 }] },
   { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['bleed'], fmt: 'square', launch: true },
   { head: 'Back it on\n*Kickstarter.*', line: LAUNCH, scene: ['pair'], fmt: 'story', launch: true },
-  { head: 'It closes\n*itself.*', line: 'Ring magnets pull it shut.', scene: ['open', 'c8', { vials: true }], fmt: 'story' },
+  { head: 'It closes\n*itself.*', line: 'Magnets pull it shut.', scene: ['open', 'c8', { vials: true }], fmt: 'story' },
   { head: 'Drop the lid.\nThe magnets\n*close it.*', size: 76, scene: ['hover', 'c6'], fmt: 'square', theme: 'grey' },
-  { head: 'Closed.\n*Open.*', line: 'Ring magnets pull it shut.', scene: ['pair'] },
+  { head: 'Closed.\n*Open.*', line: 'Magnets pull it shut.', scene: ['pair', null, { keys: ['c6', 'c4'] }] },
   { head: 'Magnets in.\n*Clips out.*', scene: ['open', 'c12', { magOut: 8 }], theme: 'grey' },
-  { head: '*Kickstarter.*\nNov 1.', line: 'Five magnetic vial cases.', scene: ['grid'], launch: true },
-  { head: 'Closes on\nits *own.*', line: 'Set the lid close. The magnets\npull it shut.', size: 88, scene: ['closed', 'c6', { el: 10 }] },
+  { head: 'Back it\n*Nov 1, 2026.*', line: 'On Kickstarter. Five magnetic vial cases.', scene: ['grid'], launch: true },
+  { head: 'The magnets\n*do the work.*', size: 84, line: 'Set the lid on. They pull it shut.', scene: ['hover', 'c7'] },
   { head: '3 mL and\n*10 mL vials.*', line: 'Five sizes. All black PETG.', scene: ['top', 'c8', { vials: true }], theme: 'grey' },
-  { head: 'Five *magnetic*\nvial cases.', size: 84, line: LAUNCH, scene: ['bleed'], fmt: 'story', launch: true },
+  { head: '*Magnetic*\nvial cases.', line: 'Back it on Kickstarter.\nLaunching November 1, 2026.', scene: ['bleed'], fmt: 'story', launch: true },
 ];
 
 const ad = ADS[N - 1];
@@ -96,11 +96,11 @@ const top = document.createElement('div');
 top.id = 'top';
 top.style.top = (story ? 250 : square ? 60 : 72) + 'px';
 const size = ad.size || (story ? 104 : square ? 84 : 92);
-const markSize = Math.round(size * 0.62);
+const markSize = story ? 64 : square ? 52 : 57;   // one wordmark size per format
 const acc = t => t.replace(/\*(.+?)\*/g, '<span class="acc">$1</span>');
 top.innerHTML =
   `<div style="display:flex; justify-content:space-between; align-items:baseline"><div class="h" style="font-size:${markSize}px">FLUXCASE</div>` +
-  `<div class="kick" style="font-size:${Math.round(markSize * 0.46)}px">Magnetic vial cases</div></div>` +
+  `<div class="kick" style="font-size:${Math.round(markSize * 0.46)}px">${ad.noKick ? '' : 'Magnetic vial cases'}</div></div>` +
   `<div class="rule" style="margin:${Math.round(markSize * 0.28)}px 0 ${Math.round(size * 0.36)}px"></div>` +
   `<div class="h" style="font-size:${size}px">${acc(ad.head).split('\n').join('<br>')}</div>` +
   (ad.line ? `<div class="s" style="font-size:${Math.round(size * 0.5)}px; margin-top:${Math.round(size * 0.24)}px">${ad.line.split('\n').join('<br>')}</div>` : '');
@@ -108,7 +108,7 @@ ui.appendChild(top);
 
 // Small print: the launch date (unless the line already carries it) and the vials note.
 const [kind, k, opt = {}] = ad.scene;
-const vials = !!opt.vials || kind === 'pair';
+const vials = !!opt.vials || (kind === 'pair' && !opt.keys);
 const footY = story ? H - 330 - 70 : H - 80;   // stories: clear of Instagram's bottom 330 px
 const foot = document.createElement('div');
 foot.id = 'foot';
@@ -136,10 +136,11 @@ const region = {
 
 // ---------- scenes ----------
 const add = (k, opts) => { const c = makeCase(partsFor(k), opts); scene.add(c.root); c.set({ color: COL.black }); return c; };
-const OPEN = { lift: 62, back: 58, tiltX: -1.62 };          // lid swung back, inner face toward camera
+// Lid swung back, inner face toward camera; scaled to the case so small cases stay large in frame.
+const openPose = c => ({ lift: c.dia * 0.66, back: c.dia * 0.62, tiltX: -1.62 });
 
 // Fit the camera so every non-shadow mesh of `objs` fills the region; az/el in degrees.
-function fit(objs, az, el, fov = 30, fill = 0.9) {
+function fit(objs, az, el, fov = 30, fill = 0.9, top = false) {
   const box = new THREE.Box3();
   objs.forEach(o => o.traverse(m => {
     let shown = true; for (let q = m; q; q = q.parent) if (!q.visible) shown = false;
@@ -166,7 +167,8 @@ function fit(objs, az, el, fov = 30, fill = 0.9) {
   }
   // Shift so the projected box centre lands on the region centre.
   const cx = ((ext.x0 + ext.x1) / 4 + 0.5) * W, cy = (0.5 - (ext.y0 + ext.y1) / 4) * H;
-  const tx = (region.left + region.right) / 2, ty = (region.top + region.bottom) / 2;
+  const ph = (ext.y1 - ext.y0) / 4 * H;   // half the projected height
+  const tx = (region.left + region.right) / 2, ty = top ? region.top + ph : (region.top + region.bottom) / 2;
   camera.setViewOffset(W, H, cx - tx, cy - ty, W, H);
   camera.updateProjectionMatrix();
 }
@@ -190,21 +192,28 @@ function labelUnder(c, k, baseY) {
 const SCENES = {
   closed() { const c = add(k); c.root.rotation.y = deg(-16); fit([c.root], -6, opt.el ?? 22); },
   hover() { const c = add(k); c.root.rotation.y = deg(-14); c.set({ lift: 9, tiltX: 0.03, color: COL.black }); fit([c.root], -8, 18); },
+  trio() { // three cases grouped: the 6-Vial, the 4-Vial and the 7-Vial Mixed
+    const a = add('c6'), b = add('c4'), m = add('c7');
+    m.root.position.set(0, 0, -60); a.root.position.set(-70, 0, 40); b.root.position.set(72, 0, 34);
+    [a, b, m].forEach((c, i) => c.root.rotation.y = deg(-12 + i * 9));
+    fit([a.root, b.root, m.root], -4, 22);
+  },
   open() {
     const c = add(k, { vials: !!opt.vials });
     c.root.rotation.y = deg(-12);
-    c.set({ ...OPEN, magOut: opt.magOut || 0, vialLift: opt.vials ? 20 : 0, color: COL.black });
-    fit([c.root], -2, 32);
+    c.set({ ...openPose(c), magOut: opt.magOut || 0, vialLift: opt.vials ? 20 : 0, color: COL.black });
+    fit([c.root], -2, 32, 30, 0.95);
   },
   top() {   // lid off to the side, looking down into the wells
     const c = add(k, { vials: !!opt.vials });
     c.lid.visible = false;
     c.root.rotation.y = deg(-8);
-    fit([c.root], -4, 36, 30, 0.9);
+    c.set({ vialLift: 20, color: COL.black });   // vials raised so the glass reads
+    fit([c.root], -4, 34, 30, 0.92);
   },
-  macro() { // close on the silver rings in the base, lid swung back out of frame
+  macro() { // close on the silver magnets in the base, lid swung back out of frame
     const c = add(k);
-    c.set({ ...OPEN, magOut: 4, color: COL.black });
+    c.set({ ...openPose(c), magOut: 4, color: COL.black });
     c.lid.visible = false;
     c.root.rotation.y = deg(-12);
     fit([c.root], -4, 48, 24, 0.98);
@@ -235,7 +244,10 @@ const SCENES = {
   bleed() { // the launch end card's row: big, running off the right edge
     const cs = rowOf(ORDER, 44);
     cs.forEach(c => c.root.rotation.y = deg(-10));
-    fit(cs.slice(0, story ? 2 : 3).map(c => c.root), 0, 17, 22, 1.08);
+    // Fit four, with the frame's right edge pulled in so the fourth is cut by it; sit the row under the copy.
+    region.right = W + 70;                                      // the fourth case runs past the edge
+    region.bottom = region.top + (region.bottom - region.top) * 0.72;
+    fit(cs.slice(0, 3).map(c => c.root), 0, 20, 22, 1);
   },
   grid() {
     const back = rowOf(['c12', 'c6', 'c4'], 46, -150), front = rowOf(['c8', 'c7'], 46, 150);
@@ -249,10 +261,11 @@ const SCENES = {
       rw.forEach(c => labelUnder(c, KS[all.indexOf(c)], y));
     });
   },
-  pair() {  // one closed, one open with vials
-    const a = add('c12'); a.root.position.set(-62, 0, 20); a.root.rotation.y = deg(-16);
-    const b = add('c8', { vials: true }); b.root.position.set(70, 0, -30); b.root.rotation.y = deg(-8);
-    b.set({ ...OPEN, vialLift: 20, color: COL.black });
+  pair() {  // one closed, one open (the 8-Vial with vials unless other cases are given)
+    const [ka, kb] = opt.keys || ['c12', 'c8'], withVials = !opt.keys;
+    const a = add(ka); a.root.position.set(-62, 0, 20); a.root.rotation.y = deg(-16);
+    const b = add(kb, { vials: withVials }); b.root.position.set(70, 0, -30); b.root.rotation.y = deg(-8);
+    b.set({ ...openPose(b), vialLift: withVials ? 20 : 0, color: COL.black });
     fit([a.root, b.root], -6, 22);
   },
 };

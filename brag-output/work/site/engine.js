@@ -69,21 +69,32 @@ async function loadPart(entry) {
   return g;
 }
 
-// Magnets are always silver. The CAD models them as plain discs; the brief says ring magnets,
-// so they are drawn as rings with the CAD's outer diameter, thickness and position.
-const magnetMat = new THREE.MeshStandardMaterial({ color: 0xD4D7DA, metalness: 1, roughness: 0.16, envMapIntensity: 1.5, emissive: 0xC8CBCE, emissiveIntensity: 0 });
-function ringGeometry(mags) {
+// Magnets are always silver: solid discs at the CAD's size, thickness and position. A flat face
+// reflects one flat tone, so each disc gets a small edge bevel and face normals that tilt toward the
+// rim (shading only, the face stays flat), which gives polished metal its highlight sweep.
+function discGeometry(mags) {
   const gs = mags.map(m => {
-    const r = m.r, ri = r * 0.42, c = Math.min(0.3, r * 0.08), z0 = m.z0, z1 = m.z1;
-    const pts = [[ri, z0 + c], [ri + c, z0], [r - c, z0], [r, z0 + c], [r, z1 - c], [r - c, z1], [ri + c, z1], [ri, z1 - c], [ri, z0 + c]]
+    const r = m.r, c = Math.min(0.35, r * 0.1), z0 = m.z0, z1 = m.z1;
+    const pts = [[0, z0], [r * 0.35, z0], [r * 0.7, z0], [r - c, z0], [r, z0 + c], [r, z1 - c], [r - c, z1], [r * 0.7, z1], [r * 0.35, z1], [0, z1]]
       .map(([x, y]) => new THREE.Vector2(x, y));
     const g = new THREE.LatheGeometry(pts, 48);
     g.rotateX(Math.PI / 2);
     g.translate(m.x, m.y, 0);
-    return toCreasedNormals(g, THREE.MathUtils.degToRad(40));
+    g.computeVertexNormals();
+    const p = g.attributes.position, n = g.attributes.normal, k = 0.16;
+    for (let i = 0; i < p.count; i++) {
+      const dx = p.getX(i) - m.x, dy = p.getY(i) - m.y, z = p.getZ(i);
+      const face = Math.abs(z - z1) < 1e-3 ? 1 : Math.abs(z - z0) < 1e-3 ? -1 : 0;
+      if (face && Math.hypot(dx, dy) <= r - c + 1e-3) {
+        const v = new THREE.Vector3(dx * k / r, dy * k / r, face).normalize();
+        n.setXYZ(i, v.x, v.y, v.z);
+      }
+    }
+    return g;
   });
   return mergeGeometries(gs);
 }
+const magnetMat = new THREE.MeshStandardMaterial({ color: 0xCDD1D5, metalness: 1, roughness: 0.14, envMapIntensity: 1.5, emissive: 0xC8CBCE, emissiveIntensity: 0 });
 // Soft contact shadow under each case.
 const contactTex = (() => {
   // 512 px with a little noise, so the soft falloff has no visible steps.
@@ -146,7 +157,7 @@ function makeCase(parts, { vials = false } = {}) {
   const baseMesh = mk(base.geo, mat);
   baseMesh.position.set(-cx, -cy, 0);
   const baseMagGrp = new THREE.Group();
-  const bm = mk(ringGeometry(MAGS[baseMag.entry.name]), magnetMat);
+  const bm = mk(discGeometry(MAGS[baseMag.entry.name]), magnetMat);
   bm.position.set(-cx, -cy, 0);
   baseMagGrp.add(bm);
   const vialGrp = new THREE.Group();
@@ -171,7 +182,7 @@ function makeCase(parts, { vials = false } = {}) {
   lidInner.position.set(-lcx, lcy, lidH / 2);
   const lidMesh = mk(lid.geo, mat);
   const lidMagGrp = new THREE.Group();
-  lidMagGrp.add(mk(ringGeometry(MAGS[lidMag.entry.name]), magnetMat));
+  lidMagGrp.add(mk(discGeometry(MAGS[lidMag.entry.name]), magnetMat));
   lidInner.add(lidMesh, lidMagGrp);
   lidPivot.add(lidInner);
   cad.add(lidPivot);

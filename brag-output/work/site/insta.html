@@ -56,16 +56,16 @@ const designs = {
   // 1. The hook: the lid a few mm from shut, magnets about to take it.
   'feed-closes'() {
     el('It closes<br>itself.', 'left:64px; top:84px; font-size:112px', 't h');
-    el('Ring magnets pull the lid shut.', 'left:68px; top:330px; font-size:26px', 't m');
+    el('Magnets pull the lid shut.', 'left:68px; top:330px; font-size:26px', 't m');
     const a = add('c12');
     a.root.rotation.y = deg(-14);
     a.set({ lift: 7, tiltX: 0.03, color: COL.black });
     look(sph(330, -8, 18, [0, 34, 0]), [0, 34, 0], 30, 0, 170);
     foot(1262);
   },
-  // 2. How it stays shut: exploded 8-vial with vials and silver ring magnets.
+  // 2. How it stays shut: exploded 8-vial with vials and silver magnets.
   'feed-magnets'() {
-    el('Ring magnets in<br>the base and lid.', 'left:64px; top:84px; font-size:66px', 't s');
+    el('Magnets in the<br>base and lid.', 'left:64px; top:84px; font-size:66px', 't s');
     el('No clips.', 'left:64px; top:250px; font-size:104px', 't h');
     const a = add('c8', { vials: true });
     a.root.rotation.y = deg(-12);

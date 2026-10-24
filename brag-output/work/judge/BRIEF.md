@@ -12,7 +12,7 @@ three.js, and has a soundtrack written in code (120 BPM, so a beat is 0.5 s and 
 
 A stranger who watches it once must come away knowing:
 - what it is: 3D printed magnetic vial cases for 3 mL and 10 mL vials
-- why it is different: ring magnets in the base and lid pull the lid shut and hold it there
+- why it is different: magnets (solid discs) in the base and lid pull the lid shut and hold it there
 - the range: 5 case sizes, all black PETG (the only material offered)
 - how to get one: back it on Kickstarter, launching November 1, 2026
 
@@ -30,7 +30,7 @@ A stranger who watches it once must come away knowing:
 - Wherever vials are shown, a small "Vials not included." line must be on screen.
 
 ## Facts that are allowed on screen
-Ring magnets in base and lid pull the case shut and hold it, no clips. PETG, 3D printed to order in
+Magnets (solid discs) in the base and lid pull the case shut and hold it, no clips. PETG, 3D printed to order in
 Texas. Five cases: 12-Vial 3 mL, 6-Vial 3 mL, 4-Vial 10 mL, 8-Vial 10 mL,
 7-Vial Mixed. Kickstarter launch November 1, 2026. No Kickstarter URL exists yet.
 

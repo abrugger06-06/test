@@ -9,7 +9,7 @@ and one bar is 2 s. Every cut lands on a beat: 2.0, 5.0, 9.0, 13.0, 16.0.
 |---|---|---|---|---|
 | 0.0-2.0 | Hook | Close-up, black 12-vial. The lid hovers with the wells and silver magnets visible, drifts down, then the magnets take it the last 9 mm and it snaps shut at 1.5 s (beat 4) with a small rebound. | "It closes itself." | Pad, three rising ticks on beats 1 to 3, magnet snap on beat 4 |
 | 2.0-5.0 | Reveal | Pull back and orbit to a three-quarter hero view of the closed case. | FLUXCASE (wordmark, deep teal rule) at 2.25 / "Magnetic cases for 3 mL and 10 mL vials." at 2.25 | Groove enters on 2.0 |
-| 5.0-9.0 | How it stays shut | Black 8-vial with plain 10 mL vials (teal flip caps) in its wells. The lid lifts, swings back and opens toward camera. At 6.5 s the silver ring magnets in the base and lid rise and flash. | "Ring magnets in the base and lid." then "No clips." at 7.0, small: "Vials not included." | Four ticks from 6.5 s as the magnets light |
+| 5.0-9.0 | How it stays shut | Black 8-vial with plain 10 mL vials (teal flip caps) in its wells. The lid lifts, swings back and opens toward camera. At 6.5 s the silver magnets in the base and lid rise and flash. | "Magnets in the base and lid." then "No clips." at 7.0, small: "Vials not included." | Four ticks from 6.5 s as the magnets light |
 | 9.0-13.0 | Five sizes | The five bases slide in, one per beat (landing 9.5, 10.0, 10.5, 11.0, 11.5), each labeled. | "Five sizes." + labels: 12-Vial 3 mL, 6-Vial 3 mL, 4-Vial 10 mL, 8-Vial 10 mL, 7-Vial Mixed | One tuned tick per landing |
 | 13.0-16.0 | Pulls shut | Black 7-vial. The open lid swings back down, drifts, and the magnets snap it shut at 14.5 s (on the beat). | "Pulls shut. Holds shut." / small: "Black PETG. 3D printed to order in Texas." | Three rising ticks, snap on 14.5 |
 | 16.0-20.0 | Outro | All five cases closed in a row, with a slow push. | FLUXCASE / "Back it on Kickstarter." / "Launching November 1, 2026." | Final D chord with bells, ringing out |
@@ -17,4 +17,4 @@ and one bar is 2 s. Every cut lands on a beat: 2.0, 5.0, 9.0, 13.0, 16.0.
 Decisions: every case is black PETG (the only material offered), magnets silver. No dimensions on screen, no URL, no pricing, no invented claims.
 Case names: "8-Vial 10 mL" and "7-Vial Mixed".
 Poster: a settled outro frame (the ask, the date, all five cases).
-Magnets: the CAD models them as discs; they are drawn as silver rings (same outer diameter, thickness and position) to match "ring magnets".
+Magnets: solid silver discs, rendered straight from the CAD.

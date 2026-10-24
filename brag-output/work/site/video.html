@@ -33,7 +33,7 @@
   <div id="rule" class="rule" style="left:124px; top:516px; width:0"></div>
   <div id="sub" class="t s" style="left:120px; top:560px; font-size:50px">Magnetic cases for<br>3 and 10 mL vials.</div>
 
-  <div id="mag1" class="t s" style="left:120px; top:330px; font-size:62px">Ring magnets in<br>the base and lid.</div>
+  <div id="mag1" class="t s" style="left:120px; top:330px; font-size:62px">Magnets in the<br>base and lid.</div>
   <div id="mag2" class="t h" style="left:120px; top:494px; font-size:96px">No clips.</div>
   <div id="novial" class="t m" style="left:124px; top:982px; font-size:24px">Vials not included.</div>
 
@@ -128,21 +128,32 @@ async function loadPart(entry) {
   return g;
 }
 
-// Magnets are always silver. The CAD models them as plain discs; the brief says ring magnets,
-// so they are drawn as rings with the CAD's outer diameter, thickness and position.
-const magnetMat = new THREE.MeshStandardMaterial({ color: 0xD4D7DA, metalness: 1, roughness: 0.16, envMapIntensity: 1.5, emissive: 0xC8CBCE, emissiveIntensity: 0 });
-function ringGeometry(mags) {
+// Magnets are always silver: solid discs at the CAD's size, thickness and position. A flat face
+// reflects one flat tone, so each disc gets a small edge bevel and face normals that tilt toward the
+// rim (shading only, the face stays flat), which gives polished metal its highlight sweep.
+function discGeometry(mags) {
   const gs = mags.map(m => {
-    const r = m.r, ri = r * 0.42, c = Math.min(0.3, r * 0.08), z0 = m.z0, z1 = m.z1;
-    const pts = [[ri, z0 + c], [ri + c, z0], [r - c, z0], [r, z0 + c], [r, z1 - c], [r - c, z1], [ri + c, z1], [ri, z1 - c], [ri, z0 + c]]
+    const r = m.r, c = Math.min(0.35, r * 0.1), z0 = m.z0, z1 = m.z1;
+    const pts = [[0, z0], [r * 0.35, z0], [r * 0.7, z0], [r - c, z0], [r, z0 + c], [r, z1 - c], [r - c, z1], [r * 0.7, z1], [r * 0.35, z1], [0, z1]]
       .map(([x, y]) => new THREE.Vector2(x, y));
     const g = new THREE.LatheGeometry(pts, 48);
     g.rotateX(Math.PI / 2);
     g.translate(m.x, m.y, 0);
-    return toCreasedNormals(g, THREE.MathUtils.degToRad(40));
+    g.computeVertexNormals();
+    const p = g.attributes.position, n = g.attributes.normal, k = 0.16;
+    for (let i = 0; i < p.count; i++) {
+      const dx = p.getX(i) - m.x, dy = p.getY(i) - m.y, z = p.getZ(i);
+      const face = Math.abs(z - z1) < 1e-3 ? 1 : Math.abs(z - z0) < 1e-3 ? -1 : 0;
+      if (face && Math.hypot(dx, dy) <= r - c + 1e-3) {
+        const v = new THREE.Vector3(dx * k / r, dy * k / r, face).normalize();
+        n.setXYZ(i, v.x, v.y, v.z);
+      }
+    }
+    return g;
   });
   return mergeGeometries(gs);
 }
+const magnetMat = new THREE.MeshStandardMaterial({ color: 0xCDD1D5, metalness: 1, roughness: 0.14, envMapIntensity: 1.5, emissive: 0xC8CBCE, emissiveIntensity: 0 });
 // Soft contact shadow under each case.
 const contactTex = (() => {
   const cv = document.createElement('canvas'); cv.width = cv.height = 256;
@@ -195,7 +206,7 @@ function makeCase(parts, { vials = false } = {}) {
   const baseMesh = mk(base.geo, mat);
   baseMesh.position.set(-cx, -cy, 0);
   const baseMagGrp = new THREE.Group();
-  const bm = mk(ringGeometry(MAGS[baseMag.entry.name]), magnetMat);
+  const bm = mk(discGeometry(MAGS[baseMag.entry.name]), magnetMat);
   bm.position.set(-cx, -cy, 0);
   baseMagGrp.add(bm);
   const vialGrp = new THREE.Group();
@@ -218,7 +229,7 @@ function makeCase(parts, { vials = false } = {}) {
   lidInner.position.set(-lcx, lcy, lidH / 2);
   const lidMesh = mk(lid.geo, mat);
   const lidMagGrp = new THREE.Group();
-  lidMagGrp.add(mk(ringGeometry(MAGS[lidMag.entry.name]), magnetMat));
+  lidMagGrp.add(mk(discGeometry(MAGS[lidMag.entry.name]), magnetMat));
   lidInner.add(lidMesh, lidMagGrp);
   lidPivot.add(lidInner);
   cad.add(lidPivot);
@@ -363,7 +374,7 @@ function renderAt(t) {
     const out = backOut(seg(t, 6.5, 7.0)) * 3.2;                      // magnets rise on beat
     hero8.set({ lift: k * 62, back: k * 58, tiltX: -k * 1.95, magOut: out, vialLift: eio(seg(t, 5.25, 6.25)) * 20, color: COL.black });
     const flash = Math.max(0, 1 - seg(t, 6.5, 7.1)) * (t >= 6.5 ? 1 : 0);
-    // Glass clears while the magnets light, so the base rings read as well as the lid's.
+    // Glass clears while the magnets light, so the base magnets read as well as the lid's.
     glassMat.opacity = 0.32 - 0.2 * Math.min(seg(t, 6.2, 6.5), 1 - seg(t, 7.2, 7.6));
     magnetMat.emissiveIntensity = flash * 0.22;
     magnetMat.envMapIntensity = 1.5 + flash * 1.6;
