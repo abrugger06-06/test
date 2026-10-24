@@ -10,7 +10,7 @@ Kickstarter. This seems kind of half-assed." So judge it as an AD: does it grab,
 someone want to back it? A clean product viewer is not enough.
 
 ## The film
-24 s, 1920x1080, 30 fps, rendered from the real CAD with three.js; soundtrack written in code
+23 s, 1920x1080, 30 fps, rendered from the real CAD with three.js; soundtrack written in code
 (120 BPM: a beat is 0.5 s). Storyboard: `/home/user/test/brag-output/brag-plan.md`.
 
 A stranger who watches once must come away knowing:
