@@ -342,7 +342,7 @@ function sMontage(t) {
     SETS.night.userData.light.intensity = 260000 * on;
     SETS.night.userData.shade.material.emissiveIntensity = 0.9 * on;
     key.intensity = on > 0.5 ? 0.3 : 0.12; kick.intensity = 0.12; rim.intensity = on > 0.5 ? 0.5 : 0.4;
-    fill.color.set(0xffb46a); fill.position.set(-110, 60, 50); fill.intensity = 380000 * on;
+    fill.color.set(0xffb46a); fill.position.set(-95, 120, -125); fill.intensity = 150000 * on;   // from the lamp side
   }
   const tgt = [s.c.root.position.x, s.c.baseH * 0.7 + s.c.root.position.y, s.c.root.position.z];
   const drift = eo(seg(t, s.t0, s.t0 + 0.5));
@@ -436,7 +436,7 @@ function sTip(t) {
   tipLine.visible = true; tipLine.position.set(R + L / 2, 0.15, z); tipLine.scale.set(L * 1.04, 46, 1);
   const ctr = new THREE.Vector3(R + L / 2, R, z);
   fill.position.copy(ctr).add(t < 11.0 ? new THREE.Vector3(-80, 140, 160) : new THREE.Vector3(140, 120, 150));
-  fill.intensity = t < 11.0 ? 120000 * eio(seg(t, 9.9, 10.4)) : 160000;
+  fill.intensity = t < 11.0 ? 120000 * eio(seg(t, 9.9, 10.4)) : 210000;
   let p, tg;
   if (t < 11.0) {
     tg = [52, 40, 0];
@@ -456,6 +456,7 @@ function sTip(t) {
 }
 function sSizes(t) {
   setSet('shelf');
+  SETS.shelf.userData.books.visible = false; SETS.shelf.userData.plant.visible = false;
   show(...row);
   const landAt = i => 12.0 + i * 0.375;
   row.forEach((c, i) => {
@@ -515,8 +516,7 @@ function sEnd(t) {
   setSet('shelf');
   show(...row);
   const lid = t < 17.5 ? 0 : t < 17.7 ? eo(seg(t, 17.5, 17.7)) * 24 : closeGap(t, 17.7, 18.0, 24);
-  SETS.shelf.userData.books.visible = false;
-  SETS.shelf.userData.plant.position.set(350, 0, -150); SETS.shelf.userData.plant.scale.setScalar(0.36);
+  SETS.shelf.userData.books.visible = false; SETS.shelf.userData.plant.visible = false;
   row.forEach((c, i) => { reset(c); c.root.position.set(endX[i], 0, 0); c.root.rotation.y = deg(-10); c.set({ lift: lid }); });
   const tgt = [0, 30, 0];
   const r = lerp(END_R0, END_R1, eio(seg(t, 16.0, 19.5))) * (1 - 0.025 * hit(t, 18.0, 0.3));
@@ -546,8 +546,7 @@ function renderAt(t) {
   fill.intensity = 0; fill.color.set(0xfff1e0);
   tipLine.visible = false; SETS.desk.userData.mug.visible = true;
   SETS.kitchen.userData.jar.position.set(300, 0, -250);   // clear of the wordmark in the title shot
-  SETS.shelf.userData.books.visible = true; SETS.shelf.userData.plant.position.copy(SETS.shelf.userData.plantAt); SETS.shelf.userData.plant.scale.setScalar(0.75);
-  SETS.night.userData.light.intensity = 400000; SETS.night.userData.shade.material.emissiveIntensity = 0.9;
+    SETS.night.userData.light.intensity = 400000; SETS.night.userData.shade.material.emissiveIntensity = 0.9;
   if (t < 2.0) sHook(t);
   else if (t < 4.0) sMontage(t);
   else if (t < 6.5) sTitle(t);

@@ -237,7 +237,7 @@ function rrect(w, d, r, hole = false) {
 // and a slider with its pull. Inner size fits a case up to 96 mm across; the walls stand 46 mm.
 function ring(w, d, r, t, h, mat, bevel = 0, sag = null) {
   const sh = rrect(w, d, r); sh.holes.push(rrect(w - 2 * t, d - 2 * t, Math.max(2, r - t), true));
-  const geo = new THREE.ExtrudeGeometry(sh, { depth: h, steps: sag ? 10 : 1, bevelEnabled: bevel > 0, bevelThickness: bevel, bevelSize: bevel * 0.6, bevelSegments: 3, curveSegments: 14 });
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: h, steps: sag ? 24 : 1, bevelEnabled: bevel > 0, bevelThickness: bevel, bevelSize: bevel * 0.6, bevelSegments: 4, curveSegments: 32 });
   geo.rotateX(-Math.PI / 2);
   if (sag) { sag(geo); geo.computeVertexNormals(); }
   return mesh(geo, mat);
@@ -251,14 +251,16 @@ function canvasSag(H, y0 = 0) {
       const k = Math.min(1, Math.max(0, y / H));
       const f = 1 + (0.035 + 0.012 * Math.sin(7 * a + 1.3) + 0.006 * Math.sin(13 * a)) * Math.sin(Math.PI * k) - 0.018 * Math.pow(k, 6);
       p.setX(i, x * f); p.setZ(i, z * f);
+      // the lip sags a little toward the corners, more on the near long side
+      p.setY(i, p.getY(i) - Math.pow(k, 4) * (2.5 * Math.pow(Math.abs(Math.sin(2 * a)), 2) + (z > 0 ? 2 : 0) * Math.pow(Math.cos(a - Math.PI / 2), 2)));
     }
   };
 }
 function pouch() {
   const g = new THREE.Group();
   const W = 156, D = 124, H = 42, T = 8;
-  const weave = linenTex('#2f3d4c');
-  const canvas = std({ map: weave, bumpMap: weave, bumpScale: 1.5, roughness: 0.92 });
+  const weave = linenTex('#2f3d4c'); weave.repeat.set(0.04, 0.04);
+  const canvas = std({ map: weave, bumpMap: weave, bumpScale: 0.8, roughness: 0.92 });
   const lining = std({ map: linenTex('#c9b796'), roughness: 1 });
   const walls = ring(W, D, 30, T, H, canvas, 3, canvasSag(H));
   const inner = ring(W - 2 * T + 0.6, D - 2 * T + 0.6, 22, 2.5, H - 1, lining, 0, canvasSag(H, 1));
@@ -280,6 +282,10 @@ function pouch() {
   const sh = canvasTex(256, 256, (c, w, h) => { const gr = c.createRadialGradient(w / 2, h / 2, w * 0.3, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(0,0,0,0.6)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = gr; c.fillRect(0, 0, w, h); });
   const blob = new THREE.Mesh(new THREE.PlaneGeometry(W * 1.25, D * 1.35), new THREE.MeshBasicMaterial({ map: sh, color: 0x000000, transparent: true, depthWrite: false }));
   blob.rotation.x = -Math.PI / 2; blob.position.y = 0.2;
+  // and a tight occlusion line where the bag's base meets the cloth
+  const ao = canvasTex(256, 256, (c, w, h) => { const gr = c.createRadialGradient(w / 2, h / 2, w * 0.4, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(0,0,0,0.85)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = gr; c.fillRect(0, 0, w, h); });
+  const aoM = new THREE.Mesh(new THREE.PlaneGeometry(W * 1.12, D * 1.14), new THREE.MeshBasicMaterial({ map: ao, color: 0x000000, transparent: true, depthWrite: false }));
+  aoM.rotation.x = -Math.PI / 2; aoM.position.y = 0.3; g.add(aoM);
   g.add(blob, base, walls, inner, floor, zip, slider, ringM, tab);
   g.userData.floorY = 4.5;
   return g;
@@ -336,13 +342,13 @@ export function buildSets(scene) {
   mk('travel', g => {
     g.add(surface(linenTex('#d8d2c5'), 3200, 2400, 1), wall(plasterTex('#e9e4dc', '#dcd5ca')));
     const tw = towel(); tw.position.set(-420, 0, -260); tw.rotation.y = 0.2; g.add(tw);
-    const ps = passport(); ps.position.set(-150, 0, 100); ps.rotation.y = 0.35; g.add(ps);
+    const ps = passport(); ps.position.set(-130, 0, -10); ps.rotation.y = 0.35; g.add(ps);
     const po = pouch(); po.position.set(20, 0, 0); po.rotation.y = -0.15; g.add(po); g.userData.floorY = po.userData.floorY;
   });
   // Shelf for the size line-up: pale oak, paper wall.
   mk('shelf', g => {
     const oak = std({ map: woodTex('#d2b48c', '#a07a50', '#ead2ae', 1), roughness: 0.55 });
-    const board = mesh(new RoundedBoxGeometry(2600, 32, 300, 3, 4), oak); board.position.set(0, -16, -110); board.receiveShadow = true;
+    const board = mesh(new RoundedBoxGeometry(2600, 32, 300, 4, 9), oak); board.position.set(0, -16, -110); board.receiveShadow = true;
     const w = wall(plasterTex('#f1eee8', '#e4dfd6'), 6000, 3000, -262); w.position.y = 0;
     const brM = std({ map: woodTex('#b8925f', '#87623a', '#d9b98a', 1), roughness: 0.55 });
     for (const x of [-250, 250]) {

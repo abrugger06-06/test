@@ -321,18 +321,18 @@ place(impact(0.8, 38), 1.0, 1.0)
 K(1.0, 1.0, 0.5)
 
 # Montage 2.0-4.0
-place(clack(84, 1.8), 2.25, 1.0, pan=-0.3)
-place(clink(1.15), 2.25, 1.0, pan=-0.3)   # the lid meeting the case on quartz
-place(click(1.3), 2.75, 1.0, pan=0.3)
-place(clack(88, 1.8), 2.75, 1.0, pan=0.3)
-place(clack(86, 1.8), 3.25, 1.0, pan=0.25)   # the lid pulled shut on the case in the pouch
-place(clack(91, 1.8), 3.75, 1.0, pan=0.2)
+place(clack(84, 1.4), 2.25, 1.0, pan=-0.3)
+place(clink(0.9), 2.25, 1.0, pan=-0.3)   # the lid meeting the case on quartz
+place(click(0.8), 2.75, 1.0, pan=0.3)
+place(clack(88, 1.4), 2.75, 1.0, pan=0.3)
+place(clack(86, 1.4), 3.25, 1.0, pan=0.25)   # the lid pulled shut on the case in the pouch
+place(clack(91, 1.5), 3.75, 1.0, pan=0.2)
 for k in range(4):
     place(snare(0.3 + 0.15 * k), 3.5 + k * 0.125, 1.0, bus='drums')
 place(riser(0.9, 0.8, 400, 9000), 3.1, 1.0)
 for j, tc in enumerate((2.0, 2.5, 3.0, 3.5)):   # a keys stab and a clap on every montage cut
-    place(rhodes([n + 12 for n in (61, 64, 69)], 0.45, 1.0), tc, 2.2, pan=0.15, bus='music')   # the bar's own chord (A)
-    place(clap(0.7), tc, 0.9, pan=-0.2, bus='drums')
+    place(rhodes([n + 12 for n in (61, 64, 69)], 0.45, 1.0), tc, 2.5, pan=0.15, bus='music')   # the bar's own chord (A)
+    place(clap(0.7), tc, 0.6, pan=-0.2, bus='drums')
 
 # Groove: D A Bm G, a chord per bar, from frame 0 to 18.0; lighter (no kick, no clap) under the 6.5-9.0 explainer.
 prog = [(38, [62, 66, 69]), (33, [61, 64, 69]), (35, [62, 66, 71]), (31, [62, 67, 71])]
@@ -391,7 +391,7 @@ place(clack(84, 1.6), 7.0, 1.0, pan=0.2)
 for j, nt in enumerate((93, 96, 100, 98)):
     place(glass(nt, 1.4), 7.25 + j * 0.06, 1.0, pan=-0.3 + 0.2 * j)
 place(riser(1.0, 0.9, 300, 7000), 8.0, 1.0)
-place(clack(86, 1.6), 9.0, 1.0)
+place(clack(86, 1.4), 9.0, 1.0)
 place(impact(0.7, 38), 9.0, 1.0)
 K(9.0, 1.0, 0.5)
 
@@ -426,15 +426,15 @@ place(bell(86, 1.2, 0.9), 16.0, 1.0, bus='music')
 place(crash(0.9), 16.0, 1.0)
 place(riser(0.5, 0.6, 400, 6000), 17.5, 1.0)
 place(clack(93, 0.6), 17.5, 0.7)
-place(clack(86, 1.7), 18.0, 1.0)
+place(clack(86, 1.5), 18.0, 1.0)
 place(impact(0.7, 38), 18.0, 1.0)
 place(crash(0.8), 18.0, 1.0)
 K(18.0, 0.7, 0.6)
-place(clap(0.9), 18.0, 1.3, bus='drums')
+place(clap(0.9), 18.0, 1.0, bus='drums')
 place(rhodes([50, 57, 62, 66, 69], 1.5, 1.4), 18.0, 1.0, bus='music')
 place(pad([50, 57, 62, 66, 69, 74], 1.5, 1.2, 0.02), 18.0, 1.0, bus='music')
 for nt, d in ((74, 0), (78, 0.03), (81, 0.06), (86, 0.09)):
-    place(bell(nt, 1.5, 1.3), 18.0 + d, 1.0, pan=(nt - 80) / 15, bus='music')
+    place(bell(nt, 1.5, 1.1), 18.0 + d, 1.0, pan=(nt - 80) / 15, bus='music')
 
 # ---------- mix ----------
 # Sidechain: the music bus dips under each kick (6 dB, 120 ms recovery).
@@ -519,4 +519,5 @@ for _ in range(3):
         break
     gain *= 10 ** ((-14 - lv) / 20)
 print('wrote', out, DUR, 's', 'LUFS', lv, 'true peak dBTP', tp, 'max GR dB', round(20 * np.log10(g.min()), 1))
-print('limiter GR dB at hits:', {t: round(20 * np.log10(g[int(t * SR / BL)] + 1e-9), 1) for t in (0.0, 1.0, 4.0, 9.0, 14.5, 15.0, 16.0, 18.0)})
+print('limiter GR dB, worst block within 0.5 s of each hit:', {t: round(20 * np.log10(g[int(t * SR / BL):int((t + 0.5) * SR / BL)].min() + 1e-9), 1) for t in (0.0, 1.0, 2.0, 2.5, 3.0, 3.5, 4.0, 9.0, 14.5, 15.0, 16.0, 18.0)})
+print('worst block in 2.0-4.0:', round(20 * np.log10(g[int(2.0 * SR / BL):int(4.0 * SR / BL)].min()), 1))
