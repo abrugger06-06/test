@@ -491,7 +491,7 @@ function sKick(t) {
   show(hero12); reset(hero12);
   hero12.root.rotation.y = deg(-30 + (t - 14.5) * 6);
   const LH = 15;
-  const lid = t < 14.5 ? 0 : t < 14.62 ? eo(seg(t, 14.5, 14.62)) * LH : t < 14.78 ? lerp(LH, LH * 0.8, seg(t, 14.62, 14.78)) : LH * 0.8 * (1 - ei(seg(t, 14.78, 15.0))) + Math.max(0, Math.sin(seg(t, 15.0, 15.18) * Math.PI) * 1.2);
+  const lid = t < 14.43 ? 0 : t < 14.58 ? eo(seg(t, 14.43, 14.58)) * LH : t < 14.78 ? lerp(LH, LH * 0.8, seg(t, 14.58, 14.78)) : LH * 0.8 * (1 - ei(seg(t, 14.78, 15.0))) + Math.max(0, Math.sin(seg(t, 15.0, 15.18) * Math.PI) * 1.2);
   hero12.set({ lift: lid, tiltX: -0.3 * clamp(lid / LH) });
   const kl = clamp(lid / LH);
   lidShade.visible = lid > 0.5;
@@ -503,7 +503,7 @@ function sKick(t) {
   frame(p, tgt, 30, 480, 60);
   panel.style.visibility = 'visible';
   panel.style.transform = `translateX(${(1 - eo5(seg(t, 14.5, 14.6))) * -90}px)`;   // the panel lands on the hit with a short settle
-  text('ks0', t, 14.5, 16.0, 'unit');
+  text('ks0', t, 14.5, 16.0, 'slam');
   text('ks1', t, 14.5, 16.0, 'slam');
   text('ks2', t, 15.0, 16.0, 'slam');
   document.getElementById('ksRule').style.width = `${eo(seg(t, 15.0, 15.3)) * 300}px`;

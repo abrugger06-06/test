@@ -465,7 +465,7 @@ for d, g in ((0.019, 0.16), (0.031, 0.12), (0.053, 0.09), (0.083, 0.06)):
 f = int(0.5 * SR)
 mix[:, -f:] *= np.linspace(1, 0, f) ** 1.5
 mix[:, :240] *= np.linspace(0, 1, 240)   # 5 ms fade-in so frame 0 cannot click
-CEIL, BL, OS = 10 ** (-1.6 / 20), 240, 4
+CEIL, BL, OS = 10 ** (-2.0 / 20), 240, 4   # leaves room for AAC overshoot
 
 
 def oversample(x):
