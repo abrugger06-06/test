@@ -1,0 +1,545 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fluxcase Kickstarter Explainer</title>
+<style>
+  @font-face { font-family: Archivo; font-weight: 800; font-stretch: 125%; src: url(fonts/archivo-800.ttf); font-display: block; }
+  @font-face { font-family: Archivo; font-weight: 900; font-stretch: 125%; src: url(fonts/archivo-900.ttf); font-display: block; }
+  @font-face { font-family: JBM; font-weight: 700; src: url(fonts/JetBrainsMono-Bold.ttf); font-display: block; }
+  :root { --ink: #111413; --paper: #F3F4F2; --grey: #E2E2E2; --teal: #74CABF; --deep: #1D6B62; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #111413; }
+  #bg, #fx, #ui, svg { position: absolute; inset: 0; }
+  canvas { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+  #fx { background: var(--paper); opacity: 0; pointer-events: none; }
+  .t { position: absolute; white-space: nowrap; visibility: hidden; will-change: transform, opacity; }
+  .h { font-family: Archivo; font-weight: 900; font-stretch: 125%; letter-spacing: -0.01em; line-height: 0.96; }
+  .s { font-family: Archivo; font-weight: 800; font-stretch: 125%; line-height: 1.1; }
+  .m { font-family: JBM; font-weight: 700; letter-spacing: 0.02em; }
+  .w { display: inline-block; }
+  .light { color: var(--paper); }
+  .dark { color: var(--ink); }
+  .acc { color: var(--deep); }
+  .rule { position: absolute; height: 6px; background: var(--deep); }
+  .label { position: absolute; transform: translateX(-50%); font-family: JBM; font-weight: 700; font-size: 36px; color: var(--ink); white-space: nowrap; visibility: hidden; }
+  .label i { display: block; width: 100%; height: 4px; background: var(--ink); margin-bottom: 12px; }
+  .call { position: absolute; font-family: JBM; font-weight: 700; font-size: 36px; color: var(--paper); white-space: nowrap; visibility: hidden; background: rgba(17,20,19,0.72); padding: 6px 14px 8px; }
+  svg line { stroke: var(--teal); stroke-width: 4; }
+  svg circle { fill: none; stroke: var(--teal); stroke-width: 4; }
+  #grain, #vig { position: absolute; inset: 0; pointer-events: none; }
+  #vig { background: radial-gradient(ellipse 75% 70% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.32) 100%); }
+  #grain { opacity: 0.07; mix-blend-mode: overlay; }
+  .legal { font-family: JBM; font-weight: 700; letter-spacing: 0.02em; color: var(--ink); text-shadow: 0 0 10px rgba(243,244,242,0.95), 0 0 3px rgba(243,244,242,0.9); }
+  .legal.onDark { color: var(--paper); text-shadow: 0 0 3px #111413, 0 2px 18px rgba(17,20,19,0.9); }
+  .scrim { position: absolute; pointer-events: none; opacity: 0;
+    background: radial-gradient(ellipse 100% 100% at 0% 0%, rgba(243,244,242,0.9) 0%, rgba(243,244,242,0.78) 42%, rgba(243,244,242,0) 100%); }
+  /* Captions: the spoken words, ink on a paper block at the bottom centre; reads on every set. */
+  #cap { position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%); visibility: hidden; white-space: nowrap;
+    font-family: Archivo; font-weight: 800; font-stretch: 125%; font-size: 54px; line-height: 1; color: var(--ink);
+    background: rgba(243,244,242,0.94); padding: 18px 34px 22px 30px; border-left: 10px solid var(--deep); }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<canvas id="c" width="1920" height="1080"></canvas>
+<div id="vig"></div>
+<div id="scrim" class="scrim" style="left:0; top:0; width:1300px; height:560px"></div>
+<canvas id="grain" width="960" height="540" style="width:1920px;height:1080px"></canvas>
+<svg id="lines" width="1920" height="1080"></svg>
+<div id="ui">
+  <div id="legal" class="t legal" style="left:124px; top:44px; font-size:34px">Vials not included.</div>
+  <!-- S2 title on the shelf: a small wordmark; the caption carries the line -->
+  <div id="mark" class="t h dark" style="left:120px; top:96px; font-size:104px">FLUXCASE</div>
+  <div id="markRule" class="rule" style="left:124px; top:216px; width:0"></div>
+  <!-- S4 explainer callouts -->
+  <div id="callLid" class="call">Magnets in the lid</div>
+  <div id="callBase" class="call">Magnets in the base</div>
+  <!-- S6 sizes -->
+  <div id="labels"></div>
+  <!-- S7 end card on the oak shelf -->
+  <div id="end0" class="t h dark" style="left:120px; top:80px; font-size:72px">FLUXCASE</div>
+  <div id="endRule" class="rule" style="left:124px; top:170px; width:0"></div>
+  <div id="end1" class="t h dark" style="left:120px; top:214px; font-size:110px">Back it on <span class="acc">Kickstarter.</span></div>
+  <div id="end3" class="t m dark" style="left:124px; top:362px; font-size:30px">Renders shown.</div>
+  <div id="cap"></div>
+</div>
+<div id="fx"></div>
+
+<script type="module">
+window.STAGE = { W: 1920, H: 1080, ao: true };
+const { THREE, scene, camera, renderer, makeCase, partsFor, CASES, ORDER, COL, look, sph, render, magnetMat, glassMat, key, rim, kick, floor } = await import('./engine.js');
+const { buildSets, windowFrame } = await import('./sets.js');
+const { EffectComposer } = await import('./vendor/pp/EffectComposer.js');
+const { RenderPass } = await import('./vendor/pp/RenderPass.js');
+const { BokehPass } = await import('./vendor/pp/BokehPass.js');
+const { OutputPass } = await import('./vendor/pp/OutputPass.js');
+const W = 1920, H = 1080;
+const deg = THREE.MathUtils.degToRad;
+// ---------- timing ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const eio = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const eo = k => 1 - Math.pow(1 - k, 3);
+const eo5 = k => 1 - Math.pow(1 - k, 5);
+const ei = k => k * k;
+const backOut = k => { const c = 1.6; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+function closeGap(t, start, at, from = 22) {
+  if (t < at - 0.3) return lerp(from, 10, eo(seg(t, start, at - 0.3)));
+  if (t < at) return lerp(10, 0, ei(seg(t, at - 0.3, at)));
+  return Math.max(0, Math.sin(seg(t, at, at + 0.18) * Math.PI) * 1.2);
+}
+
+// ---------- the cut (120 BPM, cuts on the 8th grid). Voice lines from vo/ at the times in CAPS. ----------
+window.DUR = 36.0;
+const CUT = { hook: 0, title: 2.0, titleB: 4.75, mont: 7.25, explode: 12.0, explodeB: 17.5, tip: 19.5, tipB: 21.0, tipC: 25.0, sizes: 26.75, end: 32.75 };
+// Captions: [start, end, words]. One chunk per spoken phrase, timed to the takes' word timings.
+const CAPS = [
+  [0.10, 2.00, 'Magnets pull it shut.'],
+  [2.05, 3.95, 'This is Fluxcase.'],
+  [3.95, 7.25, 'A magnetic case for 3 and 10 mL vials.'],
+  [7.30, 8.55, 'On the kitchen counter,'],
+  [8.55, 9.70, 'the nightstand,'],
+  [9.70, 10.90, 'in your travel bag,'],
+  [10.90, 12.00, 'or on your desk.'],
+  [12.05, 13.70, 'There are magnets in the lid,'],
+  [13.70, 15.45, 'and magnets in the base.'],
+  [15.50, 17.00, 'They pull the lid shut,'],
+  [17.00, 18.30, 'and hold it there.'],
+  [18.30, 19.50, 'No clips.'],
+  [19.55, 20.70, 'Knock it over.'],
+  [20.70, 22.05, 'It holds shut.'],
+  [22.10, 25.00, 'Black PETG,'],
+  [25.00, 26.75, '3D printed to order.'],
+  [26.80, 28.20, 'Five sizes.'],
+  [28.20, 30.05, 'For 3 mL vials,'],
+  [30.05, 31.50, '10 mL vials,'],
+  [31.50, 32.75, 'or a mix.'],
+];
+window.CAPS = CAPS;
+
+// ---------- look of the film (overrides on the shared engine) ----------
+const matte = c => { c.mat.clearcoat = 0; c.mat.roughness = 0.7; c.mat.envMapIntensity = 0.4; };
+magnetMat.envMap = (() => {
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256;
+  const g = cv.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.2, '#e9ecee'); gr.addColorStop(0.28, '#ffffff'); gr.addColorStop(0.36, '#b4b9bd'); gr.addColorStop(0.62, '#989da1'); gr.addColorStop(1, '#878b8f');
+  g.fillStyle = gr; g.fillRect(0, 0, 512, 256);
+  const t = new THREE.CanvasTexture(cv); t.mapping = THREE.EquirectangularReflectionMapping; t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+magnetMat.envMapIntensity = 1.3;
+magnetMat.roughness = 0.1;
+magnetMat.color.set(0xb8bec4);
+glassMat.opacity = 0.06; glassMat.envMapIntensity = 3.2; glassMat.color.set(0xf4fbff);
+glassMat.onBeforeCompile = sh => {
+  sh.fragmentShader = sh.fragmentShader.replace('#include <dithering_fragment>', `#include <dithering_fragment>
+    float fres = pow(1.0 - abs(dot(normalize(vViewPosition), normal)), 2.5);
+    gl_FragColor.rgb += vec3(0.85, 0.92, 0.95) * fres * 1.15;
+    gl_FragColor.a = max(gl_FragColor.a, fres * 0.8);`);
+};
+glassMat.needsUpdate = true;
+
+// ---------- type ----------
+function wordify(id) {
+  const el = document.getElementById(id);
+  const walk = n => [...n.childNodes].forEach(c => {
+    if (c.nodeType === 3) {
+      const span = document.createElement('span');
+      span.innerHTML = c.textContent.split(' ').map(w => w ? `<span class="w">${w}</span>` : '').join(' ');
+      c.replaceWith(span);
+    } else if (c.nodeType === 1 && !c.classList.contains('w')) walk(c);
+  });
+  walk(el);
+  return el;
+}
+const TXT = {};
+['legal', 'mark', 'end0', 'end1', 'end3'].forEach(id => TXT[id] = wordify(id));
+function text(id, t, tIn, tOut, mode = 'rise') {
+  const el = TXT[id];
+  const t0 = mode === 'slam' ? tIn - 0.1 : tIn;
+  if (!(t >= t0 && t < tOut)) return;
+  el.style.visibility = 'visible';
+  const ws = [...el.querySelectorAll('.w')];
+  if (mode === 'slam') {
+    const k = eo5(seg(t, tIn - 0.1, tIn + 0.02));
+    el.style.opacity = Math.min(1, k * 1.6);
+    el.style.transform = `scale(${lerp(1.18, 1, k)})`;
+    el.style.transformOrigin = '0% 50%';
+    ws.forEach(w => { w.style.opacity = 1; w.style.transform = 'none'; });
+    return;
+  }
+  el.style.opacity = 1; el.style.transform = 'none';
+  ws.forEach((w, i) => {
+    const d = mode === 'unit' ? 0 : i * 0.03;
+    const k = eo5(seg(t, tIn + d, tIn + d + 0.25));
+    w.style.opacity = k;
+    w.style.transform = `translateY(${(1 - k) * (mode === 'unit' ? 16 : 44)}px)`;
+  });
+}
+const cap = document.getElementById('cap');
+function caption(t) {
+  const c = CAPS.find(([a, b]) => t >= a && t < b);
+  if (!c) return;
+  const k = eo5(seg(t, c[0], c[0] + 0.12));
+  cap.textContent = c[2];
+  cap.style.visibility = 'visible';
+  cap.style.opacity = k;
+  cap.style.transform = `translateX(-50%) translateY(${(1 - k) * 14}px)`;
+}
+const legalEl = document.getElementById('legal');
+function legal(t, dark = false) { legalEl.className = dark ? 't legal onDark' : 't legal'; text('legal', t, -1, 99, 'unit'); }
+
+// Labels and callouts
+const labelsEl = document.getElementById('labels');
+const labels = ORDER.map(k => { const d = document.createElement('div'); d.className = 'label'; d.innerHTML = `<i></i>${CASES[k].label}`; labelsEl.appendChild(d); return d; });
+const svg = document.getElementById('lines');
+const callLid = document.getElementById('callLid'), callBase = document.getElementById('callBase');
+const proj = v => { const p = v.clone().project(camera); return [(p.x * .5 + .5) * W, (-p.y * .5 + .5) * H]; };
+function callout(el, from, toX, toY, k, right) {
+  if (k <= 0) return '';
+  el.style.visibility = 'visible';
+  el.style.opacity = Math.min(1, k * 1.5);
+  el.style.left = (right ? toX + 20 : toX - 20 - el.offsetWidth) + 'px';
+  el.style.top = (toY - 24) + 'px';
+  const [x0, y0] = from, e = eo(clamp(k * 1.5));
+  return `<circle cx="${x0}" cy="${y0}" r="${12 * e}"/><line x1="${x0}" y1="${y0}" x2="${lerp(x0, toX, e)}" y2="${lerp(y0, toY, e)}"/>`;
+}
+
+// ---------- sets, light and lens ----------
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+key.shadow.mapSize.set(4096, 4096);
+if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; }
+const SETS = buildSets(scene);
+const win = windowFrame(); scene.add(win);
+SETS.kitchen.traverse(o => { if (o.userData.glass) o.material = glassMat; });
+Object.assign(key.shadow.camera, { left: -800, right: 800, top: 800, bottom: -800, near: 50, far: 4000 });
+key.shadow.camera.updateProjectionMatrix();
+key.shadow.normalBias = 1.2;
+const LIGHT = {
+  desk:    { color: 0xffe2bc, k: 3.4, dir: [-700, 520, 120], win: true,  kick: 0.45, rim: 0.6, env: 0.5,  contact: 0.85 },
+  kitchen: { color: 0xffe6c6, k: 1.6, dir: [-500, 620, -200], win: true, kick: 0.5, rim: 0.6, env: 0.36, contact: 1.0 },
+  night:   { color: 0xdedad2, k: 0.3, dir: [-500, 500, 200], win: false, kick: 0.3, rim: 1.8, env: 0.22, contact: 0.7 },
+  travel:  { color: 0xffeedb, k: 2.3, dir: [-500, 700, 400], win: true,  kick: 0.6, rim: 0.6, env: 0.45, contact: 1.0 },
+  shelf:   { color: 0xfff1e0, k: 2.4, dir: [-450, 650, 600], win: true,  kick: 0.55, rim: 0.6, env: 0.5,  contact: 0.9 },
+};
+let pulse = 0;
+let curSet = null;
+const bgEl = document.getElementById('bg'), fx = document.getElementById('fx');
+function setSet(name) {
+  curSet = name;
+  Object.entries(SETS).forEach(([n, g]) => g.visible = n === name);
+  const L = LIGHT[name];
+  const sun = new THREE.Vector3(...L.dir).normalize().multiplyScalar(1700);
+  key.position.copy(sun); key.color.set(L.color); key.intensity = L.k * (1 + pulse * 0.4);
+  win.visible = L.win; win.position.copy(sun.clone().multiplyScalar(0.62)); win.lookAt(0, 0, 0);
+  kick.intensity = L.kick * (1 + pulse); rim.intensity = L.rim * (1 + pulse);
+  rim.color.set(name === 'night' ? 0xcfe0ff : 0xffffff);
+  scene.environmentIntensity = L.env;
+  floor.visible = false;
+  bgEl.style.background = '#000';
+}
+const hit = (t, at, decay = 0.12) => (t >= at ? Math.exp(-(t - at) / decay) : 0);
+function shake(t, at, amp = 1.4) { const k = t - at; return k < 0 ? 0 : amp * Math.exp(-k / 0.09) * Math.sin(k * 95); }
+const scrim = document.getElementById('scrim');
+function scrimOn(el, w, h, k = 1) { el.style.opacity = k; el.style.width = w + 'px'; el.style.height = h + 'px'; }
+
+const comp = new EffectComposer(renderer);
+comp.addPass(new RenderPass(scene, camera));
+const bokeh = new BokehPass(scene, camera, { focus: 400, aperture: 0.000018, maxblur: 0.011 });
+comp.addPass(bokeh);
+comp.addPass(new OutputPass());
+const focusAt = new THREE.Vector3();
+function frame(pos, tgt, fov = 30, shiftX = 0, shiftY = 0, focus = [tgt[0], 0, tgt[2]], ap = 0.000018) {
+  look(pos, tgt, fov, shiftX, shiftY);
+  focusAt.set(...focus);
+  bokeh.uniforms.focus.value = camera.position.distanceTo(focusAt);
+  bokeh.uniforms.aperture.value = ap;
+}
+
+const grain = document.getElementById('grain'), gctx = grain.getContext('2d');
+const noiseImg = (() => { const d = gctx.createImageData(960, 540); let s = 11; for (let i = 0; i < d.data.length; i += 4) { s = (s * 16807) % 2147483647; const v = (s / 2147483647) * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } return d; })();
+function grainAt(t) { const f = Math.floor(t * 30); gctx.putImageData(noiseImg, -((f * 137) % 480), -((f * 71) % 270)); gctx.putImageData(noiseImg, 480 - ((f * 137) % 480), 270 - ((f * 71) % 270)); }
+
+// ---------- cast ----------
+const ringTex = (() => {
+  const N = 256, cv = document.createElement('canvas'); cv.width = cv.height = N;
+  const g = cv.getContext('2d'), img = g.createImageData(N, N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const r = Math.hypot(x - N / 2 + 0.5, y - N / 2 + 0.5) / N;
+    const a = r < 0.43 ? 0.8 : Math.exp(-Math.pow((r - 0.43) / 0.025, 2)) * 0.8;
+    img.data[(y * N + x) * 4 + 3] = a * 255;
+  }
+  g.putImageData(img, 0, 0);
+  return new THREE.CanvasTexture(cv);
+})();
+const add = (k, o) => {
+  const c = makeCase(partsFor(k), o); scene.add(c.root); matte(c); c.set({ color: COL.black });
+  c.contact.material = c.contact.material.clone();
+  const ring = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: ringTex, color: 0x000000, transparent: true, depthWrite: false }));
+  ring.rotation.x = -Math.PI / 2; ring.position.y = 0.12; ring.scale.set(c.dia * 1.16, c.dia * 1.16, 1);
+  c.root.add(ring); c.ring = ring;
+  return c;
+};
+const hook8 = add('c8', { vials: true });
+const mK = add('c6'), mN = add('c4'), mT = add('c7'), mD = add('c8');
+const hero12 = add('c12'), x8 = add('c8', { vials: true }), tip7 = add('c7');
+const row = ORDER.map(k => add(k));
+const all = [hook8, mK, mN, mT, mD, hero12, x8, tip7, ...row];
+function show(...on) { all.forEach(c => c.root.visible = on.includes(c)); }
+function reset(c) {
+  c.root.position.set(0, 0, 0); c.root.rotation.set(0, 0, 0); c.root.rotation.order = 'XYZ'; c.root.scale.set(1, 1, 1);
+  c.contact.position.set(0, 0.05, 0); c.contact.rotation.set(-Math.PI / 2, 0, 0);
+  c.contact.scale.set(c.dia * 1.22, c.dia * 1.22, 1);
+  c.contact.material.opacity = curSet ? LIGHT[curSet].contact : 0.6;
+  c.ring.visible = true;
+  c.set({ color: COL.black });
+}
+const rowAt = gap => { const w = row.reduce((s, c) => s + c.dia, 0) + gap * 4; let a = -w / 2; return row.map(c => { const x = a + c.dia / 2; a += c.dia + gap; return x; }); };
+const rowX = rowAt(44), endX = rowAt(40);
+const fill = new THREE.PointLight(0xfff1e0, 0, 0, 2); scene.add(fill);
+
+// ---------- scenes ----------
+// S1 0.0-2.0, morning desk: the lid drops in from above the frame and the magnets pull it shut on 1.5 ("shut").
+function sHook(t) {
+  pulse = hit(t, 1.5);
+  setSet('desk');
+  show(hook8); reset(hook8);
+  hook8.root.rotation.y = deg(-18 + t * 4);
+  const lid = t < 1.2 ? lerp(62, 7, seg(t, 0, 1.2)) : t < 1.5 ? lerp(7, 0, ei(seg(t, 1.2, 1.5))) : Math.max(0, Math.sin(seg(t, 1.5, 1.68) * Math.PI) * 1.2);
+  hook8.set({ lift: lid });
+  const tgt = [0, 55, 0];
+  const p = sph(lerp(420, 360, eio(seg(t, 0, 1.5))) + (t > 1.5 ? (t - 1.5) * 30 : 0), lerp(-34, -22, seg(t, 0, 2)), 14, tgt);
+  p[1] += shake(t, 1.5);
+  frame(p, tgt, 30, 300, -70);
+  legal(t);
+}
+// S2 2.0-7.25, the oak shelf: a whip-in to the 12-Vial with the wordmark; at 4.75 a closer angle, the lid pops 5.0, snaps 5.5.
+function sTitle(t) {
+  pulse = hit(t, 5.5) * 0.6;
+  setSet('shelf');
+  SETS.shelf.userData.books.visible = true; SETS.shelf.userData.plant.visible = true;
+  show(hero12); reset(hero12);
+  hero12.root.position.set(0, 0, -60);
+  hero12.root.rotation.y = deg(-24 + (t - 2) * 4);
+  const lid = t < 5.0 ? 0 : t < 5.15 ? eo(seg(t, 5.0, 5.15)) * 26 : closeGap(t, 5.15, 5.5, 26);
+  hero12.set({ lift: lid });
+  const tgt = [0, 30, -60];
+  let p;
+  if (t < CUT.titleB) {
+    const az = lerp(-62, -12, eo5(seg(t, 2.0, 2.45)));
+    p = sph(lerp(560, 430, eo5(seg(t, 2.0, 2.5))) - (t - 2) * 6, az, 15, tgt);
+    frame(p, tgt, 30, 440, 20);
+    scrimOn(scrim, 1250, 500, 0.8);
+    text('mark', t, 2.0, CUT.titleB, 'slam');
+    document.getElementById('markRule').style.width = `${eo(seg(t, 2.1, 2.5)) * 300}px`;
+  } else {
+    p = sph(lerp(330, 310, eio(seg(t, 4.75, 7.25))), lerp(22, 14, seg(t, 4.75, 7.25)), 18, tgt);
+    p[1] += shake(t, 5.5, 0.8);
+    frame(p, tgt, 30, 120, -60);
+  }
+}
+// S3 7.25-12.0, four sets, one per spoken phrase.
+const MONT = [
+  { set: 'kitchen', c: mK, t0: 7.25, t1: 8.5,  az: -26, el: 9,  r: 270 },
+  { set: 'night',   c: mN, t0: 8.5,  t1: 9.75, az: 44,  el: 6,  r: 470 },
+  { set: 'travel',  c: mT, t0: 9.75, t1: 10.75, az: -18, el: 24, r: 420 },
+  { set: 'desk',    c: mD, t0: 10.75, t1: 12.0, az: -40, el: 12, r: 330 },
+];
+function sMontage(t) {
+  const s = MONT.find(m => t < m.t1) || MONT[3];
+  pulse = hit(t, s.t0 + 0.4);
+  setSet(s.set);
+  show(s.c); reset(s.c);
+  s.c.root.rotation.y = deg(-20 + (t - s.t0) * 22);
+  if (s.set === 'kitchen') SETS.kitchen.userData.jar.position.set(170, 0, -290);
+  if (s.set === 'travel') {
+    s.c.root.position.set(20, SETS.travel.userData.floorY, 0);
+    s.c.contact.visible = false; s.c.ring.visible = false;
+  }
+  s.c.set({ lift: closeGap(t, s.t0 - 0.1, s.t0 + 0.4, 30) });
+  if (s.set === 'night') {
+    const on = t >= s.t0 + 0.4 ? 1 : 0.03;
+    SETS.night.userData.light.intensity = 260000 * on;
+    SETS.night.userData.shade.material.emissiveIntensity = 0.9 * on;
+    key.intensity = on > 0.5 ? 0.3 : 0.12; kick.intensity = 0.12; rim.intensity = on > 0.5 ? 0.5 : 0.4;
+    fill.color.set(0xffb46a); fill.position.set(-95, 120, -125); fill.intensity = 150000 * on;
+  }
+  const tgt = [s.c.root.position.x, s.c.baseH * 0.7 + s.c.root.position.y, s.c.root.position.z];
+  const drift = eo(seg(t, s.t0, s.t1));
+  const p = sph(lerp(s.r, s.r * 0.88, drift), s.az + drift * 8, s.el, tgt);
+  p[1] += shake(t, s.t0 + 0.4, 1.1);
+  frame(p, tgt, 30, 300, -50, [tgt[0], 0, tgt[2]]);
+}
+// S4 12.0-19.5, desk: lid up, vials lift, magnets in the lid (13.0) and base (14.9) rise, all back and shut on 16.5;
+// from 17.5 a low close angle on the shut case.
+function sExplode(t) {
+  pulse = hit(t, 16.5) + hit(t, 13.0) * 0.4 + hit(t, 14.9) * 0.4;
+  setSet('desk');
+  show(x8); reset(x8);
+  const open = eo(seg(t, 12.0, 12.2)) * (1 - eio(seg(t, 15.7, 16.0)));
+  const lift = t < 15.9 ? eo(seg(t, 12.0, 12.2)) * 64 : closeGap(t, 15.9, 16.5, 64);
+  const out = k => k * 14;
+  const lidMag = out(backOut(seg(t, 13.0, 13.3))) * (1 - eio(seg(t, 15.5, 15.65)));
+  const baseMag = out(backOut(seg(t, 14.9, 15.2))) * (1 - eio(seg(t, 15.5, 15.65)));
+  const vial = eo(seg(t, 12.5, 12.8)) * (1 - eio(seg(t, 15.35, 15.6))) * 14;
+  x8.set({ lift: Math.max(0, lift), back: open * 30, tiltX: -open * 1.15, magOut: Math.max(0, baseMag), magOutLid: Math.max(0, lidMag), vialLift: vial });
+  x8.root.rotation.y = deg(-20);
+  if (t < CUT.explodeB) {
+    const tgt = [0, 60, 0];
+    const p = sph(lerp(440, 390, eio(seg(t, 12.0, 12.6))) * (1 - 0.05 * eo(seg(t, 16.5, 17.5))), lerp(-30, 22, eio(seg(t, 12.0, 17.5))), lerp(22, 30, eio(seg(t, 12.0, 13.0))), tgt);
+    p[1] += shake(t, 16.5, 1.3);
+    frame(p, tgt, 30, 0, 10);
+    magnetMat.emissiveIntensity = (hit(t, 13.0, 0.3) + hit(t, 14.9, 0.3)) * 0.08;
+    x8.root.updateMatrixWorld(true);
+    camera.updateMatrixWorld();
+    const lidP = x8.lid.getWorldPosition(new THREE.Vector3());
+    const baseP = new THREE.Vector3(0, x8.baseH + baseMag + 2, 0);
+    const kl = seg(t, 13.0, 13.25) * (1 - seg(t, 15.5, 15.65)), kb = seg(t, 14.9, 15.1) * (1 - seg(t, 15.5, 15.65));
+    svg.innerHTML = callout(callLid, proj(lidP), 560, 230, kl, false) + callout(callBase, proj(baseP), 1390, 800, kb, true);
+  } else {
+    const tgt = [0, 42, 0];
+    const p = sph(lerp(330, 300, eio(seg(t, 17.5, 19.5))), lerp(34, 26, seg(t, 17.5, 19.5)), 11, tgt);
+    frame(p, tgt, 30, 0, -40);
+  }
+  legal(t);
+}
+const tipLine = (() => {
+  const cv = document.createElement('canvas'); cv.width = 8; cv.height = 64;
+  const g = cv.getContext('2d'), img = g.createImageData(8, 64);
+  for (let y = 0; y < 64; y++) for (let x = 0; x < 8; x++) img.data[(y * 8 + x) * 4 + 3] = 255 * (0.9 * Math.exp(-Math.pow((y - 31.5) / 3, 2)) + 0.45 * Math.exp(-Math.pow((y - 31.5) / 13, 2)));
+  g.putImageData(img, 0, 0);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), color: 0x000000, transparent: true, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.position.y = 0.15; scene.add(m); m.visible = false;
+  return m;
+})();
+// S5 19.5-26.75, desk: the empty 7-Vial, knocked over off frame, rolls in on its side with the lid seated and rocks to rest
+// on 20.5; 21.0 a close angle on the shut seam; 25.0 a second angle.
+function sTip(t) {
+  pulse = hit(t, 20.5) * 0.6 + hit(t, 21.0) * 0.4 + hit(t, 25.0) * 0.4;
+  setSet('desk');
+  show(tip7); reset(tip7);
+  SETS.desk.userData.mug.visible = false;
+  const R = tip7.dia / 2, L = tip7.baseH + tip7.lidH;
+  const k = seg(t, 19.5, 20.5);
+  const z = t < 20.5 ? -220 * Math.pow(1 - k, 2.2) : -5 * Math.sin(seg(t, 20.5, 20.8) * Math.PI) * Math.exp(-(t - 20.5) / 0.25);
+  tip7.root.rotation.order = 'ZYX';
+  tip7.root.rotation.set(0, deg(-30), deg(-90));
+  tip7.root.position.set(R, R, z);
+  tip7.root.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), z / R));
+  tip7.root.updateMatrixWorld(true);
+  tip7.contact.position.copy(tip7.root.worldToLocal(new THREE.Vector3(R + L / 2, 0.05, z)));
+  tip7.contact.quaternion.copy(tip7.root.quaternion).invert().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)));
+  tip7.contact.scale.set(L * 1.3, tip7.dia * 0.6, 1);
+  tip7.contact.material.opacity = 1.0;
+  tip7.ring.visible = false;
+  tipLine.visible = true; tipLine.position.set(R + L / 2, 0.15, z); tipLine.scale.set(L * 1.04, 46, 1);
+  const ctr = new THREE.Vector3(R + L / 2, R, z);
+  fill.position.copy(ctr).add(t < CUT.tipB ? new THREE.Vector3(-80, 140, 160) : new THREE.Vector3(140, 120, 150));
+  fill.intensity = t < CUT.tipB ? 120000 * eio(seg(t, 20.4, 20.9)) : 210000;
+  let p, tg, sx, sy;
+  if (t < CUT.tipB) {
+    tg = [52, 40, 0];
+    p = sph(lerp(470, 440, eio(seg(t, 19.5, 21.0))), lerp(44, 38, eio(seg(t, 19.5, 21.0))), 34, tg);
+    p[1] += shake(t, 20.5, 0.9);
+    sx = 300; sy = -20;
+  } else if (t < CUT.tipC) {
+    tg = [R + L * 0.55, R, 0];
+    p = sph(lerp(340, 316, eio(seg(t, 21.0, 25.0))), 24 + lerp(0, -8, seg(t, 21.0, 25.0)), 28, tg);
+    p[1] += shake(t, 21.0, 0.5);
+    sx = 400; sy = -60;
+  } else {
+    tg = [R + L * 0.5, R, 0];
+    p = sph(lerp(360, 340, eio(seg(t, 25.0, 26.75))), lerp(-48, -40, seg(t, 25.0, 26.75)), 40, tg);
+    p[1] += shake(t, 25.0, 0.5);
+    sx = 220; sy = -60;
+  }
+  frame(p, tg, 30, sx, sy, [tg[0], 0, tg[2]]);
+}
+// S6 26.75-32.75, the oak shelf: the five sizes land on the words (3 mL pair, 10 mL pair, the mixed one).
+const LAND = [28.3, 28.7, 30.1, 30.5, 31.6];
+function sSizes(t) {
+  pulse = LAND.reduce((s, a) => s + hit(t, a) * 0.3, 0);
+  setSet('shelf');
+  SETS.shelf.userData.books.visible = false; SETS.shelf.userData.plant.visible = false;
+  show(...row);
+  row.forEach((c, i) => {
+    reset(c);
+    const land = LAND[i], t0 = land - 0.3;
+    c.root.visible = t >= t0;
+    c.root.position.set(rowX[i], (1 - ei(seg(t, t0, land))) * 80, 0);
+    c.ring.visible = t >= land;
+    const sq = t >= land ? Math.sin(seg(t, land, land + 0.16) * Math.PI) * 0.04 : 0;
+    c.root.scale.set(1 + sq, 1 - sq, 1 + sq);
+    c.root.rotation.y = deg(-10);
+  });
+  const tgt = [0, 38, 0];
+  frame(sph(lerp(1440, 1300, eio(seg(t, 26.75, 32.75))), lerp(-3, 2, seg(t, 26.75, 32.75)), 12, tgt), tgt, 16, 0, -30, [0, 0, 0], 0.000008);
+  camera.updateMatrixWorld();
+  const base = Math.max(...row.map((c, i) => -new THREE.Vector3(rowX[i], 0, c.dia / 2 + 10).project(camera).y));
+  row.forEach((c, i) => {
+    const land = LAND[i];
+    if (t < land) return;
+    const p = new THREE.Vector3(rowX[i], 0, 0).project(camera), l = labels[i], k = eo5(seg(t, land - 0.04, land + 0.1));
+    l.style.visibility = 'visible'; l.style.opacity = k;
+    l.style.left = `${(p.x * .5 + .5) * W}px`;
+    l.style.top = `${(base * .5 + .5) * H - 14 + (1 - k) * 20}px`;
+  });
+}
+// S7 32.75-36.0, the end card on the oak shelf: all five cases; the lids lift on 33.25 and snap shut together on 34.0.
+const END_R0 = 1250, END_R1 = 1185, END_SY = 120;
+function sEnd(t) {
+  pulse = hit(t, 34.0) * 0.6;
+  setSet('shelf');
+  show(...row);
+  const lid = t < 33.25 ? 0 : t < 33.45 ? eo(seg(t, 33.25, 33.45)) * 24 : closeGap(t, 33.45, 34.0, 24);
+  SETS.shelf.userData.books.visible = false; SETS.shelf.userData.plant.visible = false;
+  row.forEach((c, i) => { reset(c); c.root.position.set(endX[i], 0, 0); c.root.rotation.y = deg(-10); c.set({ lift: lid }); });
+  const tgt = [0, 30, 0];
+  const r = lerp(END_R0, END_R1, eio(seg(t, 32.75, 36.0))) * (1 - 0.025 * hit(t, 34.0, 0.3));
+  const p = sph(r, 0, 15, tgt);
+  p[1] += shake(t, 34.0, 0.6);
+  frame(p, tgt, 18, 0, END_SY, [0, 0, 0], 0.000006);
+  scrimOn(scrim, 1500, 560, 0.7);
+  text('end0', t, 32.5, 99, 'unit');
+  document.getElementById('endRule').style.width = `${eo(seg(t, 32.6, 33.0)) * 150}px`;
+  text('end1', t, 33.0, 99, 'slam');
+  text('end3', t, 32.5, 99, 'unit');
+}
+
+function renderAt(t) {
+  Object.values(TXT).forEach(el => el.style.visibility = 'hidden');
+  labels.forEach(l => l.style.visibility = 'hidden');
+  [callLid, callBase].forEach(c => c.style.visibility = 'hidden');
+  cap.style.visibility = 'hidden';
+  svg.innerHTML = '';
+  fx.style.opacity = 0;
+  pulse = 0;
+  ['markRule', 'endRule'].forEach(id => document.getElementById(id).style.width = '0');
+  scrim.style.opacity = 0;
+  magnetMat.emissiveIntensity = 0;
+  fill.intensity = 0; fill.color.set(0xfff1e0);
+  tipLine.visible = false; SETS.desk.userData.mug.visible = true;
+  SETS.kitchen.userData.jar.position.set(300, 0, -250);
+  SETS.night.userData.light.intensity = 400000; SETS.night.userData.shade.material.emissiveIntensity = 0.9;
+  SETS.shelf.userData.books.visible = true; SETS.shelf.userData.plant.visible = true;
+  if (t < CUT.title) sHook(t);
+  else if (t < CUT.mont) sTitle(t);
+  else if (t < CUT.explode) sMontage(t);
+  else if (t < CUT.tip) sExplode(t);
+  else if (t < CUT.sizes) sTip(t);
+  else if (t < CUT.end) sSizes(t);
+  else sEnd(t);
+  caption(t);
+  grainAt(t);
+  renderer.setClearColor(0x000000, 1); comp.render();
+}
+window.renderAt = renderAt;
+await document.fonts.load('900 40px Archivo');
+await document.fonts.load('800 40px Archivo');
+await document.fonts.load('700 20px JBM');
+await document.fonts.ready;
+renderAt(Number(new URLSearchParams(location.search).get('t') || 0));
+window.__ready = true;
+</script>
+</body>
+</html>
