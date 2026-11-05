@@ -1,7 +1,7 @@
 """Mix and encode the Fluxcase Kickstarter explainer (voiced cut).
 
 Lays the ten narration takes (work/vo/*.mp3, downloaded from the ElevenLabs flow) over the score (work/music4.wav),
-ducks the music under every voice line, masters the mix to -14 LUFS integrated with true peak at or below -2 dBTP
+ducks the music under every voice line, masters the mix to -14 LUFS integrated with a limiter ceiling of -2.8 dBTP
 (room for AAC overshoot, so the MP4 measures at or below -1 dBTP), encodes work/frames4 + the mix to an MP4 with the
 poster (a settled end-card frame) baked in as frame 0, and prints the loudness measured on the encoded file.
 
@@ -35,7 +35,7 @@ VO = [   # line, voice, file, start
 VO_LUFS = -16.0      # each line is gained to this before placement, so the three voices sit level
 DUCK_DB = -10.0      # music under speech
 MUSIC_DB = -3.0      # music trim against the voices before the final normalisation
-CEIL_DB = -2.0
+CEIL_DB = -2.8       # the block limiter lands about 0.3 dB over this and AAC adds about 0.9 dB, so the MP4 stays under -1 dBTP
 
 
 def run(cmd, **kw):

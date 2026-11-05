@@ -64,7 +64,8 @@ await page.waitForFunction('window.__ready === true', null, { timeout: 300000 })
 
 const shot = async (t, file) => {
   await page.evaluate(t => window.renderAt(t), t);
-  await page.screenshot({ path: file, type: file.endsWith('.jpg') ? 'jpeg' : 'png', quality: file.endsWith('.jpg') ? 95 : undefined });
+  // the first frame after load compiles every shader on SwiftShader and can take over 30 s
+  await page.screenshot({ path: file, type: file.endsWith('.jpg') ? 'jpeg' : 'png', quality: file.endsWith('.jpg') ? 95 : undefined, timeout: 180000 });
 };
 
 const t0 = Date.now();

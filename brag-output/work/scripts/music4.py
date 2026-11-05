@@ -12,7 +12,7 @@ list is the contract with the picture (site/explainer.html):
   12.0       DROP: how it works, groove kept light to 16.5: clacks 13.0 (lid) and 14.9 (base), glass 12.5,
              riser, snap + impact on 16.5 ("shut"); soft cut 17.5
   19.5-20.5  the case rolls in on its side (roll rumble) and rocks to rest on 20.5 (knock); cuts 21.0, 25.0
-  26.75      shelf: hit; five sizes land 28.3, 28.7, 30.1, 30.5, 31.6; drop-out 32.5-32.75
+  26.75      shelf: hit; five sizes land 26.9, 27.25, 27.6, 27.95, 28.3; labels tap in on the words; drop-out 32.5-32.75
   32.75      end card + crash + bell; lids lift 33.25, final hit 34.0 (the loudest); ring out to 36.0
 Mastered like music3: -14 LUFS into a 4x-oversampled true-peak limiter (the mix script re-masters the final mix).
 Usage: python3 music4.py out.wav
@@ -413,9 +413,11 @@ place(tap(0.9), 25.0, 1.0, pan=-0.2)
 # Five sizes on the shelf 26.75-32.75
 place(impact(0.9, 38), 26.75, 1.0)
 place(crash(0.7), 26.75, 1.0)
-for i, ts in enumerate((28.3, 28.7, 30.1, 30.5, 31.6)):
+for i, ts in enumerate((26.9, 27.25, 27.6, 27.95, 28.3)):   # the five cases land in a row on "Five sizes."
     place(impact(0.55, 38 + [0, 2, 4, 5, 7][i]), ts, 1.0, pan=-0.4 + 0.2 * i)
     place(clack(81 + [0, 2, 4, 5, 7][i], 1.1), ts, 1.0, pan=-0.4 + 0.2 * i)
+for i, ts in enumerate((28.3, 28.6, 30.1, 30.4, 31.6)):   # the labels come up on the words
+    place(tap(0.6), ts, 1.0, pan=-0.4 + 0.2 * i)
 place(riser(0.4, 0.9, 400, 9000), 32.1, 1.0)
 
 # End card 32.75-36.0: lids lift on 33.25, final hit on 34.0

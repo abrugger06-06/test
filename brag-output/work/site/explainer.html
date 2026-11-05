@@ -98,10 +98,10 @@ const CAPS = [
   [0.10, 2.00, 'Magnets pull it shut.'],
   [2.05, 3.95, 'This is Fluxcase.'],
   [3.95, 7.25, 'A magnetic case for 3 and 10 mL vials.'],
-  [7.30, 8.55, 'On the kitchen counter,'],
-  [8.55, 9.70, 'the nightstand,'],
-  [9.70, 10.90, 'in your travel bag,'],
-  [10.90, 12.00, 'or on your desk.'],
+  [7.30, 8.50, 'On the kitchen counter,'],
+  [8.50, 9.75, 'the nightstand,'],
+  [9.75, 10.75, 'in your travel bag,'],
+  [10.75, 12.00, 'or on your desk.'],
   [12.05, 13.70, 'There are magnets in the lid,'],
   [13.70, 15.45, 'and magnets in the base.'],
   [15.50, 17.00, 'They pull the lid shut,'],
@@ -180,7 +180,9 @@ const cap = document.getElementById('cap');
 function caption(t) {
   const c = CAPS.find(([a, b]) => t >= a && t < b);
   if (!c) return;
-  const k = eo5(seg(t, c[0], c[0] + 0.12));
+  // a chunk that follows straight on from the previous one cuts; the first chunk of a line rises in
+  const follows = CAPS.some(([, b]) => b <= c[0] && c[0] - b < 0.1);
+  const k = follows ? 1 : eo5(seg(t, c[0], c[0] + 0.12));
   cap.textContent = c[2];
   cap.style.visibility = 'visible';
   cap.style.opacity = k;
@@ -401,7 +403,7 @@ function sExplode(t) {
     const p = sph(lerp(330, 300, eio(seg(t, 17.5, 19.5))), lerp(34, 26, seg(t, 17.5, 19.5)), 11, tgt);
     frame(p, tgt, 30, 0, -40);
   }
-  legal(t);
+  if (t < CUT.explodeB) legal(t);   // the close angle shows the shut case, no vials
 }
 const tipLine = (() => {
   const cv = document.createElement('canvas'); cv.width = 8; cv.height = 64;
@@ -455,8 +457,10 @@ function sTip(t) {
   }
   frame(p, tg, 30, sx, sy, [tg[0], 0, tg[2]]);
 }
-// S6 26.75-32.75, the oak shelf: the five sizes land on the words (3 mL pair, 10 mL pair, the mixed one).
-const LAND = [28.3, 28.7, 30.1, 30.5, 31.6];
+// S6 26.75-32.75, the oak shelf: the five sizes land one after another on "Five sizes."; the labels come up on the
+// words (the 3 mL pair, the 10 mL pair, the mixed one).
+const LAND = [26.9, 27.25, 27.6, 27.95, 28.3];
+const LABEL_AT = [28.3, 28.6, 30.1, 30.4, 31.6];
 function sSizes(t) {
   pulse = LAND.reduce((s, a) => s + hit(t, a) * 0.3, 0);
   setSet('shelf');
@@ -477,7 +481,7 @@ function sSizes(t) {
   camera.updateMatrixWorld();
   const base = Math.max(...row.map((c, i) => -new THREE.Vector3(rowX[i], 0, c.dia / 2 + 10).project(camera).y));
   row.forEach((c, i) => {
-    const land = LAND[i];
+    const land = LABEL_AT[i];
     if (t < land) return;
     const p = new THREE.Vector3(rowX[i], 0, 0).project(camera), l = labels[i], k = eo5(seg(t, land - 0.04, land + 0.1));
     l.style.visibility = 'visible'; l.style.opacity = k;

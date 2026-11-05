@@ -26,7 +26,7 @@ Kickstarter right now.", River) was recorded and then cut to keep the film insid
 | 5 | 15.50 | 19.26 | B Jessica | They pull the lid shut, and hold it there. No clips. | l05b.mp3 | Everything drops back and the lid is pulled shut on 16.5 ("shut"); from 17.5 a low close angle on the shut case. |
 | 6 | 19.55 | 21.87 | C River | Knock it over. It holds shut. | l06a.mp3 | Desk, high angle: the empty 7-Vial rolls in on its side with the lid seated and rocks to rest on 20.5; 21.0 close on the shut seam. |
 | 7 | 22.10 | 26.66 | A Chris | Black PETG, 3D printed to order. | l07a.mp3 | Close on the seam, drifting; a second angle on 25.0. |
-| 8 | 26.80 | 32.48 | B Jessica | Five sizes. For three milliliter vials, ten milliliter vials, or a mix. | l08a.mp3 | Oak shelf: the 12-Vial 3 mL and 6-Vial 3 mL land on 28.3 and 28.7, the 4-Vial 10 mL and 8-Vial 10 mL on 30.1 and 30.5, the 7-Vial Mixed on 31.6, each with its label. |
+| 8 | 26.80 | 32.48 | B Jessica | Five sizes. For three milliliter vials, ten milliliter vials, or a mix. | l08a.mp3 | Oak shelf: the five cases land one after another on "Five sizes." (26.9 to 28.3); the labels come up on the words: 12-Vial 3 mL and 6-Vial 3 mL on 28.3 and 28.6, 4-Vial 10 mL and 8-Vial 10 mL on 30.1 and 30.4, 7-Vial Mixed on 31.6. |
 | 10 | 33.00 | 34.36 | A Chris | Back it on Kickstarter. | l10b.mp3 | End card on the shelf: FLUXCASE, "Back it on Kickstarter.", "Renders shown.", all five cases; lids lift 33.25 and snap shut together on 34.0. Ring-out to 36.0. |
 
 ## Captions (bottom centre, ink on paper, one chunk per spoken phrase)
@@ -36,10 +36,10 @@ Kickstarter right now.", River) was recorded and then cut to keep the film insid
 | 0.10 | 2.00 | Magnets pull it shut. |
 | 2.05 | 3.95 | This is Fluxcase. |
 | 3.95 | 7.25 | A magnetic case for 3 and 10 mL vials. |
-| 7.30 | 8.55 | On the kitchen counter, |
-| 8.55 | 9.70 | the nightstand, |
-| 9.70 | 10.90 | in your travel bag, |
-| 10.90 | 12.00 | or on your desk. |
+| 7.30 | 8.50 | On the kitchen counter, |
+| 8.50 | 9.75 | the nightstand, |
+| 9.75 | 10.75 | in your travel bag, |
+| 10.75 | 12.00 | or on your desk. |
 | 12.05 | 13.70 | There are magnets in the lid, |
 | 13.70 | 15.45 | and magnets in the base. |
 | 15.50 | 17.00 | They pull the lid shut, |
