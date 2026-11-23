@@ -52,7 +52,7 @@ band_w    = 13;          // green ring width
 band_h    = 1.2;         // green ring height (the letters are cut through it)
 dhub_r    = 23;
 nut_r     = 20;
-nut_h     = 9;
+nut_h     = 16;
 
 $fn = 120;
 function polar(r, a) = [r*cos(a), r*sin(a)];
@@ -156,8 +156,8 @@ module disc_body() {
         // threaded hole from the back, with a lead-in and a cone roof
         translate([0,0,-0.01]) thread_solid(thr_len + 1, thr_clear);
         translate([0,0,-0.01]) cylinder(d1 = thr_major + 1.5, d2 = thr_major - 2*thr_depth, h = 1.6);
-        rmin = thr_major/2 - thr_depth + thr_clear;
-        translate([0,0,thr_len + 0.98]) cylinder(r1 = thr_major/2 + thr_clear, r2 = 2, h = thr_major/2 + thr_clear - 2);
+        // 45 degree cone, then a short flat roof (bridges fine; hidden under the emblem)
+        translate([0,0,thr_len + 0.98]) cylinder(r1 = thr_major/2 + thr_clear, r2 = 9, h = thr_major/2 + thr_clear - 9);
         // emblem pocket
         translate([0,0,disc_t + 5 + nut_h - emblem_depth]) cylinder(d = emblem_d, h = 5);
     }
@@ -167,6 +167,8 @@ module disc_black() { disc_body(); }
 module disc_green() { difference() { band(); disc_body(); } }
 
 disc_top = disc_t + 5 + nut_h;
+roof_top = thr_len + 0.98 + thr_major/2 + thr_clear - 9;
+assert(roof_top < disc_top - emblem_depth - 1.5, "thread hole would break through the nut: raise nut_h");
 echo(str("Wall part height: ", spoke_h + roll_room + thr_len, " mm.  Disc height: ", disc_top, " mm"));
 echo(str("Single-colour printer: swap to GREEN at ", disc_t, " mm and back to BLACK at ", disc_t + band_h, " mm on the disc"));
 
